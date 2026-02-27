@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="fiche-titre"       content="Sonde β BCP31 / AB31">
+<meta name="fiche-description" content="Constat de vérification Bertin Technologies">
+<meta name="fiche-categorie"   content="Contamination">
+<meta name="fiche-icon"        content="☢">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a1628">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Constat BCP31">
+<title>Constat BCP31 – Bertin Technologies</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ── VARIABLES ───────────────────────────────────────────────────────── */
+:root {
+  --bg:        #0a1628;
+  --bg2:       #0f1f3d;
+  --bg3:       #162543;
+  --panel:     #1a2d52;
+  --border:    #2a4070;
+  --accent:    #00d4ff;
+  --accent2:   #ff6b35;
+  --ok:        #00e676;
+  --warn:      #ffab40;
+  --danger:    #ff5252;
+  --text:      #e8f4fd;
+  --text2:     #8ab4d4;
+  --text3:     #4a7090;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-body: 'Barlow', sans-serif;
+  --font-cond: 'Barlow Condensed', sans-serif;
+  --radius:    6px;
+  --touch:     52px;
+}
+
+/* ── RESET ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── HEADER ──────────────────────────────────────────────────────────── */
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg2);
+  border-bottom: 2px solid var(--accent);
+  padding: 0 16px;
+  display: flex; align-items: center; gap: 12px;
+  height: 60px;
+  box-shadow: 0 4px 24px rgba(0,212,255,.15);
+}
+.header-icon {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.header-title {
+  flex: 1;
+  font-family: var(--font-cond);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+.header-title span {
+  display: block;
+  font-size: .7rem;
+  font-weight: 400;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.badge-rad {
+  background: var(--danger);
+  color: white;
+  font-family: var(--font-cond);
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+@keyframes pulse-badge {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .6; }
+}
+
+/* ── TABS ────────────────────────────────────────────────────────────── */
+.tab-bar {
+  display: flex;
+  overflow-x: auto;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  padding: 0 18px;
+  height: 46px;
+  font-family: var(--font-cond);
+  font-size: .85rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+  white-space: nowrap;
+}
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab-btn:active { background: rgba(0,212,255,.08); }
+
+/* ── PANELS ──────────────────────────────────────────────────────────── */
+.tab-panel { display: none; padding: 16px; }
+.tab-panel.active { display: block; }
+
+/* ── SECTIONS ────────────────────────────────────────────────────────── */
+.section {
+  margin-bottom: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.section-title {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg3);
+  padding: 10px 14px;
+  font-family: var(--font-cond);
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+}
+.section-title .num {
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.section-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+/* ── CHAMPS ──────────────────────────────────────────────────────────── */
+.field-group { display: flex; flex-direction: column; gap: 5px; }
+.field-label {
+  font-family: var(--font-cond);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.field-label .tol {
+  font-weight: 400;
+  color: var(--warn);
+  margin-left: 6px;
+  font-size: .7rem;
+}
+input[type="text"], input[type="date"], textarea, select {
+  width: 100%;
+  min-height: var(--touch);
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  -webkit-appearance: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,212,255,.15);
+}
+textarea { min-height: 120px; resize: vertical; }
+
+/* ── GRID 2 COLONNES ────────────────────────────────────────────────── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── CASES À COCHER ──────────────────────────────────────────────────── */
+.checks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.check-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  min-height: var(--touch);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.check-item:active { background: rgba(0,212,255,.08); }
+.check-item.checked {
+  border-color: var(--accent);
+  background: rgba(0,212,255,.08);
+}
+.check-item input[type="checkbox"] { display: none; }
+.check-box {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all .15s;
+}
+.check-item.checked .check-box {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+}
+.check-label {
+  font-family: var(--font-body);
+  font-size: .85rem;
+  line-height: 1.2;
+}
+
+/* ── RADIO C / NC ────────────────────────────────────────────────────── */
+.cnc-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.cnc-group { display: flex; flex-direction: column; gap: 4px; }
+.cnc-sub {
+  font-family: var(--font-cond);
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.radio-group { display: flex; gap: 6px; }
+.radio-btn {
+  flex: 1;
+  min-height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-cond);
+  font-weight: 700;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.radio-btn:active { transform: scale(.96); }
+.radio-btn input { display: none; }
+.radio-btn.c-selected  { border-color: var(--ok);   background: rgba(0,230,118,.12); color: var(--ok); }
+.radio-btn.nc-selected { border-color: var(--danger); background: rgba(255,82,82,.12); color: var(--danger); }
+
+/* ── JUGEMENT SPÉCIAL ────────────────────────────────────────────────── */
+.jug-grid { display: flex; flex-direction: column; gap: 8px; }
+.jug-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  cursor: pointer;
+  min-height: var(--touch);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all .15s;
+}
+.jug-item.selected-ok   { border-color: var(--ok);    background: rgba(0,230,118,.1); }
+.jug-item.selected-warn { border-color: var(--warn);  background: rgba(255,171,64,.1); }
+.jug-item.selected-bad  { border-color: var(--danger); background: rgba(255,82,82,.1); }
+.jug-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.jug-item.selected-ok   .jug-dot { border-color: var(--ok);    background: var(--ok); }
+.jug-item.selected-warn .jug-dot { border-color: var(--warn);  background: var(--warn); }
+.jug-item.selected-bad  .jug-dot { border-color: var(--danger); background: var(--danger); }
+.jug-text { font-size: .9rem; line-height: 1.3; }
+
+/* ── BOUTON GÉNÉRER ──────────────────────────────────────────────────── */
+.fab-zone {
+  position: sticky; bottom: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, var(--bg) 60%, transparent);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.btn-generate {
+  width: 100%;
+  height: 58px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-cond);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 4px 24px rgba(0,212,255,.35);
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-generate:active { transform: scale(.97); box-shadow: 0 2px 12px rgba(0,212,255,.2); }
+.btn-generate:disabled {
+  background: var(--text3);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.btn-load-pdf {
+  width: 100%;
+  height: 46px;
+  background: transparent;
+  color: var(--text2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-cond);
+  font-size: .9rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .15s;
+}
+.btn-load-pdf:active { background: rgba(255,255,255,.05); }
+.btn-load-pdf.loaded { border-color: var(--ok); color: var(--ok); }
+
+/* ── STATUS BAR ──────────────────────────────────────────────────────── */
+.status-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  color: var(--text2);
+  margin: 0 16px 8px;
+}
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text3);
+  flex-shrink: 0;
+}
+.status-dot.ok    { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+.status-dot.warn  { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+.status-dot.error { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+
+/* ── TOAST ───────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: .9rem;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity .3s;
+  white-space: nowrap;
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.show { opacity: 1; }
+
+/* ── PROGRESS ────────────────────────────────────────────────────────── */
+.progress-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 16px 4px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--ok));
+  border-radius: 2px;
+  transition: width .4s ease;
+}
+
+/* ── SCAN LINE EFFECT ────────────────────────────────────────────────── */
+.app-header::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: scan 3s linear infinite;
+}
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ── INFO BOXES ──────────────────────────────────────────────────────── */
+.info-box {
+  background: rgba(0,212,255,.06);
+  border: 1px solid rgba(0,212,255,.2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: .82rem;
+  color: var(--text2);
+  line-height: 1.5;
+}
+.info-box strong { color: var(--accent); }
+
+/* ── VALEUR MESURÉE (highlight) ──────────────────────────────────────── */
+input.mesure {
+  font-size: 1.3rem;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  text-align: center;
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header" style="position:relative; overflow:hidden;">
+  <div class="header-icon">☢</div>
+  <div class="header-title">
+    Constat BCP31
+    <span>Bertin Technologies · Zone Contrôlée</span>
+  </div>
+  <div class="badge-rad">RAD</div>
+</header>
+
+<!-- STATUS + PROGRESS -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="status-bar">
+  <div class="status-dot" id="statusDot"></div>
+  <span id="statusText">Chargez le PDF source Bertin pour commencer</span>
+</div>
+
+<!-- TAB BAR -->
+<nav class="tab-bar" id="tabBar">
+  <button class="tab-btn active" onclick="showTab(0)">Identif.</button>
+  <button class="tab-btn" onclick="showTab(1)">État</button>
+  <button class="tab-btn" onclick="showTab(2)">Équip.</button>
+  <button class="tab-btn" onclick="showTab(3)">Mesures</button>
+  <button class="tab-btn" onclick="showTab(4)">Paramét.</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ONGLET 1 — IDENTIFICATION
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab0">
+
+  <div class="section">
+    <div class="section-title"><span class="num">01</span> Informations du constat</div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Numéro de constat</label>
+        <input type="text" id="num_constat" placeholder="ex : JPE2511121455C">
+      </div>
+      <div class="grid2">
+        <div class="field-group">
+          <label class="field-label">Délivré à</label>
+          <input type="text" id="delivre_a" placeholder="Site">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date vérification</label>
+          <input type="date" id="date_verif">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">02</span> Instrument vérifié – Sonde β</div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Type de sonde</label>
+        <div class="checks-grid">
+          <label class="check-item" id="lbl_ab31" onclick="toggleCheck('type_ab31','lbl_ab31')">
+            <input type="checkbox" id="type_ab31">
+            <div class="check-box">✓</div>
+            <span class="check-label">AB31</span>
+          </label>
+          <label class="check-item" id="lbl_bcp31" onclick="toggleCheck('type_bcp31','lbl_bcp31')">
+            <input type="checkbox" id="type_bcp31">
+            <div class="check-box">✓</div>
+            <span class="check-label">BCP31</span>
+          </label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">N° de série</label>
+        <input type="text" id="num_serie" placeholder="ex : 1903869">
+      </div>
+      <div class="grid2">
+        <div class="field-group">
+          <label class="field-label">Identif. client</label>
+          <input type="text" id="identif_client" placeholder="ex : BUG051">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Identifiant</label>
+          <input type="text" id="identifiant" placeholder="/">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">03</span> Personnel</div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Exécutant – Nom</label>
+        <input type="text" id="executant" placeholder="Nom de l'exécutant">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Contrôleur technique – Nom</label>
+        <input type="text" id="controleur" placeholder="Nom du contrôleur">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ONGLET 2 — ÉTAT & JUGEMENT
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab1">
+
+  <div class="section">
+    <div class="section-title"><span class="num">01</span> État en entrée</div>
+    <div class="section-body">
+      <div class="checks-grid">
+        <label class="check-item" id="lbl_entree_specs" onclick="toggleCheck('entree_specs','lbl_entree_specs')">
+          <input type="checkbox" id="entree_specs">
+          <div class="check-box">✓</div><span class="check-label">Dans les spécifications</span>
+        </label>
+        <label class="check-item" id="lbl_entree_hors" onclick="toggleCheck('entree_hors','lbl_entree_hors')">
+          <input type="checkbox" id="entree_hors">
+          <div class="check-box">✓</div><span class="check-label">Hors spécifications</span>
+        </label>
+        <label class="check-item" id="lbl_entree_panne" onclick="toggleCheck('entree_panne','lbl_entree_panne')">
+          <input type="checkbox" id="entree_panne">
+          <div class="check-box">✓</div><span class="check-label">En panne</span>
+        </label>
+        <label class="check-item" id="lbl_entree_endommage" onclick="toggleCheck('entree_endommage','lbl_entree_endommage')">
+          <input type="checkbox" id="entree_endommage">
+          <div class="check-box">✓</div><span class="check-label">Endommagé</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">02</span> Intervention réalisée</div>
+    <div class="section-body">
+      <div class="checks-grid">
+        <label class="check-item" id="lbl_reparation" onclick="toggleCheck('interv_reparation','lbl_reparation')">
+          <input type="checkbox" id="interv_reparation">
+          <div class="check-box">✓</div><span class="check-label">Réparation</span>
+        </label>
+        <label class="check-item" id="lbl_chg_det" onclick="toggleCheck('interv_chg_det','lbl_chg_det')">
+          <input type="checkbox" id="interv_chg_det">
+          <div class="check-box">✓</div><span class="check-label">Chgt détecteur</span>
+        </label>
+        <label class="check-item" id="lbl_verif" onclick="toggleCheck('interv_verification','lbl_verif')">
+          <input type="checkbox" id="interv_verification">
+          <div class="check-box">✓</div><span class="check-label">Vérification</span>
+        </label>
+        <label class="check-item" id="lbl_ajust" onclick="toggleCheck('interv_ajustage','lbl_ajust')">
+          <input type="checkbox" id="interv_ajustage">
+          <div class="check-box">✓</div><span class="check-label">Ajustage</span>
+        </label>
+        <label class="check-item" id="lbl_retour" onclick="toggleCheck('interv_retour','lbl_retour')">
+          <input type="checkbox" id="interv_retour">
+          <div class="check-box">✓</div><span class="check-label">Retour en l'état</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">03</span> État en sortie</div>
+    <div class="section-body">
+      <div class="checks-grid">
+        <label class="check-item" id="lbl_sortie_specs" onclick="toggleCheck('sortie_specs','lbl_sortie_specs')">
+          <input type="checkbox" id="sortie_specs">
+          <div class="check-box">✓</div><span class="check-label">Dans les spécifications</span>
+        </label>
+        <label class="check-item" id="lbl_sortie_hors" onclick="toggleCheck('sortie_hors','lbl_sortie_hors')">
+          <input type="checkbox" id="sortie_hors">
+          <div class="check-box">✓</div><span class="check-label">Hors spécifications</span>
+        </label>
+        <label class="check-item" id="lbl_sortie_panne" onclick="toggleCheck('sortie_panne','lbl_sortie_panne')">
+          <input type="checkbox" id="sortie_panne">
+          <div class="check-box">✓</div><span class="check-label">En panne</span>
+        </label>
+        <label class="check-item" id="lbl_sortie_end" onclick="toggleCheck('sortie_endommage','lbl_sortie_end')">
+          <input type="checkbox" id="sortie_endommage">
+          <div class="check-box">✓</div><span class="check-label">Endommagé</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">04</span> Jugement</div>
+    <div class="section-body">
+      <div class="jug-grid">
+        <div class="jug-item" id="jug_conforme" onclick="selectJugement('conforme')">
+          <div class="jug-dot"></div>
+          <span class="jug-text">Conforme</span>
+        </div>
+        <div class="jug-item" id="jug_conforme_interv" onclick="selectJugement('conforme_interv')">
+          <div class="jug-dot"></div>
+          <span class="jug-text">Conforme après intervention</span>
+        </div>
+        <div class="jug-item" id="jug_non_conforme" onclick="selectJugement('non_conforme')">
+          <div class="jug-dot"></div>
+          <span class="jug-text">Non conforme</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ONGLET 3 — ÉQUIPEMENTS
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab2">
+
+  <div class="section">
+    <div class="section-title"><span class="num">01</span> Source ⁶⁰Co de référence</div>
+    <div class="section-body">
+      <div class="grid2">
+        <div class="field-group">
+          <label class="field-label">Numéro source</label>
+          <input type="text" id="source_num" placeholder="ex : 513" class="mesure">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Activité (Bq)</label>
+          <input type="text" id="activite_bq" placeholder="ex : 2367" class="mesure">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">02</span> SaphyRAD</div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">SaphyRAD C — Sondes AB31 n°</label>
+        <input type="text" id="saphyrad_c" placeholder="/ si non applicable">
+      </div>
+      <div class="field-group">
+        <label class="field-label">SaphyRAD E — Sondes BCP31 n°</label>
+        <input type="text" id="saphyrad_e" placeholder="ex : BUG137">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ONGLET 4 — MESURES
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab3">
+
+  <div class="section">
+    <div class="section-title"><span class="num">4.1</span> Contrôle d'aspect</div>
+    <div class="section-body">
+      <div class="field-label">Aspect général <span class="tol">Tolérance : Conforme</span></div>
+      <div class="cnc-row">
+        <div class="cnc-group">
+          <div class="cnc-sub">Avant ajustage</div>
+          <div class="radio-group" id="rg_aspect_avant">
+            <div class="radio-btn" onclick="setCNC('aspect_avant','C',this)">C</div>
+            <div class="radio-btn" onclick="setCNC('aspect_avant','NC',this)">NC</div>
+          </div>
+        </div>
+        <div class="cnc-group">
+          <div class="cnc-sub">Après ajustage</div>
+          <div class="radio-group" id="rg_aspect_apres">
+            <div class="radio-btn" onclick="setCNC('aspect_apres','C',this)">C</div>
+            <div class="radio-btn" onclick="setCNC('aspect_apres','NC',this)">NC</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4.2</span> Contrôle au démarrage</div>
+    <div class="section-body">
+      <div class="field-label">Aspect fonctionnel <span class="tol">Tolérance : Conforme</span></div>
+      <div class="cnc-row">
+        <div class="cnc-group">
+          <div class="cnc-sub">Avant ajustage</div>
+          <div class="radio-group" id="rg_fonct_avant">
+            <div class="radio-btn" onclick="setCNC('fonct_avant','C',this)">C</div>
+            <div class="radio-btn" onclick="setCNC('fonct_avant','NC',this)">NC</div>
+          </div>
+        </div>
+        <div class="cnc-group">
+          <div class="cnc-sub">Après ajustage</div>
+          <div class="radio-group" id="rg_fonct_apres">
+            <div class="radio-btn" onclick="setCNC('fonct_apres','C',this)">C</div>
+            <div class="radio-btn" onclick="setCNC('fonct_apres','NC',this)">NC</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4.3</span> Bruit de fond</div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Valeur BdF β <span class="tol">BdF ≤ 4 c/s</span></label>
+        <input type="text" id="bdf_valeur" placeholder="0.00" class="mesure" oninput="checkTol(this,0,4,'bdf')">
+      </div>
+      <div class="info-box" id="bdf_info" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4.4</span> Contrôle de la sensibilité</div>
+    <div class="section-body">
+      <div class="grid2">
+        <div class="field-group">
+          <label class="field-label">Détecteur 1 (c/s)</label>
+          <input type="text" id="taux_det1" placeholder="0" class="mesure" oninput="calcMoy()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Détecteur 2 (c/s)</label>
+          <input type="text" id="taux_det2" placeholder="0" class="mesure" oninput="calcMoy()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Taux moyen (c/s) <span class="tol">calculé auto</span></label>
+        <input type="text" id="taux_moyen" placeholder="—" class="mesure" readonly style="opacity:.6">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Sensibilité ⁶⁰Co (c/s/Bq) <span class="tol">0,08 ≤ S ≤ 0,12</span></label>
+        <input type="text" id="sensibilite" placeholder="0.000" class="mesure" oninput="checkTolS(this,0.08,0.12,'sens')">
+      </div>
+      <div class="info-box" id="sens_info" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4.5a</span> Écart entre détecteurs</div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Écart relatif (%) <span class="tol">E ≤ 20%</span></label>
+        <input type="text" id="ecart_rel" placeholder="0.0" class="mesure" oninput="checkTol(this,0,20,'ecart')">
+      </div>
+      <div class="info-box" id="ecart_info" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4.5b</span> Lecture en activité</div>
+    <div class="section-body">
+      <div class="info-box" style="margin-bottom:4px"><strong>Tolérance :</strong> 0,85 ≤ R ≤ 1,15</div>
+      <div class="field-label" style="margin-top:4px">Détecteur 1</div>
+      <div class="grid2">
+        <div class="field-group">
+          <label class="field-label">Avant ajustage</label>
+          <input type="text" id="rapport_det1_av" placeholder="0.00" class="mesure" oninput="checkTolS(this,0.85,1.15,'r1av')">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Après ajustage</label>
+          <input type="text" id="rapport_det1_ap" placeholder="0.00" class="mesure" oninput="checkTolS(this,0.85,1.15,'r1ap')">
+        </div>
+      </div>
+      <div class="field-label" style="margin-top:8px">Détecteur 2</div>
+      <div class="grid2">
+        <div class="field-group">
+          <label class="field-label">Avant ajustage</label>
+          <input type="text" id="rapport_det2_av" placeholder="0.00" class="mesure" oninput="checkTolS(this,0.85,1.15,'r2av')">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Après ajustage</label>
+          <input type="text" id="rapport_det2_ap" placeholder="0.00" class="mesure" oninput="checkTolS(this,0.85,1.15,'r2ap')">
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ONGLET 5 — PARAMÉTRAGE PAGE 2
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab4">
+
+  <div class="section">
+    <div class="section-title"><span class="num">05</span> Paramétrage final</div>
+    <div class="section-body">
+      <div class="field-label">Conformité dates CPI/CPE <span class="tol">Tolérance : Conforme</span></div>
+      <div class="cnc-row">
+        <div class="cnc-group">
+          <div class="cnc-sub">Avant ajustage</div>
+          <div class="radio-group" id="rg_cpi_avant">
+            <div class="radio-btn" onclick="setCNC('cpi_avant','C',this)">C</div>
+            <div class="radio-btn" onclick="setCNC('cpi_avant','NC',this)">NC</div>
+          </div>
+        </div>
+        <div class="cnc-group">
+          <div class="cnc-sub">Après ajustage</div>
+          <div class="radio-group" id="rg_cpi_apres">
+            <div class="radio-btn" onclick="setCNC('cpi_apres','C',this)">C</div>
+            <div class="radio-btn" onclick="setCNC('cpi_apres','NC',this)">NC</div>
+          </div>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:4px">
+        <div class="field-group">
+          <label class="field-label">Sensibilité β Co-60 avant</label>
+          <input type="text" id="sensibilite_param_av" placeholder="0.00" class="mesure">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Sensibilité β Co-60 après</label>
+          <input type="text" id="sensibilite_param_ap" placeholder="0.00" class="mesure">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">06</span> Commentaires</div>
+    <div class="section-body">
+      <textarea id="commentaires" placeholder="Saisir les observations, anomalies constatées, interventions réalisées..."></textarea>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin:0 0 16px">
+    <strong>ℹ Instructions :</strong> Une fois tous les champs remplis, chargez le PDF source Bertin via le bouton ci-dessous puis générez le PDF rempli. Il sera téléchargé automatiquement sur votre appareil.
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     BOUTONS FIXES EN BAS
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="fab-zone">
+  <label class="btn-load-pdf" id="btnLoadLabel">
+    <input type="file" id="pdfInput" accept=".pdf" style="display:none" onchange="loadPDF(this)">
+    <span>📂</span> <span id="btnLoadText">Charger PDF source Bertin</span>
+  </label>
+  <button class="btn-generate" id="btnGenerate" onclick="generatePDF()" disabled>
+    <span>⬇</span> Générer le PDF rempli
+  </button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>
+
+// ── État global ──────────────────────────────────────────────────────────────
+let sourcePdfBytes = null;
+const cncValues = {};
+let jugement = null;
+
+// ── Onglets ──────────────────────────────────────────────────────────────────
+function showTab(idx) {
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  updateProgress();
+}
+
+// ── Checkboxes custom ────────────────────────────────────────────────────────
+function toggleCheck(id, lblId) {
+  const el = document.getElementById(id);
+  const lbl = document.getElementById(lblId);
+  el.checked = !el.checked;
+  lbl.classList.toggle('checked', el.checked);
+}
+
+// ── Jugement (radio unique) ──────────────────────────────────────────────────
+function selectJugement(val) {
+  jugement = val;
+  const map = {
+    conforme:        { id:'jug_conforme',       cls:'selected-ok' },
+    conforme_interv: { id:'jug_conforme_interv', cls:'selected-warn' },
+    non_conforme:    { id:'jug_non_conforme',    cls:'selected-bad' },
+  };
+  Object.values(map).forEach(({id,cls}) => {
+    const el = document.getElementById(id);
+    el.className = 'jug-item';
+  });
+  const {id, cls} = map[val];
+  document.getElementById(id).className = 'jug-item ' + cls;
+}
+
+// ── Radio C/NC ───────────────────────────────────────────────────────────────
+function setCNC(field, val, btnEl) {
+  cncValues[field] = val;
+  const group = btnEl.parentElement;
+  group.querySelectorAll('.radio-btn').forEach(b => b.className = 'radio-btn');
+  btnEl.className = 'radio-btn ' + (val === 'C' ? 'c-selected' : 'nc-selected');
+}
+
+// ── Calcul automatique de la moyenne ────────────────────────────────────────
+function calcMoy() {
+  const d1 = parseFloat(document.getElementById('taux_det1').value);
+  const d2 = parseFloat(document.getElementById('taux_det2').value);
+  if (!isNaN(d1) && !isNaN(d2)) {
+    document.getElementById('taux_moyen').value = ((d1+d2)/2).toFixed(1);
+  }
+}
+
+// ── Vérification tolérance (info visuelle) ───────────────────────────────────
+function checkTol(el, min, max, infoId) {
+  const v = parseFloat(el.value.replace(',','.'));
+  const box = document.getElementById(infoId+'_info');
+  if (isNaN(v) || el.value === '') { box.style.display='none'; return; }
+  const ok = v >= min && v <= max;
+  box.style.display = 'block';
+  box.style.background = ok ? 'rgba(0,230,118,.08)' : 'rgba(255,82,82,.08)';
+  box.style.borderColor = ok ? 'rgba(0,230,118,.3)' : 'rgba(255,82,82,.3)';
+  box.style.color = ok ? '#00e676' : '#ff5252';
+  box.innerHTML = ok
+    ? `✅ <strong>${v}</strong> — Dans la tolérance [${min} – ${max}]`
+    : `⚠️ <strong>${v}</strong> — HORS TOLÉRANCE [${min} – ${max}]`;
+}
+function checkTolS(el, min, max, infoId) { checkTol(el, min, max, infoId); }
+
+// ── Progress bar ─────────────────────────────────────────────────────────────
+function updateProgress() {
+  const fields = ['num_constat','delivre_a','date_verif','num_serie','identif_client',
+                  'executant','controleur','source_num','activite_bq','bdf_valeur',
+                  'taux_det1','taux_det2','sensibilite','ecart_rel'];
+  const filled = fields.filter(id => document.getElementById(id)?.value?.trim()).length;
+  const pct = Math.round((filled / fields.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+document.querySelectorAll('input, textarea').forEach(el =>
+  el.addEventListener('input', updateProgress));
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg, duration=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ── Chargement PDF source ─────────────────────────────────────────────────────
+async function loadPDF(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const buf = await file.arrayBuffer();
+  sourcePdfBytes = new Uint8Array(buf);
+
+  const btn = document.getElementById('btnLoadLabel');
+  const txt = document.getElementById('btnLoadText');
+  btn.classList.add('loaded');
+  txt.textContent = '✓ ' + file.name;
+
+  document.getElementById('btnGenerate').disabled = false;
+  document.getElementById('statusDot').className = 'status-dot ok';
+  document.getElementById('statusText').textContent = 'PDF source chargé · Prêt à remplir';
+  showToast('✅ PDF Bertin chargé avec succès');
+}
+
+// ── Collecte des données ─────────────────────────────────────────────────────
+function collectData() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const chk = id => document.getElementById(id)?.checked || false;
+  const cnc = key => cncValues[key] || 'C';
+
+  return {
+    num_constat:   g('num_constat'),
+    delivre_a:     g('delivre_a'),
+    date_verif:    g('date_verif').split('-').reverse().join('/'),
+    num_serie:     g('num_serie'),
+    identif_client:g('identif_client'),
+    identifiant:   g('identifiant'),
+    type_ab31:     chk('type_ab31'),
+    type_bcp31:    chk('type_bcp31'),
+    executant:     g('executant'),
+    controleur:    g('controleur'),
+    entree_specs:  chk('entree_specs'),
+    entree_hors:   chk('entree_hors'),
+    entree_panne:  chk('entree_panne'),
+    entree_endommage: chk('entree_endommage'),
+    interv_reparation:   chk('interv_reparation'),
+    interv_chg_det:      chk('interv_chg_det'),
+    interv_verification: chk('interv_verification'),
+    interv_ajustage:     chk('interv_ajustage'),
+    interv_retour:       chk('interv_retour'),
+    sortie_specs:   chk('sortie_specs'),
+    sortie_hors:    chk('sortie_hors'),
+    sortie_panne:   chk('sortie_panne'),
+    sortie_endommage: chk('sortie_endommage'),
+    jug_conforme:        jugement === 'conforme',
+    jug_conforme_interv: jugement === 'conforme_interv',
+    jug_non_conforme:    jugement === 'non_conforme',
+    source_num:    g('source_num'),
+    activite_bq:   g('activite_bq'),
+    saphyrad_c:    g('saphyrad_c'),
+    saphyrad_e:    g('saphyrad_e'),
+    aspect_avant:  cnc('aspect_avant'),
+    aspect_apres:  cnc('aspect_apres'),
+    fonct_avant:   cnc('fonct_avant'),
+    fonct_apres:   cnc('fonct_apres'),
+    bdf_valeur:    g('bdf_valeur'),
+    taux_det1:     g('taux_det1'),
+    taux_det2:     g('taux_det2'),
+    taux_moyen:    g('taux_moyen'),
+    sensibilite:   g('sensibilite'),
+    ecart_rel:     g('ecart_rel'),
+    rapport_det1_av: g('rapport_det1_av'),
+    rapport_det1_ap: g('rapport_det1_ap'),
+    rapport_det2_av: g('rapport_det2_av'),
+    rapport_det2_ap: g('rapport_det2_ap'),
+    cpi_avant:     cnc('cpi_avant'),
+    cpi_apres:     cnc('cpi_apres'),
+    sensibilite_param_av: g('sensibilite_param_av'),
+    sensibilite_param_ap: g('sensibilite_param_ap'),
+    commentaires:  g('commentaires'),
+  };
+}
+
+// ── Génération PDF ───────────────────────────────────────────────────────────
+async function generatePDF() {
+  if (!sourcePdfBytes) { showToast('⚠️ Chargez d\'abord le PDF source Bertin'); return; }
+
+  const btn = document.getElementById('btnGenerate');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Génération en cours...';
+  document.getElementById('statusDot').className = 'status-dot warn';
+  document.getElementById('statusText').textContent = 'Remplissage du formulaire PDF...';
+
+  try {
+    const d = collectData();
+    const { PDFDocument } = PDFLib;
+    const pdfDoc = await PDFDocument.load(sourcePdfBytes, { ignoreEncryption: true });
+    const form = pdfDoc.getForm();
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    const setText = (name, val) => { try { form.getTextField(name).setText(val || ''); } catch(e){} };
+    const setChk  = (name, val) => { try { val ? form.getCheckBox(name).check() : form.getCheckBox(name).uncheck(); } catch(e){} };
+
+    // ── Remplissage page 1 ───────────────────────────────────────────────────
+    setText('Texte1', d.num_constat);
+    setText('Texte2', d.delivre_a);
+    setText('Texte3', d.date_verif);
+
+    setChk('AB31',  d.type_ab31);
+    setChk('BCP31', d.type_bcp31);
+    setText('N sérieAB31 BCP31',        d.num_serie);
+    setText('Identif clientAB31 BCP31', d.identif_client);
+    setText('IdentifiantAB31 BCP31',    d.identifiant);
+
+    setChk('Dans les spécifications',   d.entree_specs);
+    setChk('Hors spécifications',       d.entree_hors);
+    setChk('En panne',                  d.entree_panne);
+    setChk('Endommagé',                 d.entree_endommage);
+
+    setChk('Réparation',     d.interv_reparation);
+    setChk('Chgt détecteur', d.interv_chg_det);
+    setChk('Vérification',   d.interv_verification);
+    setChk('Ajustage',       d.interv_ajustage);
+    setChk('Retour en létat',d.interv_retour);
+
+    setChk('Dans les spécifications_2', d.sortie_specs);
+    setChk('Hors spécifications_2',     d.sortie_hors);
+    setChk('En panne_2',                d.sortie_panne);
+    setChk('Endommagé_2',               d.sortie_endommage);
+
+    setChk('Conforme',                  d.jug_conforme);
+    setChk('Conforme après intervention', d.jug_conforme_interv);
+    setChk('Non conforme',              d.jug_non_conforme);
+
+    setText('Texte11', d.source_num);
+    setText('Texte13', d.activite_bq);
+    setText('Texte12', d.saphyrad_c);
+    setText('Texte14', d.saphyrad_e);
+    setText('Texte15', d.executant);
+    setText('Texte16', d.controleur);
+
+    // 4.1 Aspect
+    setChk('C',    d.aspect_avant === 'C');
+    setChk('NC',   d.aspect_avant === 'NC');
+    setChk('C_2',  d.aspect_apres === 'C');
+    setChk('NC_2', d.aspect_apres === 'NC');
+
+    // 4.2 Fonctionnel
+    setChk('NC_3', d.fonct_avant === 'NC');
+    setChk('C_4',  d.fonct_apres === 'C');
+    setChk('NC_4', d.fonct_apres === 'NC');
+    try {
+      const rg3 = form.getRadioGroup('C_3');
+      if (d.fonct_avant === 'C') rg3.select('/On');
+    } catch(e){}
+
+    // 4.3 Bruit de fond
+    setText('fill_18', d.bdf_valeur);
+
+    // 4.4 Sensibilité
+    setText('C NCValeur lue',   d.taux_det1);
+    setText('C NCValeur lue_3', d.taux_det2);
+    setText('C NCValeur calculée', d.taux_moyen);
+    setText('fill_34', d.sensibilite);
+
+    // 4.5 Écart
+    setText('fill_41', d.ecart_rel);
+
+    // 4.5 Rapports
+    setText('fill_48', d.rapport_det1_av);
+    setText('fill_49', d.rapport_det1_ap);
+    setText('fill_51', d.rapport_det2_av);
+    setText('fill_52', d.rapport_det2_ap);
+
+    // ── Remplissage page 2 ───────────────────────────────────────────────────
+    setChk('NC_31', d.cpi_avant === 'NC');
+    setChk('C_41',  d.cpi_apres === 'C');
+    try {
+      const rg_c3 = form.getRadioGroup('C_3');
+      if (d.cpi_avant === 'C') rg_c3.select('/On');
+    } catch(e){}
+    try {
+      const rg_nc4 = form.getRadioGroup('NC_4');
+      if (d.cpi_apres === 'NC') rg_nc4.select('/On');
+    } catch(e){}
+
+    setText('Texte7',  d.sensibilite_param_av);
+    setText('Texte8',  d.sensibilite_param_ap);
+    setText('Texte10', d.commentaires);
+
+    // ── Aplatir + télécharger ────────────────────────────────────────────────
+    form.flatten();
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const fname = `constat_${d.num_constat || 'bcp31'}_${d.date_verif.replace(/\//g,'-')}.pdf`;
+    a.href = url; a.download = fname; a.click();
+    URL.revokeObjectURL(url);
+
+    document.getElementById('statusDot').className = 'status-dot ok';
+    document.getElementById('statusText').textContent = '✓ PDF généré : ' + fname;
+    showToast('✅ PDF téléchargé : ' + fname, 4000);
+
+  } catch(err) {
+    console.error(err);
+    document.getElementById('statusDot').className = 'status-dot error';
+    document.getElementById('statusText').textContent = 'Erreur : ' + err.message;
+    showToast('❌ Erreur : ' + err.message, 5000);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<span>⬇</span> Générer le PDF rempli';
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.getElementById('date_verif').value = new Date().toISOString().split('T')[0];
+
+// ── Service Worker (offline) ─────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
