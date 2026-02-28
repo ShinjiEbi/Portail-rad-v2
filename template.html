@@ -167,8 +167,13 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .eq-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:stretch}
 .eq-bar .eq-row1{display:flex;gap:8px;width:100%;align-items:stretch}
 .eq-bar .eq-row2{display:flex;gap:8px;width:100%;align-items:stretch}
-.eq-bar input{flex:1;min-width:0}
-.eq-bar select{flex:0 0 auto;width:auto;min-width:110px}
+.eq-bar input{flex:1;min-width:0;height:46px;background:var(--panel);border:1.5px solid var(--accent);border-radius:6px;color:var(--accent);font-size:.88rem;padding:0 10px;outline:none;font-family:var(--mono);font-weight:700}
+.eq-bar input:focus{border-color:var(--accent)}
+.eq-bar input::placeholder{color:var(--text3);font-weight:400;font-family:var(--body)}
+.eq-bar select{flex:0 0 auto;width:auto;min-width:110px;height:46px;background:var(--panel);border:1.5px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;padding:0 10px;outline:none;font-family:var(--mono);font-weight:700;-webkit-appearance:none;appearance:none}
+.eq-bar select:focus{border-color:var(--accent)}
+.eq-bar select.type-c{border-color:var(--green);color:var(--green);background:rgba(0,230,118,.08)}
+.eq-bar select.type-nc{border-color:var(--red);color:var(--red);background:rgba(255,61,61,.08)}
 .eq-scan{flex-shrink:0;width:46px;height:46px;background:var(--panel);border:1.5px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;position:relative}
 .eq-scan:active{background:var(--panel2)}
 .eq-scan .eq-scan-hint{position:absolute;bottom:-14px;font-size:.45rem;color:var(--text3);font-family:var(--mono);white-space:nowrap}
@@ -364,7 +369,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
           <datalist id="eq_suggest"></datalist>
         </div>
         <div class="eq-row2">
-          <select id="eq_type"><option value="C">✓ Conforme</option><option value="NC">✗ Non Conf.</option></select>
+          <select id="eq_type" class="type-c" onchange="eqTypeColor()"><option value="C">✓ Conforme</option><option value="NC">✗ Non Conf.</option></select>
           <div class="eq-add" onclick="eqAdd()" title="Ajouter">➕ Ajouter</div>
         </div>
       </div>
@@ -757,6 +762,7 @@ const ETIQ_IMG_C='%%ETIQ_IMG_C%%';
 const ETIQ_IMG_NC='%%ETIQ_IMG_NC%%';
 
 function eqParseId(raw){if(!raw)return raw;const idx=raw.lastIndexOf('-');return idx>=0?raw.substring(idx+1):raw;}
+function eqTypeColor(){var s=document.getElementById('eq_type');s.className=s.value==='C'?'type-c':'type-nc';}
 function eqAutoComplete(){
   const raw=document.getElementById('eq_input').value.trim();
   if(!raw||raw.length<2){document.getElementById('eq_found').style.display='none';return;}
@@ -777,7 +783,9 @@ function eqAdd(){
   const mat=DATA_MATERIELS.find(m=>m.id.toLowerCase()===id.toLowerCase()||m.id.toLowerCase()===raw.toLowerCase());
   const dvp=dateVP?new Date(dateVP):new Date();
   const val=type==='C'?addMonths(dvp,12):null;
-  eqItems.push({id:mat?mat.id:id,des:mat?mat.des:'',type,dvp:fmtDateEtiq(dvp),val:val?fmtDateEtiq(val):'',nc:mat?mat.nc:''});
+  const fullId=mat?mat.id:id;
+  const etiqId=eqParseId(fullId);
+  eqItems.push({id:fullId,idEtiq:etiqId,des:mat?mat.des:'',type,dvp:fmtDateEtiq(dvp),val:val?fmtDateEtiq(val):'',nc:mat?mat.nc:''});
   document.getElementById('eq_input').value='';document.getElementById('eq_found').style.display='none';
   eqRender();eqPreview();showToast('✓ '+id+' ajouté');
 }
@@ -790,7 +798,7 @@ function eqRender(){
   const btn=document.getElementById('eq_print_btn');btn.disabled=!eqItems.length;
   const el=document.getElementById('eq_list');
   if(!eqItems.length){el.innerHTML='<div style="text-align:center;color:var(--text3);font-size:.85rem;padding:20px">Scannez ou tapez un ID matériel pour commencer</div>';return;}
-  el.innerHTML=eqItems.map((it,i)=>'<div class="eq-item"><span class="eq-type '+(it.type==='C'?'c':'nc')+'">'+(it.type==='C'?'✓ C':'✗ NC')+'</span><div class="eq-mid"><div class="eq-id">'+esc(it.id)+'</div><div class="eq-des">'+esc(it.des)+'</div><div class="eq-dates">VP: '+it.dvp+(it.val?' → VAL: '+it.val:'')+'</div></div><button class="eq-del" onclick="eqRemove('+i+')">✕</button></div>').join('');
+  el.innerHTML=eqItems.map((it,i)=>{const shortId=it.idEtiq||it.id;const showFull=it.id!==shortId?' <span style="font-size:.6rem;color:var(--text3)">('+esc(it.id)+')</span>':'';return '<div class="eq-item"><span class="eq-type '+(it.type==='C'?'c':'nc')+'">'+(it.type==='C'?'✓ C':'✗ NC')+'</span><div class="eq-mid"><div class="eq-id">'+esc(shortId)+showFull+'</div><div class="eq-des">'+esc(it.des)+'</div><div class="eq-dates">VP: '+it.dvp+(it.val?' → VAL: '+it.val:'')+'</div></div><button class="eq-del" onclick="eqRemove('+i+')">✕</button></div>';}).join('');
 }
 
 function eqPreview(){
@@ -801,15 +809,23 @@ function eqPreview(){
   const isNC=last.type==='NC';
   const img=new Image();
   img.onload=function(){
-    const scaleX=canvas.width/592;const scaleY=canvas.height/336;
+    // Image 592x336 (C) ou 592x337 (NC), canvas 302x144
+    const sx=canvas.width/592;const sy=canvas.height/(isNC?337:336);
     ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    ctx.fillStyle='#000';ctx.textAlign='center';
+    ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
     if(!isNC){
-      ctx.font='bold '+Math.round(40*scaleX)+'px sans-serif';ctx.fillText(last.val||'',325*scaleX,60*scaleY);
-      ctx.font='bold '+Math.round(36*scaleX)+'px sans-serif';ctx.fillText(last.dvp||'',325*scaleX,168*scaleY);
-      ctx.fillText(last.id||'',325*scaleX,280*scaleY);
+      // VALIDITÉ : centre zone (373, 87)
+      ctx.font='bold '+Math.round(38*sx)+'px sans-serif';
+      ctx.fillText(last.val||'',373*sx,87*sy);
+      // VP : centre zone (373, 170)
+      ctx.font='bold '+Math.round(34*sx)+'px sans-serif';
+      ctx.fillText(last.dvp||'',373*sx,170*sy);
+      // ID : centre zone (373, 251)
+      ctx.fillText(last.idEtiq||last.id||'',373*sx,251*sy);
     } else {
-      ctx.font='bold '+Math.round(36*scaleX)+'px sans-serif';ctx.fillText(last.dvp||'',280*scaleX,270*scaleY);
+      // Date contrôle : centre zone (249, 257)
+      ctx.font='bold '+Math.round(34*sx)+'px sans-serif';
+      ctx.fillText(last.dvp||'',249*sx,257*sy);
     }
   };
   img.src=isNC?ETIQ_IMG_NC:ETIQ_IMG_C;
@@ -913,9 +929,14 @@ function eqPrint(){
       const ctx=canvas.getContext('2d');const img=new Image();
       img.onload=function(){
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
-        ctx.fillStyle='#000';ctx.textAlign='center';
-        if(!isNC){ctx.font='bold 40px sans-serif';ctx.fillText(it.val||'',325,60);ctx.font='bold 36px sans-serif';ctx.fillText(it.dvp||'',325,168);ctx.fillText(it.id||'',325,280);}
-        else{ctx.font='bold 36px sans-serif';ctx.fillText(it.dvp||'',280,270);}
+        ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
+        if(!isNC){
+          ctx.font='bold 38px sans-serif';ctx.fillText(it.val||'',373,87);
+          ctx.font='bold 34px sans-serif';ctx.fillText(it.dvp||'',373,170);
+          ctx.fillText(it.idEtiq||it.id||'',373,251);
+        } else {
+          ctx.font='bold 34px sans-serif';ctx.fillText(it.dvp||'',249,257);
+        }
         resolve(canvas.toDataURL('image/png'));
       };
       img.src=isNC?ETIQ_IMG_NC:ETIQ_IMG_C;
