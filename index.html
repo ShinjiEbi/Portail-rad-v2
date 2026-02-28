@@ -41,6 +41,13 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .install-btn:active{opacity:.8}
 .install-close{background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer;padding:4px 8px}
 
+/* UPDATE BANNER */
+.update-bar{display:none;align-items:center;gap:10px;padding:10px 16px;background:rgba(0,230,118,.08);border-bottom:1px solid var(--green);cursor:pointer;animation:updatePulse 2s ease-in-out infinite}
+.update-bar.show{display:flex}
+.update-bar span{font-family:var(--mono);font-size:.75rem;color:var(--green);flex:1}
+.update-bar .update-btn{padding:6px 16px;background:var(--green);color:var(--bg);border:none;border-radius:6px;font-weight:700;font-size:.78rem;cursor:pointer}
+@keyframes updatePulse{0%,100%{background:rgba(0,230,118,.08)}50%{background:rgba(0,230,118,.15)}}
+
 /* ══════════════════════════════════════════════════════════
    TABS
    ══════════════════════════════════════════════════════════ */
@@ -220,6 +227,12 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
   <span>📲 Installer l'application</span>
   <button class="install-btn" id="installBtn">Installer</button>
   <button class="install-close" id="installClose">✕</button>
+</div>
+
+<!-- UPDATE BANNER (MAJ détectée) -->
+<div class="update-bar" id="updateBar" onclick="applyUpdate()">
+  <span>🔄 Mise à jour disponible</span>
+  <button class="update-btn">Actualiser</button>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -936,10 +949,56 @@ renderMateriels();
 initCalc();
 
 // ══════════════════════════════════════════════════════════
-// SERVICE WORKER
+// SERVICE WORKER — Enregistrement + Détection MAJ
 // ══════════════════════════════════════════════════════════
+let swWaiting = null;
+
+function applyUpdate() {
+  if (swWaiting) {
+    // Dire au nouveau SW de prendre le contrôle
+    swWaiting.postMessage({ type: 'SKIP_WAITING' });
+  } else {
+    // Fallback : recharger simplement
+    window.location.reload();
+  }
+}
+
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(function(){});
+  navigator.serviceWorker.register('./sw.js').then(function(reg) {
+
+    // 1. Vérifier immédiatement si une MAJ est déjà en attente
+    if (reg.waiting) {
+      swWaiting = reg.waiting;
+      document.getElementById('updateBar').classList.add('show');
+    }
+
+    // 2. Écouter les futures MAJ
+    reg.addEventListener('updatefound', function() {
+      var newSW = reg.installing;
+      if (!newSW) return;
+      newSW.addEventListener('statechange', function() {
+        // Le nouveau SW est installé et attend d'être activé
+        if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+          swWaiting = newSW;
+          document.getElementById('updateBar').classList.add('show');
+        }
+      });
+    });
+
+    // 3. Forcer la vérification de MAJ à chaque ouverture
+    reg.update().catch(function() {});
+
+    // 4. Re-vérifier périodiquement (toutes les 30 min)
+    setInterval(function() {
+      reg.update().catch(function() {});
+    }, 30 * 60 * 1000);
+
+  }).catch(function() {});
+
+  // 5. Quand le nouveau SW prend le contrôle → recharger la page
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    window.location.reload();
+  });
 }
 </script>
 </body>

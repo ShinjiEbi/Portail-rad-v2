@@ -2,7 +2,7 @@
 // Service Worker – Portail Tech Bertin
 // Version auto-incrémentée par export_data.py
 // ══════════════════════════════════════════════════════════
-const VERSION = 'f4addd8edd3c';
+const VERSION = 'fb3c78527fa1';
 const CACHE   = 'portail-tech-' + VERSION;
 
 // Fichiers à cacher (mis à jour automatiquement par export_data.py)
@@ -10,7 +10,7 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  // (aucune fiche)
+  './forms/bcp31_sonde_beta.html',
 ];
 
 // ── INSTALL : pré-cache tous les assets ─────────────────
@@ -40,6 +40,13 @@ self.addEventListener('activate', function(e) {
     })
   );
   self.clients.claim();
+});
+
+// ── MESSAGE : forcer l'activation depuis l'app ──────────
+self.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // ── FETCH : cache-first, fallback network ───────────────
