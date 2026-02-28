@@ -1296,8 +1296,8 @@ function rdSelectBanc(){
   let d1='–', d2='–', model='–';
   if(banc.ch) banc.ch.forEach(function(c){
     const ll = c.l.toLowerCase();
-    if(ll.includes('distance') && ll.includes('1') || ll.includes('d1')) d1 = c.v;
-    if(ll.includes('distance') && ll.includes('2') || ll.includes('d2')) d2 = c.v;
+    if((ll.includes('distance') && ll.includes('1')) || ll === 'd1' || ll.includes('d1 ') || ll.includes(' d1')) d1 = c.v;
+    if((ll.includes('distance') && ll.includes('2')) || ll === 'd2' || ll.includes('d2 ') || ll.includes(' d2')) d2 = c.v;
     if(ll.includes('modèle') || ll.includes('model') || ll.includes('raccordement') || ll.includes('étalon')) model = c.v;
   });
   document.getElementById('rd_d1').textContent = d1;
@@ -1317,8 +1317,8 @@ function rdGetBancData(){
   let d1='', d2='', model='';
   if(banc.ch) banc.ch.forEach(function(c){
     const ll = c.l.toLowerCase();
-    if(ll.includes('distance') && ll.includes('1') || ll.includes('d1')) d1 = c.v;
-    if(ll.includes('distance') && ll.includes('2') || ll.includes('d2')) d2 = c.v;
+    if((ll.includes('distance') && ll.includes('1')) || ll === 'd1' || ll.includes('d1 ') || ll.includes(' d1')) d1 = c.v;
+    if((ll.includes('distance') && ll.includes('2')) || ll === 'd2' || ll.includes('d2 ') || ll.includes(' d2')) d2 = c.v;
     if(ll.includes('modèle') || ll.includes('model') || ll.includes('raccordement') || ll.includes('étalon')) model = c.v;
   });
   return {d1:d1, d2:d2, loc:banc.loc||'', val:banc.val?dfr(banc.val):'', model:model};
@@ -1405,6 +1405,17 @@ function rdShowConfig(){
 }
 
 function rdShowAdd(){
+  // Vérifier que la config est renseignée
+  const missing = [];
+  if(!rdConfig.operateur) missing.push('Opérateur');
+  if(!rdConfig.trigramme) missing.push('Trigramme');
+  if(!rdConfig.site) missing.push('Site');
+  if(!rdConfig.banc_id) missing.push('Banc d\'étalonnage');
+  if(missing.length){
+    toast('⚠ Config incomplète : ' + missing.join(', '), true);
+    rdShowConfig();
+    return;
+  }
   rdCurrentIdx = -2;
   rdShowPanel('rd_add');
   rdRenderSidebar();
@@ -1438,7 +1449,7 @@ function rdLookup(){
     const mat = DATA_MATERIELS.find(function(m){ return (m.id||m.code||'') === code; });
     if(mat){
       info.style.display='block';
-      document.getElementById('rd_lu_type').textContent = mat.desc || mat.type || '–';
+      document.getElementById('rd_lu_type').textContent = mat.des || mat.desc || mat.type || '–';
       document.getElementById('rd_lu_sn').textContent = mat.ns || '–';
       return;
     }
@@ -1472,9 +1483,9 @@ function rdAddAppareil(){
   if(typeof DATA_MATERIELS !== 'undefined'){
     const mat = DATA_MATERIELS.find(function(m){ return (m.id||m.code||'') === code; });
     if(mat){
-      desc = mat.desc || mat.type || '';
+      desc = mat.des || mat.desc || mat.type || '';
       sn = mat.ns || '';
-      corim = mat.corim || '';
+      corim = mat.nc || mat.corim || '';
     }
   }
   type_radia = desc;
