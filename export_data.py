@@ -20,6 +20,7 @@ Placeholders remplacés dans template.html :
     %%NB_CONSTATS%%      Nombre fiches constats
     %%ETIQ_IMG_C%%       Image base64 étiquette conforme
     %%ETIQ_IMG_NC%%      Image base64 étiquette non conforme
+    %%RADIA_PDF_B64%%    PDF template constat radiamètre en base64
 """
 
 import sys, os, json, datetime, re, hashlib
@@ -225,6 +226,17 @@ def load_etiq_images(dossier_script):
     return images
 
 
+def load_radia_pdf(dossier_script):
+    """Charge le PDF template radiamètre en base64."""
+    for name in ["Constat_radiametres.pdf", "constat_radiametres.pdf",
+                  "Constat_de_verification_radiametres.pdf"]:
+        p = dossier_script / name
+        if p.exists():
+            import base64
+            return base64.b64encode(p.read_bytes()).decode()
+    return ""
+
+
 # ══════════════════════════════════════════════════════════
 # MISE À JOUR SW.JS
 # ══════════════════════════════════════════════════════════
@@ -357,6 +369,14 @@ def main():
     html = html.replace('%%NB_CONSTATS%%', str(len(fiches)))
     html = html.replace('%%ETIQ_IMG_C%%', etiq_imgs["C"])
     html = html.replace('%%ETIQ_IMG_NC%%', etiq_imgs["NC"])
+
+    # ── PDF template radiamètre ───────────────────────────
+    radia_pdf_b64 = load_radia_pdf(dossier_script)
+    if radia_pdf_b64:
+        print(f"  ✓ PDF radiamètre embarqué ({len(radia_pdf_b64)//1024} Ko)")
+    else:
+        print("  ⚠ PDF radiamètre non trouvé (Constat_radiametres.pdf)")
+    html = html.replace('%%RADIA_PDF_B64%%', radia_pdf_b64)
 
     out_path = dossier_sortie / "index.html"
     out_path.write_text(html, encoding="utf-8")

@@ -205,6 +205,49 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .confirm-overlay.open{display:flex}.confirm-box{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:24px;max-width:360px;width:90%;text-align:center}
 .confirm-box p{font-size:.9rem;color:var(--text);margin-bottom:8px;line-height:1.5}.confirm-box .sub{font-size:.78rem;color:var(--text2)}
 </style>
+/* ── RADIAMÈTRES ─────────────────────────────────────────── */
+.rd-layout{display:flex;height:calc(100vh - 110px);overflow:hidden}
+.rd-sidebar{width:90px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.rd-side-item{padding:10px 6px;text-align:center;cursor:pointer;border-bottom:1px solid var(--border);transition:all .15s;position:relative}
+.rd-side-item:hover,.rd-side-item.active{background:var(--panel2)}
+.rd-side-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
+.rd-side-icon{font-size:1.3rem;margin-bottom:2px}
+.rd-side-label{font-family:var(--mono);font-size:.6rem;color:var(--text2);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd-side-status{font-size:.55rem;margin-top:2px;font-weight:700;letter-spacing:.05em}
+.rd-side-status.ok{color:var(--green)}.rd-side-status.nc{color:var(--red)}.rd-side-status.wait{color:var(--text3)}.rd-side-status.partial{color:var(--orange)}
+.rd-side-add{padding:14px 6px;text-align:center;cursor:pointer;border-top:1px solid var(--border);margin-top:auto;background:rgba(0,212,255,.05);transition:all .15s}
+.rd-side-add:hover{background:rgba(0,212,255,.12)}
+.rd-config{border-bottom:2px solid var(--border2)!important}
+.rd-main{flex:1;overflow-y:auto;padding:12px}
+.rd-panel{animation:fadeSlide .2s ease}
+@keyframes fadeSlide{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.rd-title{font-family:var(--title);font-size:1.1rem;color:var(--accent);letter-spacing:.06em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.rd-form label{display:block;font-family:var(--mono);font-size:.65rem;color:var(--text3);letter-spacing:.08em;margin:10px 0 4px;text-transform:uppercase}
+.rd-form input,.rd-form select,.rd-form textarea{width:100%;height:40px;background:var(--panel);border:1.5px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--body);font-size:.9rem;padding:0 10px;outline:none;transition:border-color .2s}
+.rd-form textarea{height:auto;padding:8px 10px}
+.rd-form input:focus,.rd-form select:focus,.rd-form textarea:focus{border-color:var(--accent)}
+.rd-form input[readonly]{color:var(--text2);background:var(--bg3)}
+.rd-section{font-family:var(--title);font-size:.85rem;color:var(--accent);margin:16px 0 6px;padding:6px 10px;background:rgba(0,212,255,.06);border-left:3px solid var(--accent);border-radius:0 4px 4px 0;letter-spacing:.04em}
+.rd-radio{display:flex;gap:6px;flex-wrap:wrap}
+.rr{padding:6px 12px;background:var(--panel);border:1.5px solid var(--border);border-radius:20px;color:var(--text2);font-size:.78rem;cursor:pointer;transition:all .15s;font-family:var(--body)}
+.rr.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.1)}
+.rr[data-v="Dégradé"].active,.rr[data-v="Non-conforme"].active{border-color:var(--red);color:var(--red);background:rgba(255,61,61,.1)}
+.rd-mesure-grid{display:grid;grid-template-columns:1fr 100px auto;gap:4px 8px;align-items:center}
+.rd-mg-label{font-size:.8rem;color:var(--text2)}
+.rd-mg-val input{width:100px;text-align:center;font-family:var(--mono);font-weight:600}
+.rd-mg-tol{font-family:var(--mono);font-size:.65rem;color:var(--text3);padding:4px 8px;background:var(--bg3);border-radius:4px;text-align:center}
+.rd-mg-tol.ok{color:var(--green);background:rgba(0,230,118,.08)}.rd-mg-tol.ng{color:var(--red);background:rgba(255,61,61,.08)}
+.rd-jugement{text-align:center;padding:14px;margin-top:12px;border-radius:8px;font-family:var(--title);font-size:1.2rem;font-weight:700;letter-spacing:.08em;border:2px solid var(--border)}
+.rd-jugement.ok{color:var(--green);border-color:var(--green);background:rgba(0,230,118,.08)}
+.rd-jugement.ng{color:var(--red);border-color:var(--red);background:rgba(255,61,61,.08)}
+.rd-jugement.wait{color:var(--text3)}
+.rd-info-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.8rem;color:var(--text2);border-bottom:1px solid var(--border)}
+.rd-info-row span:first-child{color:var(--text3)}
+.rd-info-row strong{color:var(--accent)}
+.rd-banc-info{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-top:8px}
+.rd-cst-header{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:.8rem;color:var(--text2)}
+.rd-stats{font-family:var(--mono);font-size:.75rem;color:var(--text2);padding:10px 0;border-top:1px solid var(--border);margin-top:12px}
+.rd-stats .sc{color:var(--green)}.rd-stats .snc{color:var(--red)}
 </head>
 <body>
 
@@ -249,6 +292,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
   <div class="tab" onclick="go('materiels')"><span class="ti">🔧</span><div><div class="tt">MATÉRIELS</div><div class="td">BASE</div></div><span class="tb" id="bm">%%NB_MATERIELS%%</span></div>
   <div class="tab" onclick="go('calc')"><span class="ti">🧮</span><div><div class="tt">CALCUL</div><div class="td">VÉRIF</div></div><span class="tb">⚡</span></div>
   <div class="tab" onclick="go('etiq')"><span class="ti">🏷</span><div><div class="tt">ÉTIQUETTES</div><div class="td">IMPRESSION</div></div><span class="tb" id="betiq">0</span></div>
+  <div class="tab" onclick="go('radia')"><span class="ti">☢</span><div><div class="tt">RADIAM.</div><div class="td">VÉRIF</div></div><span class="tb" id="bradia">0</span></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -393,6 +437,167 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
     <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="eqClear()">🗑 Vider la liste</button>
   </div>
 </div>
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 6 — RADIAMÈTRES (Vérification sur site EDF)
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="p_radia">
+  <!-- Layout: sidebar left (onglets verticaux) + main right (formulaire) -->
+  <div class="rd-layout">
+    <!-- SIDEBAR GAUCHE : liste des appareils -->
+    <div class="rd-sidebar" id="rd_sidebar">
+      <div class="rd-side-item rd-config active" onclick="rdShowConfig()">
+        <div class="rd-side-icon">⚙️</div>
+        <div class="rd-side-label">CONFIG</div>
+        <div class="rd-side-status">SESSION</div>
+      </div>
+      <div id="rd_list"></div>
+      <div class="rd-side-add" id="rd_add_btn">
+        <div class="rd-side-icon">➕</div>
+        <div class="rd-side-label">SCAN</div>
+      </div>
+    </div>
+
+    <!-- MAIN DROITE : contenu -->
+    <div class="rd-main" id="rd_main">
+
+      <!-- ── PANNEAU CONFIG ─────────────────────── -->
+      <div class="rd-panel" id="rd_config">
+        <div class="rd-title">⚙️ Configuration session</div>
+        <div class="rd-form">
+          <label>Opérateur</label>
+          <input id="rd_operateur" placeholder="Nom complet" oninput="rdSaveConfig()">
+          <label>Trigramme</label>
+          <input id="rd_trigramme" maxlength="4" placeholder="SBO" oninput="rdSaveConfig()" style="text-transform:uppercase;width:100px">
+          <label>Contrôleur technique</label>
+          <input id="rd_controleur" placeholder="Nom complet" oninput="rdSaveConfig()">
+          <label>Site d'intervention</label>
+          <input id="rd_site" placeholder="EDF Saint-Laurent" oninput="rdSaveConfig()">
+          <label>N° d'intervention</label>
+          <input id="rd_intervention" placeholder="ITV 123456" oninput="rdSaveConfig()">
+          <label>Date essai</label>
+          <input type="date" id="rd_date" oninput="rdSaveConfig()">
+          <label>Banc d'irradiation</label>
+          <select id="rd_banc" onchange="rdSelectBanc()">
+            <option value="">— Sélectionner un banc —</option>
+          </select>
+          <div class="rd-banc-info" id="rd_banc_info" style="display:none">
+            <div class="rd-info-row"><span>Distance d1 :</span><strong id="rd_d1">–</strong> cm</div>
+            <div class="rd-info-row"><span>Distance d2 :</span><strong id="rd_d2">–</strong> cm</div>
+            <div class="rd-info-row"><span>Localisation :</span><span id="rd_loc">–</span></div>
+            <div class="rd-info-row"><span>Validité banc :</span><span id="rd_val_banc">–</span></div>
+            <div class="rd-info-row"><span>Modèle étalon raccordement :</span><span id="rd_model">–</span></div>
+          </div>
+        </div>
+        <div class="rd-stats" id="rd_stats"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn btn-primary" onclick="rdGenAllPDF()" id="rd_btn_pdf" disabled>📄 Générer tous les PDF</button>
+          <button class="btn btn-accent" onclick="rdExportCSV()" id="rd_btn_csv" disabled>📊 Export CSV</button>
+          <button class="btn btn-ghost" onclick="rdClearSession()">🗑 Vider session</button>
+        </div>
+      </div>
+
+      <!-- ── PANNEAU AJOUT ──────────────────────── -->
+      <div class="rd-panel" id="rd_add" style="display:none">
+        <div class="rd-title">➕ Ajouter un radiamètre</div>
+        <div class="rd-form">
+          <label>Code matériel (scan QR ou saisie)</label>
+          <div style="display:flex;gap:8px">
+            <input id="rd_scan_input" placeholder="SRIRRRCTDOLG-BEL347..." style="flex:1" list="rd_mat_list" oninput="rdLookup()">
+            <button class="btn btn-accent" onclick="rdStartScan()" style="width:52px;font-size:1.3rem;padding:0">📷</button>
+          </div>
+          <datalist id="rd_mat_list"></datalist>
+          <div id="rd_lookup_info" style="display:none;margin-top:8px">
+            <div class="rd-info-row"><span>Type :</span><strong id="rd_lu_type">–</strong></div>
+            <div class="rd-info-row"><span>S/N :</span><strong id="rd_lu_sn">–</strong></div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" onclick="rdAddAppareil()" id="rd_add_confirm" style="width:100%;height:48px" disabled>✓ Ajouter à la session</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PANNEAU CONSTAT (formulaire par appareil) ─ -->
+      <div class="rd-panel" id="rd_constat" style="display:none">
+        <div class="rd-title" id="rd_cst_title">CONSTAT</div>
+        <div class="rd-cst-header" id="rd_cst_header"></div>
+        <div class="rd-form">
+          <!-- Identification -->
+          <div class="rd-section">📋 Identification</div>
+          <label>Type radiamètre</label>
+          <input id="rd_c_type" oninput="rdSaveItem()">
+          <label>N° série (S/N)</label>
+          <input id="rd_c_sn" oninput="rdSaveItem()">
+          <label>N° CORIM / GMAO</label>
+          <input id="rd_c_corim" oninput="rdSaveItem()">
+          <label>N° constat</label>
+          <input id="rd_c_numcst" readonly style="color:var(--accent)">
+
+          <!-- §5 Contrôles préliminaires -->
+          <div class="rd-section">5. Contrôles préliminaires</div>
+          <label>Aspect général</label>
+          <div class="rd-radio" id="rd_c_aspect">
+            <button class="rr active" onclick="rdRadio(this)" data-v="Correct">Correct</button>
+            <button class="rr" onclick="rdRadio(this)" data-v="Dégradé">Dégradé</button>
+          </div>
+          <label>État de charge batterie</label>
+          <div class="rd-radio" id="rd_c_batterie">
+            <button class="rr active" onclick="rdRadio(this)" data-v="Conforme">Conforme</button>
+            <button class="rr" onclick="rdRadio(this)" data-v="Non-conforme">Non-conforme</button>
+          </div>
+
+          <!-- §7 Contrôle fonctionnel -->
+          <div class="rd-section">7. Contrôle fonctionnel initial</div>
+          <label>Son, affichage, rétroéclairage</label>
+          <div class="rd-radio" id="rd_c_son">
+            <button class="rr active" onclick="rdRadio(this)" data-v="Conforme">Conforme</button>
+            <button class="rr" onclick="rdRadio(this)" data-v="Non-conforme">Non-conforme</button>
+          </div>
+          <label>Reconnaissance sonde</label>
+          <div class="rd-radio" id="rd_c_sonde">
+            <button class="rr" onclick="rdRadio(this)" data-v="Conforme">Conforme</button>
+            <button class="rr" onclick="rdRadio(this)" data-v="Non-conforme">Non-conforme</button>
+            <button class="rr active" onclick="rdRadio(this)" data-v="Sans objet">Sans objet</button>
+          </div>
+          <label>Mise à jour date(s)</label>
+          <div class="rd-radio" id="rd_c_maj">
+            <button class="rr" onclick="rdRadio(this)" data-v="Réalisée">Réalisée</button>
+            <button class="rr active" onclick="rdRadio(this)" data-v="Sans objet">Sans objet</button>
+          </div>
+
+          <!-- §8 Vérification métrologique -->
+          <div class="rd-section">8. Vérification métrologique</div>
+          <div class="rd-mesure-grid">
+            <div class="rd-mg-label">Distance d1 (cm)</div>
+            <div class="rd-mg-val"><input id="rd_c_d1" type="number" readonly></div>
+            <div class="rd-mg-tol">Banc</div>
+            <div class="rd-mg-label">DeD d1 (mSv/h)</div>
+            <div class="rd-mg-val"><input id="rd_c_ded1" type="number" step="0.1" oninput="rdCalcJugement()" placeholder="ex: 1.0"></div>
+            <div class="rd-mg-tol" id="rd_c_ded1_tol">0.7 – 1.3</div>
+            <div class="rd-mg-label">Distance d2 (cm)</div>
+            <div class="rd-mg-val"><input id="rd_c_d2" type="number" readonly></div>
+            <div class="rd-mg-tol">Banc</div>
+            <div class="rd-mg-label">DeD d2 (µSv/h)</div>
+            <div class="rd-mg-val"><input id="rd_c_ded2" type="number" step="1" oninput="rdCalcJugement()" placeholder="ex: 100"></div>
+            <div class="rd-mg-tol" id="rd_c_ded2_tol">63 – 117</div>
+          </div>
+
+          <!-- Commentaires -->
+          <label>Commentaires</label>
+          <textarea id="rd_c_comment" rows="2" oninput="rdSaveItem()" placeholder="Optionnel..."></textarea>
+
+          <!-- Jugement -->
+          <div class="rd-jugement" id="rd_c_jugement">⏳ EN ATTENTE</div>
+
+          <!-- Actions -->
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn btn-primary" onclick="rdGenOnePDF()" style="flex:1">📄 PDF</button>
+            <button class="btn btn-ghost" onclick="rdDeleteItem()" style="width:60px;color:var(--red)">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════
      QR SCANNER MODAL
@@ -510,7 +715,7 @@ function fmtAct(v){if(v==null)return'–';return v.toFixed(2)+' Bq';}
 // ══════════════════════════════════════════════════════════
 // NAVIGATION & UTILITAIRES
 // ══════════════════════════════════════════════════════════
-const TAB_MAP = {constats:0,etalons:1,materiels:2,calc:3,etiq:4};
+const TAB_MAP = {constats:0,etalons:1,materiels:2,calc:3,etiq:4,radia:5};
 function go(p){document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));document.getElementById('p_'+p).classList.add('active');document.querySelectorAll('.tab')[TAB_MAP[p]].classList.add('active');}
 function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';}
 function dfr(s){if(!s)return'–';try{const p=s.split('-');return p.length>=3?p[2]+'/'+p[1]+'/'+p[0]:s}catch{return s;}}
@@ -1022,5 +1227,641 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+// ══════════════════════════════════════════════════════════
+// ONGLET 6 — RADIAMÈTRES
+// ══════════════════════════════════════════════════════════
+const RD_PDF_B64='%%RADIA_PDF_B64%%';
+
+// Session state
+let rdSession = LS.get('radia_session', { items: [], counter: 0 });
+let rdConfig = LS.get('radia_config', {});
+let rdCurrentIdx = -1; // -1=config, -2=add, >=0=item index
+
+function rdSaveSession(){ LS.set('radia_session', rdSession); }
+function rdSaveConfig(){
+  rdConfig = {
+    operateur: document.getElementById('rd_operateur').value,
+    trigramme: document.getElementById('rd_trigramme').value.toUpperCase(),
+    controleur: document.getElementById('rd_controleur').value,
+    site: document.getElementById('rd_site').value,
+    intervention: document.getElementById('rd_intervention').value,
+    date: document.getElementById('rd_date').value,
+    banc_id: document.getElementById('rd_banc').value
+  };
+  LS.set('radia_config', rdConfig);
+}
+
+function rdInit(){
+  // Load config
+  const c = rdConfig;
+  if(c.operateur) document.getElementById('rd_operateur').value = c.operateur;
+  if(c.trigramme) document.getElementById('rd_trigramme').value = c.trigramme;
+  if(c.controleur) document.getElementById('rd_controleur').value = c.controleur;
+  if(c.site) document.getElementById('rd_site').value = c.site;
+  if(c.intervention) document.getElementById('rd_intervention').value = c.intervention;
+  document.getElementById('rd_date').value = c.date || new Date().toISOString().slice(0,10);
+  // Populate bancs from etalons (category containing 'Irrad' or similar)
+  rdPopulateBancs();
+  if(c.banc_id) { document.getElementById('rd_banc').value = c.banc_id; rdSelectBanc(); }
+  // Populate matériel datalist
+  rdPopulateMatList();
+  // Render sidebar
+  rdRenderSidebar();
+  rdUpdateStats();
+  // Add button
+  document.getElementById('rd_add_btn').onclick = function(){ rdShowAdd(); };
+}
+
+function rdPopulateBancs(){
+  const etalons = getEtalons();
+  const sel = document.getElementById('rd_banc');
+  sel.innerHTML = '<option value="">— Sélectionner un banc —</option>';
+  // Find etalons with cat containing 'Irrad' or 'Banc' or 'irrad'
+  etalons.forEach(function(e){
+    if(e.cat && (e.cat.toLowerCase().includes('irrad') || e.cat.toLowerCase().includes('banc'))){
+      const label = e.id + (e.loc ? ' - ' + e.loc : '');
+      sel.innerHTML += '<option value="'+esc(e.id)+'">'+esc(label)+'</option>';
+    }
+  });
+}
+
+function rdSelectBanc(){
+  const bancId = document.getElementById('rd_banc').value;
+  const info = document.getElementById('rd_banc_info');
+  if(!bancId){ info.style.display='none'; rdSaveConfig(); return; }
+  const etalons = getEtalons();
+  const banc = etalons.find(function(e){ return e.id === bancId; });
+  if(!banc){ info.style.display='none'; rdSaveConfig(); return; }
+  info.style.display='block';
+  // Extract d1, d2 from champs
+  let d1='–', d2='–', model='–';
+  if(banc.ch) banc.ch.forEach(function(c){
+    const ll = c.l.toLowerCase();
+    if(ll.includes('distance') && ll.includes('1') || ll.includes('d1')) d1 = c.v;
+    if(ll.includes('distance') && ll.includes('2') || ll.includes('d2')) d2 = c.v;
+    if(ll.includes('modèle') || ll.includes('model') || ll.includes('raccordement') || ll.includes('étalon')) model = c.v;
+  });
+  document.getElementById('rd_d1').textContent = d1;
+  document.getElementById('rd_d2').textContent = d2;
+  document.getElementById('rd_loc').textContent = banc.loc || '–';
+  document.getElementById('rd_val_banc').textContent = banc.val ? dfr(banc.val) : '–';
+  document.getElementById('rd_model').textContent = model;
+  rdSaveConfig();
+}
+
+function rdGetBancData(){
+  const bancId = rdConfig.banc_id;
+  if(!bancId) return {d1:'',d2:'',loc:'',val:'',model:''};
+  const etalons = getEtalons();
+  const banc = etalons.find(function(e){ return e.id === bancId; });
+  if(!banc) return {d1:'',d2:'',loc:'',val:'',model:''};
+  let d1='', d2='', model='';
+  if(banc.ch) banc.ch.forEach(function(c){
+    const ll = c.l.toLowerCase();
+    if(ll.includes('distance') && ll.includes('1') || ll.includes('d1')) d1 = c.v;
+    if(ll.includes('distance') && ll.includes('2') || ll.includes('d2')) d2 = c.v;
+    if(ll.includes('modèle') || ll.includes('model') || ll.includes('raccordement') || ll.includes('étalon')) model = c.v;
+  });
+  return {d1:d1, d2:d2, loc:banc.loc||'', val:banc.val?dfr(banc.val):'', model:model};
+}
+
+function rdPopulateMatList(){
+  const dl = document.getElementById('rd_mat_list');
+  dl.innerHTML = '';
+  if(typeof DATA_MATERIELS === 'undefined') return;
+  DATA_MATERIELS.forEach(function(m){
+    const o = document.createElement('option');
+    o.value = m.id || m.code || '';
+    o.textContent = (m.desc||m.type||'') + ' - ' + (m.ns||'');
+    dl.appendChild(o);
+  });
+}
+
+// ── SIDEBAR RENDERING ──────────────────────────────────────
+function rdRenderSidebar(){
+  const list = document.getElementById('rd_list');
+  list.innerHTML = '';
+  rdSession.items.forEach(function(it, idx){
+    const st = rdItemStatus(it);
+    const div = document.createElement('div');
+    div.className = 'rd-side-item' + (rdCurrentIdx===idx?' active':'');
+    div.onclick = function(){ rdShowItem(idx); };
+    div.innerHTML =
+      '<div class="rd-side-icon">' + (st==='ok'?'✓':st==='ng'?'✗':st==='partial'?'⚠':'⏳') + '</div>' +
+      '<div class="rd-side-label">' + esc(it.type_short || '?') + '</div>' +
+      '<div class="rd-side-label" style="color:var(--accent);font-weight:700">' + esc(it.id_short || it.code || '?') + '</div>' +
+      '<div class="rd-side-status ' + st + '">' + (st==='ok'?'CONFORME':st==='ng'?'NON-CONF':st==='partial'?'PARTIEL':'ATTENTE') + '</div>';
+    list.appendChild(div);
+  });
+  rdUpdateStats();
+}
+
+function rdItemStatus(it){
+  if(!it.ded1 && !it.ded2) return 'wait';
+  const j = rdCalcJugementFor(it);
+  if(j === null) return 'partial';
+  return j ? 'ok' : 'ng';
+}
+
+function rdCalcJugementFor(it){
+  if(!it.ded1 || !it.ded2) return null;
+  const d1 = parseFloat(it.ded1);
+  const d2 = parseFloat(it.ded2);
+  if(isNaN(d1)||isNaN(d2)) return null;
+  const ok1 = d1 >= 0.7 && d1 <= 1.3;
+  const ok2 = d2 >= 63 && d2 <= 117;
+  const checks = (it.aspect!=='Dégradé') && (it.batterie!=='Non-conforme') && (it.son!=='Non-conforme') &&
+                 (it.sonde!=='Non-conforme') && ok1 && ok2;
+  return checks;
+}
+
+function rdUpdateStats(){
+  const total = rdSession.items.length;
+  let ok=0, ng=0;
+  rdSession.items.forEach(function(it){
+    const j = rdCalcJugementFor(it);
+    if(j===true) ok++;
+    else if(j===false) ng++;
+  });
+  const el = document.getElementById('rd_stats');
+  if(total===0){
+    el.innerHTML = 'Aucun appareil dans la session';
+  } else {
+    el.innerHTML = '<span class="sc">'+ok+' ✓</span> conforme'+(ok>1?'s':'') +
+      ' · <span class="snc">'+ng+' ✗</span> NC · '+total+' total';
+  }
+  document.getElementById('rd_btn_pdf').disabled = total===0;
+  document.getElementById('rd_btn_csv').disabled = total===0;
+  // Update tab badge
+  const badge = document.getElementById('bradia');
+  if(badge) badge.textContent = total || '0';
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────
+function rdShowConfig(){
+  rdCurrentIdx = -1;
+  rdShowPanel('rd_config');
+  rdRenderSidebar();
+  document.querySelector('.rd-config').classList.add('active');
+}
+
+function rdShowAdd(){
+  rdCurrentIdx = -2;
+  rdShowPanel('rd_add');
+  rdRenderSidebar();
+  document.getElementById('rd_scan_input').value = '';
+  document.getElementById('rd_lookup_info').style.display = 'none';
+  document.getElementById('rd_add_confirm').disabled = true;
+  document.getElementById('rd_scan_input').focus();
+}
+
+function rdShowItem(idx){
+  rdCurrentIdx = idx;
+  rdShowPanel('rd_constat');
+  rdRenderSidebar();
+  rdLoadItem(idx);
+}
+
+function rdShowPanel(id){
+  ['rd_config','rd_add','rd_constat'].forEach(function(p){
+    document.getElementById(p).style.display = p===id?'block':'none';
+  });
+}
+
+// ── LOOKUP MATÉRIEL ────────────────────────────────────────
+function rdLookup(){
+  const code = document.getElementById('rd_scan_input').value.trim();
+  const info = document.getElementById('rd_lookup_info');
+  if(!code){ info.style.display='none'; document.getElementById('rd_add_confirm').disabled=true; return; }
+  document.getElementById('rd_add_confirm').disabled = false;
+  // Search in DATA_MATERIELS
+  if(typeof DATA_MATERIELS !== 'undefined'){
+    const mat = DATA_MATERIELS.find(function(m){ return (m.id||m.code||'') === code; });
+    if(mat){
+      info.style.display='block';
+      document.getElementById('rd_lu_type').textContent = mat.desc || mat.type || '–';
+      document.getElementById('rd_lu_sn').textContent = mat.ns || '–';
+      return;
+    }
+  }
+  info.style.display='none';
+}
+
+function rdParseId(raw){
+  if(!raw) return raw;
+  const i = raw.lastIndexOf('-');
+  return i > 0 ? raw.substring(i+1) : raw;
+}
+
+function rdGetTypeShort(desc){
+  if(!desc) return '?';
+  // Extract first meaningful word: "DOLPHY GAMMA - (GAMMA...)" -> "Dolphy"
+  const m = desc.match(/^([A-Za-z0-9]+)/);
+  return m ? m[1] : desc.substring(0,8);
+}
+
+// ── ADD APPAREIL ───────────────────────────────────────────
+function rdAddAppareil(){
+  const code = document.getElementById('rd_scan_input').value.trim();
+  if(!code){ toast('Saisir un code matériel',true); return; }
+  // Check duplicate
+  if(rdSession.items.find(function(it){ return it.code === code; })){
+    toast('Déjà dans la session',true); return;
+  }
+  // Lookup
+  let type_radia='', sn='', corim='', desc='';
+  if(typeof DATA_MATERIELS !== 'undefined'){
+    const mat = DATA_MATERIELS.find(function(m){ return (m.id||m.code||'') === code; });
+    if(mat){
+      desc = mat.desc || mat.type || '';
+      sn = mat.ns || '';
+      corim = mat.corim || '';
+    }
+  }
+  type_radia = desc;
+  const id_short = rdParseId(code);
+  const type_short = rdGetTypeShort(desc);
+  // Generate constat number
+  rdSession.counter++;
+  const tri = (rdConfig.trigramme || 'XXX').toUpperCase();
+  const dt = rdConfig.date || new Date().toISOString().slice(0,10);
+  const dp = dt.replace(/-/g,'').slice(2); // AAMMJJ
+  const cnum = String(rdSession.counter).padStart(4,'0');
+  const numConstat = tri + dp + cnum + 'C';
+
+  const bancData = rdGetBancData();
+  const item = {
+    code: code,
+    id_short: id_short,
+    type_short: type_short,
+    type_radia: type_radia,
+    sn: sn,
+    corim: corim,
+    numConstat: numConstat,
+    aspect: 'Correct',
+    batterie: 'Conforme',
+    son: 'Conforme',
+    sonde: 'Sans objet',
+    maj: 'Sans objet',
+    d1: bancData.d1,
+    d2: bancData.d2,
+    ded1: '',
+    ded2: '',
+    comment: '',
+    jugement: null
+  };
+  rdSession.items.push(item);
+  rdSaveSession();
+  rdRenderSidebar();
+  rdShowItem(rdSession.items.length - 1);
+  toast('✓ ' + id_short + ' ajouté');
+}
+
+// ── LOAD/SAVE ITEM ─────────────────────────────────────────
+function rdLoadItem(idx){
+  const it = rdSession.items[idx];
+  if(!it) return;
+  document.getElementById('rd_cst_title').textContent = '☢ ' + (it.type_short||'?') + ' — ' + (it.id_short||it.code);
+  document.getElementById('rd_cst_header').innerHTML =
+    '<div style="display:flex;justify-content:space-between"><span>Code : <strong style="color:var(--accent)">'+esc(it.code)+'</strong></span></div>';
+  document.getElementById('rd_c_type').value = it.type_radia || '';
+  document.getElementById('rd_c_sn').value = it.sn || '';
+  document.getElementById('rd_c_corim').value = it.corim || '';
+  document.getElementById('rd_c_numcst').value = it.numConstat || '';
+  // Radio buttons
+  rdSetRadio('rd_c_aspect', it.aspect || 'Correct');
+  rdSetRadio('rd_c_batterie', it.batterie || 'Conforme');
+  rdSetRadio('rd_c_son', it.son || 'Conforme');
+  rdSetRadio('rd_c_sonde', it.sonde || 'Sans objet');
+  rdSetRadio('rd_c_maj', it.maj || 'Sans objet');
+  // Mesures
+  document.getElementById('rd_c_d1').value = it.d1 || '';
+  document.getElementById('rd_c_d2').value = it.d2 || '';
+  document.getElementById('rd_c_ded1').value = it.ded1 || '';
+  document.getElementById('rd_c_ded2').value = it.ded2 || '';
+  document.getElementById('rd_c_comment').value = it.comment || '';
+  rdCalcJugement();
+}
+
+function rdSaveItem(){
+  if(rdCurrentIdx < 0) return;
+  const it = rdSession.items[rdCurrentIdx];
+  if(!it) return;
+  it.type_radia = document.getElementById('rd_c_type').value;
+  it.type_short = rdGetTypeShort(it.type_radia);
+  it.sn = document.getElementById('rd_c_sn').value;
+  it.corim = document.getElementById('rd_c_corim').value;
+  it.aspect = rdGetRadio('rd_c_aspect');
+  it.batterie = rdGetRadio('rd_c_batterie');
+  it.son = rdGetRadio('rd_c_son');
+  it.sonde = rdGetRadio('rd_c_sonde');
+  it.maj = rdGetRadio('rd_c_maj');
+  it.ded1 = document.getElementById('rd_c_ded1').value;
+  it.ded2 = document.getElementById('rd_c_ded2').value;
+  it.comment = document.getElementById('rd_c_comment').value;
+  rdSaveSession();
+  rdRenderSidebar();
+}
+
+function rdDeleteItem(){
+  if(rdCurrentIdx < 0) return;
+  if(!confirm('Supprimer cet appareil ?')) return;
+  rdSession.items.splice(rdCurrentIdx, 1);
+  rdSaveSession();
+  rdRenderSidebar();
+  rdShowConfig();
+}
+
+// ── RADIO BUTTONS ──────────────────────────────────────────
+function rdRadio(btn){
+  btn.parentElement.querySelectorAll('.rr').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  rdSaveItem();
+  rdCalcJugement();
+}
+function rdSetRadio(containerId, val){
+  const el = document.getElementById(containerId);
+  el.querySelectorAll('.rr').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-v') === val);
+  });
+}
+function rdGetRadio(containerId){
+  const el = document.getElementById(containerId);
+  const active = el.querySelector('.rr.active');
+  return active ? active.getAttribute('data-v') : '';
+}
+
+// ── JUGEMENT AUTO ──────────────────────────────────────────
+function rdCalcJugement(){
+  rdSaveItem();
+  if(rdCurrentIdx < 0) return;
+  const it = rdSession.items[rdCurrentIdx];
+  const el = document.getElementById('rd_c_jugement');
+  const d1v = parseFloat(it.ded1);
+  const d2v = parseFloat(it.ded2);
+  // Tolerance indicators
+  const t1 = document.getElementById('rd_c_ded1_tol');
+  const t2 = document.getElementById('rd_c_ded2_tol');
+  t1.className = 'rd-mg-tol' + (!isNaN(d1v) ? (d1v>=0.7&&d1v<=1.3?' ok':' ng') : '');
+  t2.className = 'rd-mg-tol' + (!isNaN(d2v) ? (d2v>=63&&d2v<=117?' ok':' ng') : '');
+
+  const j = rdCalcJugementFor(it);
+  if(j === null){
+    el.textContent = '⏳ EN ATTENTE (saisir DeD1 et DeD2)';
+    el.className = 'rd-jugement wait';
+  } else if(j){
+    el.textContent = '✓ CONFORME';
+    el.className = 'rd-jugement ok';
+  } else {
+    el.textContent = '✗ NON-CONFORME';
+    el.className = 'rd-jugement ng';
+  }
+  it.jugement = j;
+  rdSaveSession();
+  rdRenderSidebar();
+}
+
+// ── SCANNER QR (reuse etiquettes scanner) ──────────────────
+function rdStartScan(){
+  if(!('BarcodeDetector' in window)){
+    toast('Scanner QR non disponible sur ce navigateur',true); return;
+  }
+  const modal = document.getElementById('qrModal');
+  document.getElementById('qrMode').textContent = 'MODE SCAN UNIQUE — RADIAMÈTRE';
+  document.getElementById('qrCount').textContent = '';
+  modal.classList.add('open');
+  const reader = document.getElementById('qrReader');
+  reader.innerHTML = '';
+  const video = document.createElement('video');
+  video.setAttribute('playsinline','');
+  video.style.cssText = 'width:100%;border-radius:8px';
+  reader.appendChild(video);
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(stream){
+    video.srcObject = stream;
+    video.play();
+    const detector = new BarcodeDetector({formats:['qr_code']});
+    const scan = function(){
+      if(!modal.classList.contains('open')){
+        stream.getTracks().forEach(function(t){t.stop();}); return;
+      }
+      detector.detect(video).then(function(barcodes){
+        if(barcodes.length > 0){
+          const val = barcodes[0].rawValue;
+          document.getElementById('rd_scan_input').value = val;
+          rdLookup();
+          eqBeep();
+          stream.getTracks().forEach(function(t){t.stop();});
+          modal.classList.remove('open');
+          return;
+        }
+        requestAnimationFrame(scan);
+      }).catch(function(){ requestAnimationFrame(scan); });
+    };
+    requestAnimationFrame(scan);
+  }).catch(function(err){
+    toast('Caméra non accessible: '+err.message, true);
+    modal.classList.remove('open');
+  });
+}
+
+// ── CLEAR SESSION ──────────────────────────────────────────
+function rdClearSession(){
+  if(!confirm('Vider toute la session ? Les données seront perdues.')) return;
+  rdSession = { items: [], counter: 0 };
+  rdSaveSession();
+  rdRenderSidebar();
+  rdShowConfig();
+  toast('Session vidée');
+}
+
+// ── CSV EXPORT ─────────────────────────────────────────────
+function rdExportCSV(){
+  if(!rdSession.items.length) return;
+  const sep = ';';
+  const header = ['Scan code client','N° client simplifié','Type d\'appareil','Numéro du constat',
+    'Numéro de série','Numéro CORIM','Aspect','Charge batterie','Son et affichage',
+    'Reco sonde','Maj Date','DeD 1','DeD2','Jugement','Date essai'].join(sep);
+  const rows = rdSession.items.map(function(it){
+    const j = rdCalcJugementFor(it);
+    return [
+      it.code, it.id_short, it.type_radia, it.numConstat,
+      it.sn, it.corim || '-', it.aspect, it.batterie, it.son,
+      it.sonde, it.maj, it.ded1, it.ded2,
+      j===true?'CONFORME':j===false?'NON-CONFORME':'EN ATTENTE',
+      rdConfig.date || ''
+    ].join(sep);
+  });
+  const bom = '\uFEFF';
+  const csv = bom + header + '\n' + rows.join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const dt = (rdConfig.date||new Date().toISOString().slice(0,10)).replace(/-/g,'');
+  a.download = 'Radiametres_' + dt + '.csv';
+  a.click();
+  toast('✓ CSV exporté');
+}
+
+// ── PDF GENERATION (using pdf-lib in browser) ──────────────
+async function rdLoadPdfLib(){
+  if(window.PDFLib) return;
+  // Load pdf-lib from CDN (cached by SW)
+  return new Promise(function(resolve, reject){
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+    s.onload = resolve;
+    s.onerror = function(){ reject(new Error('pdf-lib non chargé')); };
+    document.head.appendChild(s);
+  });
+}
+
+async function rdGenPDF(it){
+  await rdLoadPdfLib();
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+
+  // Decode template PDF
+  const pdfBytes = Uint8Array.from(atob(RD_PDF_B64), function(c){ return c.charCodeAt(0); });
+  const pdfDoc = await PDFDocument.load(pdfBytes);
+  const page = pdfDoc.getPages()[0];
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const { height } = page.getSize();
+
+  // Helper: draw text at PDF coordinates (origin top-left → pdf-lib uses bottom-left)
+  function txt(x, y, text, size, bold){
+    if(!text) return;
+    page.drawText(String(text), {
+      x: x,
+      y: height - y,
+      size: size || 9,
+      font: bold ? fontB : font,
+      color: rgb(0, 0, 0)
+    });
+  }
+  function txtRed(x, y, text, size){
+    if(!text) return;
+    page.drawText(String(text), {
+      x: x,
+      y: height - y,
+      size: size || 9,
+      font: fontB,
+      color: rgb(0.8, 0, 0)
+    });
+  }
+
+  const bancData = rdGetBancData();
+  const j = rdCalcJugementFor(it);
+  const conforme = j === true;
+  const dateEssai = rdConfig.date || new Date().toISOString().slice(0,10);
+  const dp = dateEssai.split('-');
+  const dateFr = dp[2]+'/'+dp[1]+'/'+dp[0];
+  // Date validité = +12 mois si conforme
+  let dateVal = '';
+  if(conforme && dp.length===3){
+    const dv = new Date(parseInt(dp[0]), parseInt(dp[1])-1, parseInt(dp[2]));
+    dv.setFullYear(dv.getFullYear()+1);
+    dateVal = String(dv.getDate()).padStart(2,'0')+'/'+String(dv.getMonth()+1).padStart(2,'0')+'/'+dv.getFullYear();
+  }
+
+  // Fill fields (positions calibrated from test)
+  txt(415, 98, it.numConstat, 9);
+  txt(415, 178, rdConfig.site || '', 9);
+  txt(415, 192, dateFr, 9);
+  txt(415, 205, rdConfig.intervention || '', 9);
+
+  // Instrument table
+  txt(148, 250, it.type_radia || '', 8);
+  txt(318, 250, it.sn || '', 8);
+  txt(393, 250, it.id_short || '', 8);
+  txt(468, 250, it.corim || '-', 8);
+
+  // Jugement
+  if(conforme){
+    txt(175, 295, 'CONFORME', 11, true);
+  } else {
+    txtRed(175, 295, 'NON-CONFORME', 11);
+  }
+  if(dateVal) txt(278, 305, dateVal, 9);
+
+  // Equipments
+  txt(195, 376, rdConfig.banc_id || '', 9);
+  txt(345, 376, bancData.loc, 9);
+  txt(475, 376, bancData.val, 9);
+  txt(465, 389, bancData.model, 8);
+
+  // Opérateur / Contrôleur
+  txt(215, 429, rdConfig.operateur || '', 9);
+  txt(215, 456, rdConfig.controleur || '', 9);
+
+  // Mesures table (col "Valeur avant Ajustage" starts at x=300)
+  txt(300, 535, it.aspect || '', 8);
+  txt(300, 548, it.batterie || '', 8);
+  txt(300, 574, it.son || '', 8);
+  txt(300, 587, it.sonde || '', 8);
+  txt(300, 600, it.maj || '', 8);
+  txt(300, 627, it.d1 || '', 8);
+  txt(300, 640, it.ded1 ? String(it.ded1).replace('.',',') : '', 8);
+  txt(300, 653, it.d2 || '', 8);
+  txt(300, 666, it.ded2 || '', 8);
+
+  // Commentaires
+  txt(60, 715, it.comment || '', 8);
+
+  return await pdfDoc.save();
+}
+
+function rdPdfName(it){
+  const dateEssai = rdConfig.date || new Date().toISOString().slice(0,10);
+  const dp = dateEssai.split('-');
+  const datePart = dp[0].slice(2)+'-'+dp[1]+'-'+dp[2]; // AA-MM-JJ
+  const j = rdCalcJugementFor(it);
+  const suffix = j===true ? 'C' : 'NC';
+  const code = it.code || ('INCONNU-' + (it.id_short || 'X'));
+  return code + '-' + datePart + '_' + suffix + '.pdf';
+}
+
+async function rdGenOnePDF(){
+  if(rdCurrentIdx < 0) return;
+  const it = rdSession.items[rdCurrentIdx];
+  try {
+    toast('Génération PDF...');
+    const bytes = await rdGenPDF(it);
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = rdPdfName(it);
+    a.click();
+    toast('✓ PDF généré : ' + rdPdfName(it));
+  } catch(err) {
+    toast('Erreur PDF : ' + err.message, true);
+    console.error(err);
+  }
+}
+
+async function rdGenAllPDF(){
+  if(!rdSession.items.length) return;
+  try {
+    toast('Génération de ' + rdSession.items.length + ' PDF...');
+    await rdLoadPdfLib();
+    for(let i=0; i<rdSession.items.length; i++){
+      const it = rdSession.items[i];
+      const bytes = await rdGenPDF(it);
+      const blob = new Blob([bytes], {type:'application/pdf'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = rdPdfName(it);
+      a.click();
+      // Small delay to avoid browser blocking multiple downloads
+      await new Promise(function(r){ setTimeout(r, 300); });
+    }
+    toast('✓ ' + rdSession.items.length + ' PDF générés');
+  } catch(err) {
+    toast('Erreur PDF : ' + err.message, true);
+    console.error(err);
+  }
+}
+
+// Init radiamètres au chargement
+rdInit();
 </body>
 </html>
