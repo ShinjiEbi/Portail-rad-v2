@@ -814,14 +814,14 @@ function eqPreview(){
     ctx.drawImage(img,0,0,canvas.width,canvas.height);
     ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
     if(!isNC){
-      // VALIDITÉ : centre zone (373, 87)
+      // VALIDITÉ : centre zone x=393 (décalé droite), y=87
       ctx.font='bold '+Math.round(38*sx)+'px sans-serif';
-      ctx.fillText(last.val||'',373*sx,87*sy);
+      ctx.fillText(last.val||'',393*sx,87*sy);
       // VP : centre zone (373, 170)
       ctx.font='bold '+Math.round(34*sx)+'px sans-serif';
       ctx.fillText(last.dvp||'',373*sx,170*sy);
-      // ID : centre zone (373, 251)
-      ctx.fillText(last.idEtiq||last.id||'',373*sx,251*sy);
+      // ID : centre zone (373, 262) descendu
+      ctx.fillText(last.idEtiq||last.id||'',373*sx,262*sy);
     } else {
       // Date contrôle : centre zone (249, 257)
       ctx.font='bold '+Math.round(34*sx)+'px sans-serif';
@@ -931,9 +931,9 @@ function eqPrint(){
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
         ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
         if(!isNC){
-          ctx.font='bold 38px sans-serif';ctx.fillText(it.val||'',373,87);
+          ctx.font='bold 38px sans-serif';ctx.fillText(it.val||'',393,87);
           ctx.font='bold 34px sans-serif';ctx.fillText(it.dvp||'',373,170);
-          ctx.fillText(it.idEtiq||it.id||'',373,251);
+          ctx.fillText(it.idEtiq||it.id||'',373,262);
         } else {
           ctx.font='bold 34px sans-serif';ctx.fillText(it.dvp||'',249,257);
         }

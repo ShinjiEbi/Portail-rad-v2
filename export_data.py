@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 export_data.py - Génère le Portail Tech PWA mono-fichier
-Lit un classeur RPM.xlsm → produit index.html + met à jour sw.js
+Lit un classeur RPM.xlsm → produit index.html, copie sw.js et manifest.json
 
 Usage :
     python export_data.py "chemin/RPM.xlsm" [dossier_sortie]
@@ -20,10 +20,6 @@ Placeholders remplacés dans template.html :
     %%NB_CONSTATS%%      Nombre fiches constats
     %%ETIQ_IMG_C%%       Image base64 étiquette conforme
     %%ETIQ_IMG_NC%%      Image base64 étiquette non conforme
-
-Placeholders remplacés dans sw.js :
-    %%SW_VERSION%%       Version auto-incrémentée
-    %%SW_FILES%%         Liste des forms/*.html à cacher
 """
 
 import sys, os, json, datetime, re, hashlib
@@ -232,27 +228,16 @@ def load_etiq_images(dossier_script):
 # ══════════════════════════════════════════════════════════
 # MISE À JOUR SW.JS
 # ══════════════════════════════════════════════════════════
-def update_sw(dossier_sortie, fiches, version):
-    """Met à jour sw.js avec la liste des fiches et la version."""
-    sw_template = Path(__file__).parent / "sw.js"
-    if not sw_template.exists():
-        print("  ⚠ sw.js template introuvable")
+def copy_sw(dossier_sortie):
+    """Copie sw.js vers le dossier de sortie."""
+    sw_src = Path(__file__).parent / "sw.js"
+    sw_dst = dossier_sortie / "sw.js"
+    if not sw_src.exists():
+        print("  ⚠ sw.js introuvable")
         return
-
-    sw_content = sw_template.read_text(encoding="utf-8")
-
-    # Construire la liste des forms à cacher
-    forms_lines = []
-    for f in fiches:
-        forms_lines.append(f"  './forms/{f['f']}',")
-    sw_files = "\n".join(forms_lines) if forms_lines else "  // (aucune fiche)"
-
-    sw_content = sw_content.replace("%%SW_VERSION%%", version)
-    sw_content = sw_content.replace("%%SW_FILES%%", sw_files)
-
-    sw_out = dossier_sortie / "sw.js"
-    sw_out.write_text(sw_content, encoding="utf-8")
-    print(f"  ✓ sw.js mis à jour (v{version}, {len(fiches)} fiche(s) en cache)")
+    if str(sw_src) != str(sw_dst):
+        sw_dst.write_text(sw_src.read_text(encoding="utf-8"), encoding="utf-8")
+    print("  ✓ sw.js copié")
 
 
 # ══════════════════════════════════════════════════════════
@@ -401,10 +386,8 @@ def main():
     # ══════════════════════════════════════════════════════
     # MISE À JOUR sw.js
     # ══════════════════════════════════════════════════════
-    print("\n  🔧 Mise à jour sw.js...")
-    # Version = hash court du contenu pour forcer la MàJ du cache
-    sw_version = data_hash({"e": h_et, "m": h_mat, "c": h_cst, "t": now})
-    update_sw(dossier_sortie, fiches, sw_version)
+    print("\n  🔧 Copie sw.js...")
+    copy_sw(dossier_sortie)
 
     # ══════════════════════════════════════════════════════
     # COPIE manifest.json
@@ -427,7 +410,6 @@ def main():
     print(f"     Étalons:   {len(etalons):>5}  (MAJ: {dates.get('date_etalons', '?')})")
     print(f"     Matériels: {len(materiels):>5}  (MAJ: {dates.get('date_materiels', '?')})")
     print(f"     Constats:  {len(fiches):>5}  (MAJ: {dates.get('date_constats', '?')})")
-    print(f"     SW:         v{sw_version}")
     print(f"{'='*55}\n")
 
 

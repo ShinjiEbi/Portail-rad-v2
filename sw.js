@@ -1,32 +1,18 @@
 // ══════════════════════════════════════════════════════════
 // Service Worker – Portail Tech Bertin
-// Version auto-incrémentée par export_data.py
+// Stratégie : network-first pour index.html (détecte les MAJ)
+//             cache-first pour le reste (offline)
 // ══════════════════════════════════════════════════════════
-const VERSION = 'fb3c78527fa1';
-const CACHE   = 'portail-tech-' + VERSION;
+const CACHE = 'portail-tech-v1';
 
-// Fichiers à cacher (mis à jour automatiquement par export_data.py)
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './forms/bcp31_sonde_beta.html',
-];
-
-// ── INSTALL : pré-cache tous les assets ─────────────────
+// ── INSTALL ─────────────────────────────────────────────
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE).then(function(cache) {
-      return Promise.allSettled(
-        ASSETS.map(function(url) {
-          return cache.add(url).catch(function() {
-            console.warn('[SW] Cache miss:', url);
-          });
-        })
-      );
+      return cache.addAll(['./', './index.html', './manifest.json']).catch(function() {});
     })
   );
-  self.skipWaiting();
+  // Ne PAS skipWaiting ici — on laisse l'app décider via SKIP_WAITING
 });
 
 // ── ACTIVATE : nettoyer les anciens caches ──────────────
@@ -34,7 +20,7 @@ self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
       return Promise.all(
-        keys.filter(function(k) { return k !== CACHE; })
+        keys.filter(function(k) { return k.startsWith('portail-tech-') && k !== CACHE; })
             .map(function(k) { return caches.delete(k); })
       );
     })
@@ -49,23 +35,38 @@ self.addEventListener('message', function(e) {
   }
 });
 
-// ── FETCH : cache-first, fallback network ───────────────
+// ── FETCH ───────────────────────────────────────────────
 self.addEventListener('fetch', function(e) {
-  // Ne pas intercepter les requêtes non-GET
   if (e.request.method !== 'GET') return;
 
+  var url = new URL(e.request.url);
+
+  // Network-first pour index.html (détecte les MAJ à chaque ouverture)
+  if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
+    e.respondWith(
+      fetch(e.request).then(function(response) {
+        if (response && response.status === 200) {
+          var clone = response.clone();
+          caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
+        }
+        return response;
+      }).catch(function() {
+        return caches.match(e.request);
+      })
+    );
+    return;
+  }
+
+  // Cache-first pour tout le reste (forms/, manifest, images...)
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       if (cached) return cached;
       return fetch(e.request).then(function(response) {
         if (!response || response.status !== 200) return response;
         var clone = response.clone();
-        caches.open(CACHE).then(function(cache) {
-          cache.put(e.request, clone);
-        });
+        caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
         return response;
       }).catch(function() {
-        // Offline fallback : retourner index.html pour navigation
         return caches.match('./index.html');
       });
     })
