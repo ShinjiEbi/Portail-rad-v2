@@ -157,11 +157,15 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 /* ══════════════════════════════════════════════════════════
    ÉTIQUETTES
    ══════════════════════════════════════════════════════════ */
-.eq-bar{display:flex;gap:8px;margin-bottom:10px;align-items:stretch}
-.eq-bar input,.eq-bar select{flex:1}
-.eq-scan{flex-shrink:0;width:52px;height:52px;background:var(--panel);border:1.5px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer}
+.eq-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:stretch}
+.eq-bar .eq-row1{display:flex;gap:8px;width:100%;align-items:stretch}
+.eq-bar .eq-row2{display:flex;gap:8px;width:100%;align-items:stretch}
+.eq-bar input{flex:1;min-width:0}
+.eq-bar select{flex:0 0 auto;width:auto;min-width:110px}
+.eq-scan{flex-shrink:0;width:46px;height:46px;background:var(--panel);border:1.5px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;position:relative}
 .eq-scan:active{background:var(--panel2)}
-.eq-add{flex-shrink:0;width:52px;height:52px;background:rgba(0,230,118,.12);border:1.5px solid var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer}
+.eq-scan .eq-scan-hint{position:absolute;bottom:-14px;font-size:.45rem;color:var(--text3);font-family:var(--mono);white-space:nowrap}
+.eq-add{flex:1;height:46px;background:rgba(0,230,118,.12);border:1.5px solid var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;gap:6px;color:var(--green);font-weight:700;font-family:var(--mono)}
 .eq-add:active{background:rgba(0,230,118,.2)}
 .eq-list{display:flex;flex-direction:column;gap:8px;margin:10px 0}
 .eq-item{background:var(--panel);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;animation:ci .35s ease both}
@@ -341,11 +345,15 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
     <div class="calc-section">
       <div class="calc-title">Ajouter un matériel</div>
       <div class="eq-bar">
-        <div class="eq-scan" onclick="eqScan()" title="Scanner QR">📷</div>
-        <input type="text" id="eq_input" placeholder="ID matériel (ex: BUG026)" list="eq_suggest" oninput="eqAutoComplete()">
-        <datalist id="eq_suggest"></datalist>
-        <select id="eq_type" style="flex:.5"><option value="C">✓ Conforme</option><option value="NC">✗ Non Conf.</option></select>
-        <div class="eq-add" onclick="eqAdd()" title="Ajouter">➕</div>
+        <div class="eq-row1">
+          <div class="eq-scan" id="eqScanBtn" title="Appui court: 1 scan · Appui long: multi-scan">📷<span class="eq-scan-hint">long=multi</span></div>
+          <input type="text" id="eq_input" placeholder="ID matériel (ex: BUG026)" list="eq_suggest" oninput="eqAutoComplete()">
+          <datalist id="eq_suggest"></datalist>
+        </div>
+        <div class="eq-row2">
+          <select id="eq_type"><option value="C">✓ Conforme</option><option value="NC">✗ Non Conf.</option></select>
+          <div class="eq-add" onclick="eqAdd()" title="Ajouter">➕ Ajouter</div>
+        </div>
       </div>
       <div class="fg">
         <label style="font-size:.75rem;color:var(--text2)">Date VP (auto depuis base ou manuelle)</label>
@@ -372,8 +380,10 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
      QR SCANNER MODAL
      ══════════════════════════════════════════════════════════ -->
 <div id="qrModal">
-  <div style="font-family:var(--mono);color:var(--accent);font-size:.8rem;margin-bottom:12px;letter-spacing:.1em">SCANNER QR CODE</div>
+  <div style="font-family:var(--mono);color:var(--accent);font-size:.8rem;margin-bottom:8px;letter-spacing:.1em">SCANNER QR CODE</div>
+  <div id="qrMode" style="font-family:var(--mono);font-size:.65rem;color:var(--green);margin-bottom:12px;letter-spacing:.08em"></div>
   <div id="qrReader" style="width:90%;max-width:400px"></div>
+  <div id="qrCount" style="font-family:var(--mono);font-size:.9rem;color:var(--green);margin-top:12px"></div>
   <button class="qr-close" onclick="eqScanStop()">✕ Fermer</button>
 </div>
 
@@ -792,36 +802,93 @@ function eqPreview(){
   img.src=isNC?ETIQ_IMG_NC:ETIQ_IMG_C;
 }
 
-function eqScan(){
+// ── Son bip pour scan QR ─────────────────────────────────
+function eqBeep(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='sine';osc.frequency.value=1200;
+    gain.gain.value=0.3;
+    osc.start();osc.stop(ctx.currentTime+0.12);
+  }catch(e){}
+}
+
+// ── Gestion appui court / long sur bouton scanner ────────
+let eqScanMulti=false;  // false=single, true=multi
+let eqScanTimer=null;
+let eqScanCount=0;
+let eqLastScanned='';   // éviter double scan du même QR
+
+(function(){
+  const btn=document.getElementById('eqScanBtn');
+  // Appui long = multi-scan (>500ms)
+  btn.addEventListener('pointerdown',function(e){
+    eqScanMulti=false;
+    eqScanTimer=setTimeout(function(){eqScanMulti=true;},500);
+  });
+  btn.addEventListener('pointerup',function(e){
+    clearTimeout(eqScanTimer);
+    eqStartScan(eqScanMulti);
+  });
+  btn.addEventListener('pointercancel',function(e){
+    clearTimeout(eqScanTimer);
+  });
+})();
+
+function eqStartScan(multi){
   if(!window.isSecureContext){showToast('Caméra indisponible (HTTPS requis)','err');return;}
   if(!('BarcodeDetector' in window)){showToast('BarcodeDetector non supporté par ce navigateur','err');return;}
+  eqScanMulti=multi;
+  eqScanCount=0;
+  eqLastScanned='';
   const modal=document.getElementById('qrModal');modal.classList.add('open');
+  document.getElementById('qrMode').textContent=multi?'MODE MULTI-SCAN (appuyez Fermer pour arrêter)':'MODE SCAN UNIQUE';
+  document.getElementById('qrCount').textContent='';
   const reader=document.getElementById('qrReader');
   const video=document.createElement('video');video.setAttribute('playsinline','');video.autoplay=true;
   reader.innerHTML='';reader.appendChild(video);
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(stream=>{
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(stream){
     video.srcObject=stream;
     const detector=new BarcodeDetector({formats:['qr_code']});
-    qrScanner=setInterval(()=>{
+    qrScanner=setInterval(function(){
       if(video.readyState>=2){
-        detector.detect(video).then(codes=>{
+        detector.detect(video).then(function(codes){
           if(codes.length){
             const val=codes[0].rawValue;
-            eqScanStop();
+            // Éviter double détection du même code
+            if(val===eqLastScanned)return;
+            eqLastScanned=val;
+            // Reset après 2s pour pouvoir rescanner le même
+            setTimeout(function(){if(eqLastScanned===val)eqLastScanned='';},2000);
+            eqBeep();
+            eqScanCount++;
+            // Remplir et ajouter automatiquement
             document.getElementById('eq_input').value=val;
             eqAutoComplete();
-            showToast('QR: '+val);
+            if(eqScanMulti){
+              // Multi-scan : ajouter directement et continuer
+              eqAdd();
+              document.getElementById('qrCount').textContent='✓ '+eqScanCount+' scanné'+(eqScanCount>1?'s':'');
+            }else{
+              // Single : fermer après 1 scan
+              showToast('QR: '+val);
+              eqScanStop();
+            }
           }
-        }).catch(()=>{});
+        }).catch(function(){});
       }
     },300);
-  }).catch(()=>{showToast('Accès caméra refusé','err');modal.classList.remove('open');});
+  }).catch(function(){showToast('Accès caméra refusé','err');modal.classList.remove('open');});
 }
+
 function eqScanStop(){
   if(qrScanner){clearInterval(qrScanner);qrScanner=null;}
   const reader=document.getElementById('qrReader');const video=reader.querySelector('video');
-  if(video&&video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());}
+  if(video&&video.srcObject){video.srcObject.getTracks().forEach(function(t){t.stop();});}
   reader.innerHTML='';document.getElementById('qrModal').classList.remove('open');
+  if(eqScanCount>0&&eqScanMulti){showToast('✓ '+eqScanCount+' étiquette'+(eqScanCount>1?'s':'')+' ajoutée'+(eqScanCount>1?'s':''));}
+  eqScanCount=0;
 }
 
 function eqPrint(){
