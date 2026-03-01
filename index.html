@@ -28,7 +28,9 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .htitle{font-size:1.25rem;font-weight:700;letter-spacing:.06em}.hsub{font-family:var(--mono);font-size:.6rem;color:var(--accent);letter-spacing:.12em;margin-top:3px}
 .hright{margin-left:auto;text-align:right}
 .hdate{font-family:var(--mono);font-size:.55rem;color:var(--text3);line-height:1.6}
-.scanl{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:200%;animation:sc 2.5s linear infinite}
+.scanl{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:200%;animation:sc 2.5s linear infinite;transition:background .3s}
+.scanl.online{background:linear-gradient(90deg,transparent,var(--green),transparent);background-size:200%;animation:sc 2.5s linear infinite}
+.scanl.error{background:linear-gradient(90deg,transparent,var(--red),transparent);background-size:200%;animation:sc 1s linear infinite}
 @keyframes sc{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
 /* ══════════════════════════════════════════════════════════
@@ -262,12 +264,12 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
+      <div class="hdate">Export: 01/03/2026 10:31</div>
       <div class="hdate">Étalons: 28/02/2026 20:07</div>
       <div class="hdate">Matériels: 28/02/2026 20:07</div>
-      <div class="hdate">Constats: 27/02/2026 22:24</div>
     </div>
   </div>
-  <div class="scanl"></div>
+  <div class="scanl" id="scanl"></div>
 </header>
 
 <!-- INSTALL BANNER (Android uniquement) -->
@@ -1884,6 +1886,33 @@ async function rdGenAllPDF(){
     console.error(err);
   }
 }
+
+// ── Détection en ligne / hors ligne / erreur ─────────────
+function updateNetStatus(){
+  var el = document.getElementById('scanl');
+  if(!el) return;
+  if(el.classList.contains('error')) return; // erreur prioritaire
+  el.className = navigator.onLine ? 'scanl online' : 'scanl';
+}
+function setErrorState(msg){
+  var el = document.getElementById('scanl');
+  if(el) el.className = 'scanl error';
+  console.error('[PORTAIL ERREUR] ' + msg);
+}
+window.addEventListener('online', updateNetStatus);
+window.addEventListener('offline', updateNetStatus);
+updateNetStatus();
+
+// Détection erreurs critiques
+window.addEventListener('error', function(e){
+  setErrorState('JS: ' + (e.message || 'erreur inconnue'));
+});
+window.addEventListener('unhandledrejection', function(e){
+  setErrorState('Promise: ' + (e.reason || 'rejet non géré'));
+});
+// Vérification localStorage disponible
+try { localStorage.setItem('_test','1'); localStorage.removeItem('_test'); }
+catch(e){ setErrorState('localStorage indisponible'); }
 
 // Init radiamètres au chargement
 rdInit();
