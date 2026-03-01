@@ -778,16 +778,16 @@ input.mesure {
     <div class="section-title"><span class="num">4.6.1</span> Versions logiciels</div>
     <div class="section-body">
       <div class="field-group">
-        <label class="field-label">Version logiciel principal</label>
-        <input type="text" id="ver_principal" placeholder="Valeur lue" data-field="ver_principal">
+        <label class="field-label">Logiciel de base <span class="tol">Valeur lue</span></label>
+        <input type="text" id="ver_base" placeholder="Valeur lue" data-field="ver_base">
       </div>
       <div class="field-group">
-        <label class="field-label">Version logiciel secondaire</label>
-        <input type="text" id="ver_secondaire" placeholder="Valeur lue" data-field="ver_secondaire">
+        <label class="field-label">Logiciel d'application <span class="tol">Valeur lue</span></label>
+        <input type="text" id="ver_appli" placeholder="Valeur lue" data-field="ver_appli">
       </div>
       <div class="field-group">
-        <label class="field-label">Version FPGA</label>
-        <input type="text" id="ver_fpga" placeholder="Valeur lue" data-field="ver_fpga">
+        <label class="field-label">Table des paramètres <span class="tol">Valeur lue</span></label>
+        <input type="text" id="ver_params" placeholder="Valeur lue" data-field="ver_params">
       </div>
     </div>
   </div>
@@ -797,7 +797,7 @@ input.mesure {
     <div class="section-title"><span class="num">4.6.2</span> Seuils d'alarme</div>
     <div class="section-body">
       <div class="info-box" style="margin-bottom:8px">
-        <strong>9 seuils :</strong> α S1-S3, β S1-S3, Doserate S1-S3 · Valeur lue + SO avant/après
+        <strong>9 seuils (en Bq/m3) :</strong> α Act. S1-S3, β Act. S1-S3, Doserate S1-S3 · Valeur lue + SO avant/après
       </div>
       <table class="mtable" id="tbl_seuils"></table>
     </div>
@@ -853,12 +853,13 @@ input.mesure {
 
   <!-- 4.7 Aéraulique -->
   <div class="section">
-    <div class="section-title"><span class="num">4.7</span> Aéraulique</div>
+    <div class="section-title"><span class="num">4.7</span> Contrôle de l'aéraulique</div>
     <div class="section-body">
       <div class="field-group">
-        <label class="field-label">Horodateur <span class="tol">valeur lue</span></label>
+        <label class="field-label">Relevé de l'horodateur <span class="tol">Valeur lue</span></label>
         <input type="text" id="aero_horodateur" placeholder="Valeur lue" data-field="aero_horodateur">
       </div>
+      <div id="sec_47_so"></div>
       <div id="sec_47_cnc"></div>
     </div>
   </div>
@@ -867,68 +868,86 @@ input.mesure {
   <div class="section">
     <div class="section-title"><span class="num">4.8</span> Calibrage en énergie</div>
     <div class="section-body">
+      <div class="info-box" style="margin-bottom:8px"><strong>Calibration du LPDU</strong></div>
       <div class="grid2">
         <div class="field-group">
-          <label class="field-label">Gain</label>
-          <input type="text" id="cal_gain" placeholder="Valeur" data-field="cal_gain" class="mesure">
+          <label class="field-label">Gain ampli Alpha, Bêta <span class="tol">0,6 ≤ gain ≤ 1,2</span></label>
+          <input type="text" id="cal_gain_ab" placeholder="Valeur" data-field="cal_gain_ab" class="mesure" oninput="checkTol(this,0.6,1.2,'cal_gain_ab')">
+          <div class="info-box" id="cal_gain_ab_info" style="display:none"></div>
         </div>
         <div class="field-group">
-          <label class="field-label">Offset</label>
-          <input type="text" id="cal_offset" placeholder="Valeur" data-field="cal_offset" class="mesure">
+          <label class="field-label">Gain ampli Gamma <span class="tol">0,6 ≤ gain ≤ 1,2</span></label>
+          <input type="text" id="cal_gain_gamma" placeholder="Valeur" data-field="cal_gain_gamma" class="mesure" oninput="checkTol(this,0.6,1.2,'cal_gain_gamma')">
+          <div class="info-box" id="cal_gain_gamma_info" style="display:none"></div>
         </div>
       </div>
-      <div class="grid2">
+      <div class="grid3">
         <div class="field-group">
-          <label class="field-label">Pente</label>
+          <label class="field-label">Offset <span class="tol">Valeur lue</span></label>
+          <input type="text" id="cal_offset" placeholder="Valeur" data-field="cal_offset" class="mesure">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Pente <span class="tol">Valeur lue</span></label>
           <input type="text" id="cal_pente" placeholder="Valeur" data-field="cal_pente" class="mesure">
         </div>
         <div class="field-group">
-          <label class="field-label">Quadratique</label>
+          <label class="field-label">Quadratique <span class="tol">Valeur lue</span></label>
           <input type="text" id="cal_quad" placeholder="Valeur" data-field="cal_quad" class="mesure">
         </div>
       </div>
       <div class="field-group">
-        <label class="field-label">Calibration nucléaire <span class="tol">420 ± 20 canaux</span></label>
-        <input type="text" id="cal_canaux" placeholder="Valeur lue" data-field="cal_canaux" class="mesure" oninput="checkTol(this,400,440,'cal')">
+        <label class="field-label">Calibration nucléaire (alpha max) <span class="tol">420 ± 20 canaux</span></label>
+        <input type="text" id="cal_canaux" placeholder="Valeur lue" data-field="cal_canaux" class="mesure" oninput="checkTol(this,400,440,'cal_canaux')">
+        <div class="info-box" id="cal_canaux_info" style="display:none"></div>
       </div>
-      <div class="info-box" id="cal_info" style="display:none"></div>
-      <div class="field-group">
-        <label class="field-label">Calibration spectre polonium (keV)</label>
-        <input type="text" id="cal_polonium" placeholder="keV" data-field="cal_polonium" class="mesure">
+      <div id="sec_48_cnc1"></div>
+      <div class="info-box" style="margin-bottom:8px;margin-top:8px"><strong>Calibration spectre descendants radon</strong></div>
+      <div class="grid2">
+        <div class="field-group">
+          <label class="field-label">1er pt AlphaMax 218Po <span class="tol">4930 ± 50 keV</span></label>
+          <input type="text" id="cal_218po" placeholder="keV" data-field="cal_218po" class="mesure" oninput="checkTol(this,4880,4980,'cal_218po')">
+          <div class="info-box" id="cal_218po_info" style="display:none"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">2ème pt AlphaMax 214Po <span class="tol">6750 ± 60 keV</span></label>
+          <input type="text" id="cal_214po" placeholder="keV" data-field="cal_214po" class="mesure" oninput="checkTol(this,6690,6810,'cal_214po')">
+          <div class="info-box" id="cal_214po_info" style="display:none"></div>
+        </div>
       </div>
+      <div id="sec_48_cnc2"></div>
     </div>
   </div>
 
   <!-- 4.9 Bruits de fonds -->
   <div class="section">
-    <div class="section-title"><span class="num">4.9</span> Bruits de fonds</div>
+    <div class="section-title"><span class="num">4.9</span> Contrôle des bruits de fonds</div>
     <div class="section-body">
       <div class="grid3">
         <div class="field-group">
-          <label class="field-label">BdF α</label>
-          <input type="text" id="bdf_alpha" placeholder="0" data-field="bdf_alpha" class="mesure">
+          <label class="field-label">AlphaCps <span class="tol">≤ 0,001 c/s</span></label>
+          <input type="text" id="bdf_alpha" placeholder="c/s" data-field="bdf_alpha" class="mesure">
         </div>
         <div class="field-group">
-          <label class="field-label">BdF β</label>
-          <input type="text" id="bdf_beta" placeholder="0" data-field="bdf_beta" class="mesure">
+          <label class="field-label">BêtaCps <span class="tol">≤ 3,2 c/s</span></label>
+          <input type="text" id="bdf_beta" placeholder="c/s" data-field="bdf_beta" class="mesure">
         </div>
         <div class="field-group">
-          <label class="field-label">BdF γ</label>
-          <input type="text" id="bdf_gamma" placeholder="0" data-field="bdf_gamma" class="mesure">
+          <label class="field-label">GammaCps <span class="tol">≤ 1,2 c/s</span></label>
+          <input type="text" id="bdf_gamma" placeholder="c/s" data-field="bdf_gamma" class="mesure">
         </div>
       </div>
       <div class="grid3">
         <div class="field-group">
-          <label class="field-label">BdF α cumulé</label>
-          <input type="text" id="bdf_alpha_c" placeholder="0" data-field="bdf_alpha_c" class="mesure">
+          <label class="field-label">218Po <span class="tol">≤ 0,05 c/s</span></label>
+          <input type="text" id="bdf_218po" placeholder="c/s" data-field="bdf_218po" class="mesure">
         </div>
         <div class="field-group">
-          <label class="field-label">BdF β cumulé</label>
-          <input type="text" id="bdf_beta_c" placeholder="0" data-field="bdf_beta_c" class="mesure">
+          <label class="field-label">214Po <span class="tol">≤ 0,05 c/s</span></label>
+          <input type="text" id="bdf_214po" placeholder="c/s" data-field="bdf_214po" class="mesure">
         </div>
         <div class="field-group">
-          <label class="field-label">BdF doserate</label>
-          <input type="text" id="bdf_dose" placeholder="0" data-field="bdf_dose" class="mesure">
+          <label class="field-label">212Po <span class="tol">≤ 0,05 c/s</span></label>
+          <input type="text" id="bdf_212po" placeholder="c/s" data-field="bdf_212po" class="mesure">
         </div>
       </div>
     </div>
@@ -936,21 +955,23 @@ input.mesure {
 
   <!-- 4.10 Rendements -->
   <div class="section">
-    <div class="section-title"><span class="num">4.10</span> Rendements</div>
+    <div class="section-title"><span class="num">4.10</span> Contrôle des rendements</div>
     <div class="section-body">
-      <div class="info-box" style="margin-bottom:8px"><strong>Formule :</strong> R = ((Mesure − BdF) / Activité source) × 100</div>
       <div class="grid3">
         <div class="field-group">
-          <label class="field-label">Rendement γ (%)</label>
-          <input type="text" id="rdt_gamma" placeholder="%" data-field="rdt_gamma" class="mesure">
+          <label class="field-label">Rendement γ ¹³⁷Cs 4π <span class="tol">15 ≤ R ≤ 23%</span></label>
+          <input type="text" id="rdt_gamma" placeholder="%" data-field="rdt_gamma" class="mesure" oninput="checkTol(this,15,23,'rdt_gamma')">
+          <div class="info-box" id="rdt_gamma_info" style="display:none"></div>
         </div>
         <div class="field-group">
-          <label class="field-label">Rendement β (%)</label>
-          <input type="text" id="rdt_beta" placeholder="%" data-field="rdt_beta" class="mesure">
+          <label class="field-label">Rendement β ¹³⁷Cs 4π <span class="tol">5,5 ≤ R ≤ 9,5%</span></label>
+          <input type="text" id="rdt_beta" placeholder="%" data-field="rdt_beta" class="mesure" oninput="checkTol(this,5.5,9.5,'rdt_beta')">
+          <div class="info-box" id="rdt_beta_info" style="display:none"></div>
         </div>
         <div class="field-group">
-          <label class="field-label">Rendement α (%)</label>
-          <input type="text" id="rdt_alpha" placeholder="%" data-field="rdt_alpha" class="mesure">
+          <label class="field-label">Rendement α ²³⁹Pu 4π <span class="tol">5 ≤ R ≤ 9%</span></label>
+          <input type="text" id="rdt_alpha" placeholder="%" data-field="rdt_alpha" class="mesure" oninput="checkTol(this,5,9,'rdt_alpha')">
+          <div class="info-box" id="rdt_alpha_info" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -964,12 +985,12 @@ input.mesure {
 <div class="tab-panel" id="tab6">
 
   <div class="section">
-    <div class="section-title"><span class="num">4.11</span> Contrôle balise</div>
+    <div class="section-title"><span class="num">4.11</span> Contrôle de la balise</div>
     <div class="section-body" id="sec_411"></div>
   </div>
 
   <div class="section">
-    <div class="section-title"><span class="num">4.12</span> Sauvegarde USB</div>
+    <div class="section-title"><span class="num">4.12</span> Sauvegarde des fichiers sur clef USB</div>
     <div class="section-body" id="sec_412"></div>
   </div>
 
@@ -979,11 +1000,11 @@ input.mesure {
       <div id="sec_413_cnc"></div>
       <div class="grid2" style="margin-top:8px">
         <div class="field-group">
-          <label class="field-label">Nom CTR</label>
+          <label class="field-label">Nom</label>
           <input type="text" id="ctr_nom" placeholder="Nom" data-field="ctr_nom">
         </div>
         <div class="field-group">
-          <label class="field-label">Visa CTR</label>
+          <label class="field-label">Visa</label>
           <input type="text" id="ctr_visa" placeholder="Visa" data-field="ctr_visa">
         </div>
       </div>
@@ -1101,55 +1122,99 @@ const CHECKS_SORTIE = [
   {id:'sortie_endommage', label:'Endommagé'},
 ];
 
-const CNC_43 = [{id:'ctrl_general', label:'Contrôle général'}];
-const CNC_44 = [{id:'mise_service', label:'Mise en service'}];
+const CNC_43 = [{id:'ctrl_aspect', label:'Contrôle d\'aspect', tol:'Conforme'}];
+const CNC_44 = [{id:'mise_service', label:'Contrôle de la mise en service sans défaut', tol:'Conforme'}];
 
 const SEUILS = [
-  'α S1','α S2','α S3',
-  'β S1','β S2','β S3',
-  'Dose S1','Dose S2','Dose S3'
+  'α Act. S1','α Act. S2','α Act. S3',
+  'β Act. S1','β Act. S2','β Act. S3',
+  'Doserate S1','Doserate S2','Doserate S3'
 ];
 
 const CNC_463 = [
-  {id:'p_463', label:'§4.6.3 Paramètre temporel'},
-  {id:'p_464', label:'§4.6.4 Paramètre débitmètre'},
-  {id:'p_465', label:'§4.6.5 Paramètre transmission'},
+  {id:'p_463', label:'§4.6.3 Mise à jour date et heure LPDU', tol:'Conforme'},
+  {id:'p_464', label:'§4.6.4 Contrôle paramètres filtre aérosol', tol:'Conforme'},
+  {id:'p_465', label:'§4.6.5 Contrôle paramètres d\'acquisition', tol:'9600'},
 ];
 
 const PIPS_ALPHA = [
-  'Fenêtre basse α','Fenêtre haute α','ROI α basse','ROI α haute',
-  'Seuil rejet α','Durée mesure α','Compensation α',
-  'Efficacité α','Limite détection α','Sensibilité α'
+  {label:'Débit de prélèvement', tol:'Débit ou Flow'},
+  {label:'Seuil de saturation filtre', tol:'10 000 c/s'},
+  {label:'Valeur min Activité Volu', tol:'0,01 Bq/m3'},
+  {label:'Valeur max Activité Volu', tol:'10 000 Bq/m3'},
+  {label:'Alpha artificiel', tol:'0,04'},
+  {label:'Compensation systémique Bdf', tol:'0 c/s'},
+  {label:'Pond. Comptage Alpha 214Po', tol:'0'},
+  {label:'Pondération Comptage Alpha 218Po', tol:'0,09'},
+  {label:'Grandeur physique GP1/GP2/GP3/GP4 (Bq/m3)', tol:'0,01/0,1/1/10'},
+  {label:'Ecart type relatif ETR1/ETR2/ETR3/ETR4 (%)', tol:'50/15/15/15'},
 ];
 const PIPS_CUMUL = [
-  'Fenêtre cumul basse','Fenêtre cumul haute','ROI cumul basse','ROI cumul haute',
-  'Seuil rejet cumul','Durée cumul','Efficacité cumul'
+  {label:'Débit de prélèvement', tol:'Débit ou Flow'},
+  {label:'Efficacité détection Alpha (c/s/Bq)', tol:'0,04'},
+  {label:'Seconde fenêtre comp.', tol:'0'},
+  {label:'Première fenêtre comp.', tol:'0,09'},
+  {label:'Grandeur physique GP1/GP2/GP3/GP4 (Bq/m3)', tol:'0,148/1,48/15/30'},
+  {label:'Ecart type relatif ETR1/ETR2/ETR3/ETR4 (%)', tol:'50/9/9/9'},
 ];
 const PIPS_BETA = [
-  'Fenêtre basse β','Fenêtre haute β','ROI β basse','ROI β haute',
-  'Seuil rejet β','Durée mesure β','Compensation β',
-  'Fenêtre basse β2','Fenêtre haute β2','ROI β2 basse','ROI β2 haute',
-  'Seuil rejet β2','Durée β2','Compensation β2',
-  'Efficacité β','Limite détection β','Sensibilité β','Radon corr.'
+  {label:'Débit de prélèvement', tol:'Débit ou Flow'},
+  {label:'Seuil de saturation filtre', tol:'10 000 c/s'},
+  {label:'Valeur min Activité Volumique', tol:'1 Bq/m3'},
+  {label:'Valeur max Activité Volumique', tol:'1E6 Bq/m3'},
+  {label:'Période Rad. Isotope', tol:'1E12 s'},
+  {label:'Pond. Comp gamma', tol:'1,2'},
+  {label:'Comp. Systémique Bdf', tol:'0 C/s'},
+  {label:'Seuil filtrage Bdf', tol:'0,3'},
+  {label:'Compensation activité bêta naturelle', tol:'Case cochée'},
+  {label:'Grandeur physique GP1/GP2/GP3/GP4 (Bq/m3)', tol:'0,5/30/100/1000'},
+  {label:'Ecart type relatif ETR1/ETR2/ETR3/ETR4 (%)', tol:'20/7,5/7,5/7,5'},
+  {label:'212Po', tol:'0,0385'},
+  {label:'214Po', tol:'0,0385'},
+  {label:'214Po dans fenêtre 218Po', tol:'0,0015'},
+  {label:'218Po', tol:'0,0367'},
+  {label:'Bêta artificiel Cs137, Co60', tol:'0,055'},
+  {label:'214Bi', tol:'0,1'},
+  {label:'214Pb', tol:'0,045'},
+  {label:'Fils du Rn', tol:'0,054'},
 ];
 const PIPS_DOSE = [
-  'Fenêtre dose basse','Fenêtre dose haute','ROI dose basse','ROI dose haute',
-  'Seuil rejet dose','Durée dose','Efficacité dose','Sensibilité dose'
+  {label:'Eff. Détection (C/s/µGy/h)', tol:'1'},
+  {label:'Compensation systémique Bdf', tol:'0,15 c/s'},
+  {label:'Durée max phase d\'initialisation', tol:'100 s'},
+  {label:'Valeur min par défaut', tol:'0,1 µGy/h'},
+  {label:'Valeur max', tol:'100 000 µGy/h'},
+  {label:'Ecart type relatif débit de dose', tol:'10 %'},
+  {label:'Ecart type absolu débit de dose', tol:'0,1 µGy/h'},
+  {label:'Durée max d\'un cycle d\'estimation', tol:'300 s'},
 ];
 
+const CNC_47_SO = [
+  {id:'aero_palettes',    label:'Changement des palettes', tol:'Conforme'},
+  {id:'aero_horodateur_raz', label:'Remise à 0 de l\'horodateur (si possible)', tol:'Conforme'},
+];
 const CNC_47 = [
-  {id:'aero_palettes', label:'Palettes'},
-  {id:'aero_debit',    label:'Débit'},
-  {id:'aero_dp',       label:'ΔP'},
+  {id:'aero_debit',    label:'Contrôle du débit', tol:'35 ± 2 l/min'},
+  {id:'aero_dp_max',   label:'Contrôle du ΔP max', tol:'Conforme'},
+  {id:'aero_dp_min',   label:'Contrôle du ΔP min', tol:'Conforme'},
+];
+const CNC_48_1 = [
+  {id:'cal_spectre1',    label:'Enregistrement du spectre', tol:'Conforme'},
+  {id:'cal_voie_gamma',  label:'Réglage de la voie gamma', tol:'Conforme'},
+  {id:'cal_spectre2',    label:'Enregistrement du spectre', tol:'Conforme'},
+  {id:'cal_remise_config', label:'Remise en configuration Alpha, Bêta, Gamma', tol:'Conforme'},
+];
+const CNC_48_2 = [
+  {id:'cal_spectre3',    label:'Enregistrement du spectre', tol:'Conforme'},
 ];
 const CNC_411 = [
-  {id:'ctrl_affichage',  label:'Affichage'},
-  {id:'ctrl_voyants',    label:'Voyants'},
-  {id:'ctrl_alarmes',    label:'Alarmes'},
-  {id:'ctrl_impression', label:'Impression'},
+  {id:'ctrl_sonde_deconnect', label:'Sonde de détection non connecté', tol:'Conforme'},
+  {id:'ctrl_defaut_temp',     label:'Défaut température', tol:'Conforme'},
+  {id:'ctrl_defaut_filtre',   label:'Défaut filtre', tol:'Conforme'},
+  {id:'ctrl_bon_fonct',       label:'Contrôle du bon fonctionnement', tol:'Conforme'},
 ];
-const CNC_412 = [{id:'usb_sauvegarde', label:'Sauvegarde USB'}];
-const CNC_413 = [{id:'ctrl_renforce', label:'Contrôle technique renforcé'}];
+const CNC_412 = [{id:'usb_sauvegarde', label:'Sauvegarde des paramètres de la balise', tol:'Conforme'}];
+const CNC_413 = [{id:'ctrl_renforce', label:'Vérification des fichiers de la clef USB', tol:'Conforme'}];
 
 // ══════════════════════════════════════════════════════════════════════
 // INIT UI
@@ -1169,7 +1234,7 @@ function buildCNC(containerId, items){
   const el = document.getElementById(containerId);
   el.innerHTML = items.map(c =>
     '<div style="margin-bottom:8px">'+
-    '<div class="field-label">'+esc(c.label)+'</div>'+
+    '<div class="field-label">'+esc(c.label)+(c.tol ? ' <span class="tol">'+esc(c.tol)+'</span>' : '')+'</div>'+
     '<div class="cnc-row">'+
       '<div class="cnc-group"><div class="cnc-sub">Avant ajustage</div>'+
         '<div class="radio-group" id="rg_'+c.id+'_av">'+
@@ -1189,7 +1254,7 @@ function buildCNCwithSO(containerId, items){
   const el = document.getElementById(containerId);
   el.innerHTML = items.map(c =>
     '<div style="margin-bottom:8px">'+
-    '<div class="field-label">'+esc(c.label)+'</div>'+
+    '<div class="field-label">'+esc(c.label)+(c.tol ? ' <span class="tol">'+esc(c.tol)+'</span>' : '')+'</div>'+
     '<div class="cnc-row with-so">'+
       '<div class="cnc-group"><div class="cnc-sub">Avant</div>'+
         '<div class="radio-group" id="rg_'+c.id+'_av">'+
@@ -1216,8 +1281,8 @@ function buildSeuilsTable(tableId, items){
     const key = 'seuil_' + i;
     h += '<tr><td>'+esc(s)+'</td>';
     h += '<td><input type="text" id="'+key+'_val" data-field="'+key+'_val" placeholder="–"></td>';
-    h += '<td><div class="radio-group"><div class="radio-btn" onclick="setCNC(\''+key+'_av\',\'C\',this)">C</div><div class="radio-btn" onclick="setCNC(\''+key+'_av\',\'NC\',this)">NC</div></div></td>';
-    h += '<td><div class="radio-group"><div class="radio-btn" onclick="setCNC(\''+key+'_ap\',\'C\',this)">C</div><div class="radio-btn" onclick="setCNC(\''+key+'_ap\',\'NC\',this)">NC</div></div></td>';
+    h += '<td><div class="radio-group"><div class="radio-btn" onclick="setCNC(\''+key+'_av\',\'SO\',this)">SO</div></div></td>';
+    h += '<td><div class="radio-group"><div class="radio-btn" onclick="setCNC(\''+key+'_ap\',\'SO\',this)">SO</div></div></td>';
     h += '</tr>';
   });
   h += '</tbody>';
@@ -1226,10 +1291,13 @@ function buildSeuilsTable(tableId, items){
 
 function buildPIPSTable(tableId, items, prefix){
   const el = document.getElementById(tableId);
-  let h = '<thead><tr><th>Paramètre</th><th>Avant</th><th>Après</th></tr></thead><tbody>';
+  let h = '<thead><tr><th>Paramètre</th><th>Tolérance</th><th>Avant</th><th>Après</th></tr></thead><tbody>';
   items.forEach(function(p, i){
     const key = prefix + '_' + i;
-    h += '<tr><td>'+esc(p)+'</td>';
+    const label = typeof p === 'string' ? p : p.label;
+    const tol = typeof p === 'string' ? '' : (p.tol || '');
+    h += '<tr><td>'+esc(label)+'</td>';
+    h += '<td style="text-align:center;font-family:var(--font-mono);font-size:.78rem;color:var(--warn)">'+esc(tol)+'</td>';
     h += '<td><div class="radio-group"><div class="radio-btn" onclick="setCNC(\''+key+'_av\',\'C\',this)">C</div><div class="radio-btn" onclick="setCNC(\''+key+'_av\',\'NC\',this)">NC</div></div></td>';
     h += '<td><div class="radio-group"><div class="radio-btn" onclick="setCNC(\''+key+'_ap\',\'C\',this)">C</div><div class="radio-btn" onclick="setCNC(\''+key+'_ap\',\'NC\',this)">NC</div></div></td>';
     h += '</tr>';
@@ -1250,7 +1318,10 @@ buildPIPSTable('tbl_pips_alpha', PIPS_ALPHA, 'pa');
 buildPIPSTable('tbl_pips_cumul', PIPS_CUMUL, 'pc');
 buildPIPSTable('tbl_pips_beta',  PIPS_BETA,  'pb');
 buildPIPSTable('tbl_pips_dose',  PIPS_DOSE,  'pd');
-buildCNCwithSO('sec_47_cnc', CNC_47);
+buildCNCwithSO('sec_47_so', CNC_47_SO);
+buildCNC('sec_47_cnc', CNC_47);
+buildCNC('sec_48_cnc1', CNC_48_1);
+buildCNC('sec_48_cnc2', CNC_48_2);
 buildCNC('sec_411', CNC_411);
 buildCNC('sec_412', CNC_412);
 buildCNC('sec_413_cnc', CNC_413);
