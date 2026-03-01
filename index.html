@@ -1746,23 +1746,25 @@ async function rdGenPDF(it){
   const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const { height } = page.getSize();
 
-  // Helper: draw text at PDF coordinates (origin top-left → pdf-lib uses bottom-left)
+  // Helper: draw text at PDF coordinates (origin top-left → pdf-lib uses bottom-left baseline)
   function txt(x, y, text, size, bold){
     if(!text) return;
+    var s = size || 9;
     page.drawText(String(text), {
       x: x,
-      y: height - y,
-      size: size || 9,
+      y: height - y - s,
+      size: s,
       font: bold ? fontB : font,
       color: rgb(0, 0, 0)
     });
   }
   function txtRed(x, y, text, size){
     if(!text) return;
+    var s = size || 9;
     page.drawText(String(text), {
       x: x,
-      y: height - y,
-      size: size || 9,
+      y: height - y - s,
+      size: s,
       font: fontB,
       color: rgb(0.8, 0, 0)
     });
