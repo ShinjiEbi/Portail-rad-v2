@@ -2,7 +2,7 @@
   "name": "Portail Tech – Bertin",
   "short_name": "Portail Tech",
   "description": "Portail de gestion étalons, matériels et constats de vérification",
-  "start_url": "./index.html",
+  "start_url": "/index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -11,19 +11,7 @@
   "lang": "fr",
   "icons": [
     {
-      "src": "./icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icons/icon-192-maskable.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
