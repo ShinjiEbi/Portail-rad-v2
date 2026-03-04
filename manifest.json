@@ -11,17 +11,17 @@
   "lang": "fr",
   "icons": [
     {
-      "src": "/Portail-rad-v2/icons/icon-192.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
 
      {
-      "src": "/Portail-rad-v2/icons/icon-512.png",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "categories": ["utilities", "productivity"]
