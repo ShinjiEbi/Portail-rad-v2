@@ -242,9 +242,11 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .rd-jugement.ok{color:var(--green);border-color:var(--green);background:rgba(0,230,118,.08)}
 .rd-jugement.ng{color:var(--red);border-color:var(--red);background:rgba(255,61,61,.08)}
 .rd-jugement.wait{color:var(--text3)}
-.rd-info-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.8rem;color:var(--text2);border-bottom:1px solid var(--border)}
+.rd-info-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.8rem;color:var(--text2);border-bottom:1px solid var(--border)}
 .rd-info-row span:first-child{color:var(--text3)}
 .rd-info-row strong{color:var(--accent)}
+.rd-info-row input{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.8rem;color:var(--text);font-family:var(--mono);transition:border-color .2s}
+.rd-info-row input:focus{border-color:var(--accent);outline:none;background:var(--bg3)}
 .rd-banc-info{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-top:8px}
 .rd-cst-header{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:.8rem;color:var(--text2)}
 .rd-stats{font-family:var(--mono);font-size:.75rem;color:var(--text2);padding:10px 0;border-top:1px solid var(--border);margin-top:12px}
@@ -305,7 +307,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 04/03/2026 22:01</div>
+      <div class="hdate">Export: 10/03/2026 13:34</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 04/03/2026 21:51</div>
     </div>
@@ -580,11 +582,11 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
             <option value="">— Sélectionner un banc —</option>
           </select>
           <div class="rd-banc-info" id="rd_banc_info" style="display:none">
-            <div class="rd-info-row"><span>Distance d1 :</span><strong id="rd_d1">–</strong> cm</div>
-            <div class="rd-info-row"><span>Distance d2 :</span><strong id="rd_d2">–</strong> cm</div>
-            <div class="rd-info-row"><span>Localisation :</span><span id="rd_loc">–</span></div>
-            <div class="rd-info-row"><span>Validité banc :</span><span id="rd_val_banc">–</span></div>
-            <div class="rd-info-row"><span>Modèle étalon raccordement :</span><span id="rd_model">–</span></div>
+            <div class="rd-info-row"><span>Distance d1 (cm) :</span><input id="rd_d1" style="width:80px;text-align:right;font-weight:700;color:var(--accent)" oninput="rdSaveConfig()"></div>
+            <div class="rd-info-row"><span>Distance d2 (cm) :</span><input id="rd_d2" style="width:80px;text-align:right;font-weight:700;color:var(--accent)" oninput="rdSaveConfig()"></div>
+            <div class="rd-info-row"><span>Localisation :</span><input id="rd_loc" style="width:140px;text-align:right" oninput="rdSaveConfig()"></div>
+            <div class="rd-info-row"><span>Validité banc :</span><input id="rd_val_banc" style="width:100px;text-align:right" oninput="rdSaveConfig()"></div>
+            <div class="rd-info-row"><span>Modèle étalon raccord. :</span><input id="rd_model" style="width:160px;text-align:right" oninput="rdSaveConfig()"></div>
           </div>
         </div>
         <div class="rd-stats" id="rd_stats"></div>
@@ -1362,7 +1364,12 @@ function rdSaveConfig(){
     site: document.getElementById('rd_site').value,
     intervention: document.getElementById('rd_intervention').value,
     date: document.getElementById('rd_date').value,
-    banc_id: document.getElementById('rd_banc').value
+    banc_id: document.getElementById('rd_banc').value,
+    banc_d1: document.getElementById('rd_d1').value,
+    banc_d2: document.getElementById('rd_d2').value,
+    banc_loc: document.getElementById('rd_loc').value,
+    banc_val: document.getElementById('rd_val_banc').value,
+    banc_model: document.getElementById('rd_model').value
   };
   LS.set('radia_config', rdConfig);
 }
@@ -1378,7 +1385,20 @@ function rdInit(){
   document.getElementById('rd_date').value = c.date || new Date().toISOString().slice(0,10);
   // Populate bancs from etalons (category containing 'Irrad' or similar)
   rdPopulateBancs();
-  if(c.banc_id) { document.getElementById('rd_banc').value = c.banc_id; rdSelectBanc(); }
+  if(c.banc_id) {
+    document.getElementById('rd_banc').value = c.banc_id;
+    // Restore saved banc fields (manual overrides)
+    if(c.banc_d1 !== undefined){
+      document.getElementById('rd_d1').value = c.banc_d1 || '';
+      document.getElementById('rd_d2').value = c.banc_d2 || '';
+      document.getElementById('rd_loc').value = c.banc_loc || '';
+      document.getElementById('rd_val_banc').value = c.banc_val || '';
+      document.getElementById('rd_model').value = c.banc_model || '';
+      document.getElementById('rd_banc_info').style.display = 'block';
+    } else {
+      rdSelectBanc();
+    }
+  }
   // Populate matériel datalist
   rdPopulateMatList();
   // Render sidebar
@@ -1410,27 +1430,6 @@ function rdSelectBanc(){
   if(!banc){ info.style.display='none'; rdSaveConfig(); return; }
   info.style.display='block';
   // Extract d1, d2 from champs
-  let d1='–', d2='–', model='–';
-  if(banc.ch) banc.ch.forEach(function(c){
-    const ll = c.l.toLowerCase();
-    if((ll.includes('distance') && ll.includes('1')) || ll === 'd1' || ll.includes('d1 ') || ll.includes(' d1')) d1 = c.v;
-    if((ll.includes('distance') && ll.includes('2')) || ll === 'd2' || ll.includes('d2 ') || ll.includes(' d2')) d2 = c.v;
-    if(ll.includes('modèle') || ll.includes('model') || ll.includes('raccordement') || ll.includes('étalon')) model = c.v;
-  });
-  document.getElementById('rd_d1').textContent = d1;
-  document.getElementById('rd_d2').textContent = d2;
-  document.getElementById('rd_loc').textContent = banc.loc || '–';
-  document.getElementById('rd_val_banc').textContent = banc.val ? dfr(banc.val) : '–';
-  document.getElementById('rd_model').textContent = model;
-  rdSaveConfig();
-}
-
-function rdGetBancData(){
-  const bancId = rdConfig.banc_id;
-  if(!bancId) return {d1:'',d2:'',loc:'',val:'',model:''};
-  const etalons = getEtalons();
-  const banc = etalons.find(function(e){ return e.id === bancId; });
-  if(!banc) return {d1:'',d2:'',loc:'',val:'',model:''};
   let d1='', d2='', model='';
   if(banc.ch) banc.ch.forEach(function(c){
     const ll = c.l.toLowerCase();
@@ -1438,7 +1437,22 @@ function rdGetBancData(){
     if((ll.includes('distance') && ll.includes('2')) || ll === 'd2' || ll.includes('d2 ') || ll.includes(' d2')) d2 = c.v;
     if(ll.includes('modèle') || ll.includes('model') || ll.includes('raccordement') || ll.includes('étalon')) model = c.v;
   });
-  return {d1:d1, d2:d2, loc:banc.loc||'', val:banc.val?dfr(banc.val):'', model:model};
+  document.getElementById('rd_d1').value = d1;
+  document.getElementById('rd_d2').value = d2;
+  document.getElementById('rd_loc').value = banc.loc || '';
+  document.getElementById('rd_val_banc').value = banc.val ? dfr(banc.val) : '';
+  document.getElementById('rd_model').value = model;
+  rdSaveConfig();
+}
+
+function rdGetBancData(){
+  return {
+    d1: document.getElementById('rd_d1').value || rdConfig.banc_d1 || '',
+    d2: document.getElementById('rd_d2').value || rdConfig.banc_d2 || '',
+    loc: document.getElementById('rd_loc').value || rdConfig.banc_loc || '',
+    val: document.getElementById('rd_val_banc').value || rdConfig.banc_val || '',
+    model: document.getElementById('rd_model').value || rdConfig.banc_model || ''
+  };
 }
 
 function rdPopulateMatList(){
