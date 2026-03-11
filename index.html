@@ -307,7 +307,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 10/03/2026 13:34</div>
+      <div class="hdate">Export: 11/03/2026 11:14</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 04/03/2026 21:51</div>
     </div>
@@ -1903,9 +1903,9 @@ async function rdGenPDF(it){
 
   // Fill fields (positions calibrées v3)
   txt(375, 91, it.numConstat, 8);
-  txt(410, 170, rdConfig.site || '', 8);
-  txt(410, 184, dateFr, 8);
-  txt(410, 197, rdConfig.intervention || '', 8);
+  txt(413, 170, rdConfig.site || '', 8);
+  txt(413, 184, dateFr, 8);
+  txt(413, 197, rdConfig.intervention || '', 8);
 
   // Instrument table (data row y=243)
   txt(148, 243, typePdf, 8);
@@ -1915,16 +1915,16 @@ async function rdGenPDF(it){
 
   // Jugement
   if(conforme){
-    txt(130, 295, 'CONFORME', 11, true);
+    txt(126, 295, 'CONFORME', 11, true);
   } else {
-    txtRed(130, 295, 'NON-CONFORME', 11);
+    txtRed(126, 295, 'NON-CONFORME', 11);
   }
   if(dateVal) txt(315, 302, dateVal, 9);
 
   // Equipments
-  txt(185, 368, rdConfig.banc_id || '', 8);
-  txt(338, 368, bancData.loc, 8);
-  txt(468, 368, bancData.val, 8);
+  txt(185, 369, rdConfig.banc_id || '', 8);
+  txt(338, 369, bancData.loc, 8);
+  txt(468, 369, bancData.val, 8);
   txt(468, 382, bancData.model, 7);
 
   // Opérateur / Contrôleur
@@ -1932,15 +1932,15 @@ async function rdGenPDF(it){
   txt(212, 448, rdConfig.controleur || '', 8);
 
   // Mesures table (col "Valeur avant Ajustage" x=310)
-  txt(310, 526, it.aspect || '', 8);
-  txt(310, 539, it.batterie || '', 8);
-  txt(310, 566, it.son || '', 8);
-  txt(310, 579, it.sonde || '', 8);
-  txt(310, 592, it.maj || '', 8);
-  txt(310, 618, it.d1 || '', 8);
-  txt(310, 632, it.ded1 ? String(it.ded1).replace('.',',') : '', 8);
-  txt(310, 645, it.d2 || '', 8);
-  txt(310, 658, it.ded2 || '', 8);
+  txt(310, 527, it.aspect || '', 8);
+  txt(310, 540, it.batterie || '', 8);
+  txt(310, 567, it.son || '', 8);
+  txt(310, 580, it.sonde || '', 8);
+  txt(310, 593, it.maj || '', 8);
+  txt(310, 619, it.d1 || '', 8);
+  txt(310, 633, it.ded1 ? String(it.ded1).replace('.',',') : '', 8);
+  txt(310, 646, it.d2 || '', 8);
+  txt(310, 659, it.ded2 || '', 8);
 
   // Commentaires
   txt(53, 700, it.comment || '', 8);
