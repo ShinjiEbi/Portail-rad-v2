@@ -353,7 +353,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 14/03/2026 20:20</div>
+      <div class="hdate">Export: 14/03/2026 20:31</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -2843,8 +2843,6 @@ function asInit(){
   document.getElementById('as_contrat').value=asConfig.contrat||'';
   document.getElementById('as_contact').value=asConfig.contact||'';
   document.getElementById('as_date').value=asConfig.date||new Date().toISOString().split('T')[0];
-  document.getElementById('as_mailto').value=asConfig.mailto||'';
-  document.getElementById('as_mailcc').value=asConfig.mailcc||'';
   var items=LS.get('as_items');
   if(items)asItems=items;
   asRenderSidebar();
@@ -2858,8 +2856,6 @@ function asSaveConfig(){
   asConfig.contrat=document.getElementById('as_contrat').value;
   asConfig.contact=document.getElementById('as_contact').value;
   asConfig.date=document.getElementById('as_date').value;
-  asConfig.mailto=document.getElementById('as_mailto').value;
-  asConfig.mailcc=document.getElementById('as_mailcc').value;
   LS.set('as_config',asConfig);
 }
 
