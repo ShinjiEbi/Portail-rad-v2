@@ -28,7 +28,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .htitle{font-size:1.25rem;font-weight:700;letter-spacing:.06em}.hsub{font-family:var(--mono);font-size:.6rem;color:var(--accent);letter-spacing:.12em;margin-top:3px}
 .hright{margin-left:auto;text-align:right}
 .hdate{font-family:var(--mono);font-size:.55rem;color:var(--text3);line-height:1.6}
-.scanl{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:200%;animation:sc 2.5s linear infinite;transition:background .3s}
+.scanl{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:200%;animation:sc 2.5s linear infinite;transition:background .3s;margin:0 -16px}
 .scanl.online{background:linear-gradient(90deg,transparent,var(--green),transparent);background-size:200%;animation:sc 2.5s linear infinite}
 .scanl.error{background:linear-gradient(90deg,transparent,var(--red),transparent);background-size:200%;animation:sc 1s linear infinite}
 @keyframes sc{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -248,6 +248,24 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .rd-info-row input{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.8rem;color:var(--text);font-family:var(--mono);transition:border-color .2s}
 .rd-info-row input:focus{border-color:var(--accent);outline:none;background:var(--bg3)}
 .as-photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.as-photos .as-ph{position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}.as-photos .as-ph img{width:100%;height:100%;object-fit:cover}.as-photos .as-ph-del{position:absolute;top:2px;right:2px;width:20px;height:20px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* JOURNAL LOG */
+.jlog-panel{position:fixed;inset:0;z-index:999;background:var(--bg);display:none;flex-direction:column}
+.jlog-panel.open{display:flex}
+.jlog-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.jlog-head h2{font-size:1.1rem;color:var(--accent);flex:1;margin:0}
+.jlog-filters{display:flex;gap:6px;padding:8px 16px;overflow-x:auto;flex-shrink:0;border-bottom:1px solid var(--border)}
+.jlog-f{padding:4px 10px;border-radius:12px;font-size:.7rem;font-family:var(--mono);cursor:pointer;border:1px solid var(--border);color:var(--text2);background:var(--panel);white-space:nowrap}
+.jlog-f.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.1)}
+.jlog-list{flex:1;overflow-y:auto;padding:8px 16px}
+.jlog-entry{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.8rem;align-items:flex-start}
+.jlog-time{font-family:var(--mono);font-size:.65rem;color:var(--text3);white-space:nowrap;min-width:45px;padding-top:2px}
+.jlog-icon{font-size:1rem;flex-shrink:0}
+.jlog-msg{color:var(--text);flex:1;line-height:1.4}
+.jlog-msg b{color:var(--accent)}
+.jlog-entry.err .jlog-msg{color:var(--red)}
+.jlog-entry.err .jlog-time{color:var(--red)}
+.jlog-empty{text-align:center;color:var(--text3);padding:40px;font-size:.85rem}
 .rd-banc-info{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-top:8px}
 .rd-cst-header{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:.8rem;color:var(--text2)}
 .rd-stats{font-family:var(--mono);font-size:.75rem;color:var(--text2);padding:10px 0;border-top:1px solid var(--border);margin-top:12px}
@@ -298,17 +316,44 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 <body>
 
 <!-- ══════════════════════════════════════════════════════════
+     JOURNAL D'ACTIVITÉ
+     ══════════════════════════════════════════════════════════ -->
+<div class="jlog-panel" id="jlog_panel">
+  <div class="jlog-head">
+    <h2>📋 Journal d'activité</h2>
+    <button class="btn btn-ghost" onclick="pLogExport()" style="padding:4px 10px;font-size:.7rem">📥 Exporter</button>
+    <button class="btn btn-ghost" onclick="pLogClear()" style="padding:4px 10px;font-size:.7rem;color:var(--red)">🗑 Vider</button>
+    <button class="mx" onclick="toggleJournal()" style="background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer">✕</button>
+  </div>
+  <div class="jlog-filters" id="jlog_filters">
+    <div class="jlog-f active" onclick="pLogFilter('all')">Tout</div>
+    <div class="jlog-f" onclick="pLogFilter('file')">📄 Fichiers</div>
+    <div class="jlog-f" onclick="pLogFilter('listing')">📝 Listing</div>
+    <div class="jlog-f" onclick="pLogFilter('assist')">🛠 Assistance</div>
+    <div class="jlog-f" onclick="pLogFilter('etalon')">⚗️ Étalons</div>
+    <div class="jlog-f" onclick="pLogFilter('etiq')">🏷 Étiquettes</div>
+    <div class="jlog-f" onclick="pLogFilter('radia')">☢ Radiamètres</div>
+    <div class="jlog-f" onclick="pLogFilter('scan')">📷 Scans</div>
+    <div class="jlog-f" onclick="pLogFilter('net')">🌐 Réseau</div>
+    <div class="jlog-f" onclick="pLogFilter('err')">❌ Erreurs</div>
+  </div>
+  <div class="jlog-list" id="jlog_list">
+    <div class="jlog-empty">Aucune activité enregistrée</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
      HEADER
      ══════════════════════════════════════════════════════════ -->
 <header>
   <div class="htop">
-    <div class="logo">☢</div>
+    <div class="logo" onclick="toggleJournal()" style="cursor:pointer" title="Journal d'activité">☢</div>
     <div>
       <div class="htitle">PORTAIL TECH</div>
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 14/03/2026 19:45</div>
+      <div class="hdate">Export: 14/03/2026 20:20</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -925,6 +970,73 @@ const DATA_MATERIELS = [{"id":"0KZC002PD","des":"C2 rados tse1","ns":"","nc":"",
 const DATA_CONSTATS = [{"f":"abpm_203m.html","url":"forms/abpm_203m.html","t":"Balise ABPM 203M","d":"Constat de vérification Bertin Technologies","c":"Aérosol","i":"☢"},{"f":"bcp31_sonde_beta.html","url":"forms/bcp31_sonde_beta.html","t":"Sonde β BCP31 / AB31","d":"Constat de vérification Bertin Technologies","c":"Contamination","i":"☢"}];
 
 // ══════════════════════════════════════════════════════════
+// JOURNAL D'ACTIVITÉ — Système de logging
+// ══════════════════════════════════════════════════════════
+var _pLogs=[];
+var _pLogFilter='all';
+var _pLogMax=500;
+
+(function(){
+  try{var s=localStorage.getItem('pt_journal');if(s)_pLogs=JSON.parse(s);}catch(e){}
+})();
+
+function pLog(type,icon,msg){
+  var now=new Date();
+  var entry={
+    t:now.toISOString(),
+    h:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0'),
+    type:type,
+    icon:icon,
+    msg:msg
+  };
+  _pLogs.unshift(entry);
+  if(_pLogs.length>_pLogMax)_pLogs.length=_pLogMax;
+  try{localStorage.setItem('pt_journal',JSON.stringify(_pLogs));}catch(e){}
+  // Mettre à jour si le panneau est ouvert
+  if(document.getElementById('jlog_panel').classList.contains('open'))pLogRender();
+}
+
+function toggleJournal(){
+  var p=document.getElementById('jlog_panel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open'))pLogRender();
+}
+
+function pLogRender(){
+  var el=document.getElementById('jlog_list');
+  var filtered=_pLogFilter==='all'?_pLogs:_pLogs.filter(function(e){return e.type===_pLogFilter;});
+  if(!filtered.length){el.innerHTML='<div class="jlog-empty">Aucune entrée'+ (_pLogFilter!=='all'?' pour ce filtre':'') +'</div>';return;}
+  el.innerHTML=filtered.slice(0,200).map(function(e){
+    var cls='jlog-entry'+(e.type==='err'?' err':'');
+    return '<div class="'+cls+'"><span class="jlog-time">'+e.h+'</span><span class="jlog-icon">'+e.icon+'</span><span class="jlog-msg">'+e.msg+'</span></div>';
+  }).join('');
+}
+
+function pLogFilter(type){
+  _pLogFilter=type;
+  document.querySelectorAll('.jlog-f').forEach(function(f){f.classList.remove('active');});
+  event.target.classList.add('active');
+  pLogRender();
+}
+
+function pLogClear(){
+  if(!confirm('Vider le journal ?'))return;
+  _pLogs=[];
+  try{localStorage.removeItem('pt_journal');}catch(e){}
+  pLogRender();
+}
+
+function pLogExport(){
+  var txt=_pLogs.map(function(e){return e.t+' ['+e.type+'] '+e.msg;}).join('\n');
+  var blob=new Blob([txt],{type:'text/plain'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='journal_portail_'+new Date().toISOString().slice(0,10)+'.txt';
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+pLog('net','🚀','Portail démarré');
+
+// ══════════════════════════════════════════════════════════
 // PWA INSTALL PROMPT (Android uniquement)
 // ══════════════════════════════════════════════════════════
 let deferredInstallPrompt = null;
@@ -1042,14 +1154,14 @@ function closeM(){document.getElementById('modal').classList.remove('open');}
 function getCertificats(){try{return JSON.parse(localStorage.getItem('pt_certificats')||'{}');}catch(e){return {};}}
 function getCertificat(id){return getCertificats()[id]||null;}
 function setCertificat(id,b64){const c=getCertificats();c[id]=b64;localStorage.setItem('pt_certificats',JSON.stringify(c));}
-function supprimerCE(id){const c=getCertificats();delete c[id];localStorage.setItem('pt_certificats',JSON.stringify(c));showToast('Certificat supprimé');}
+function supprimerCE(id){const c=getCertificats();delete c[id];localStorage.setItem('pt_certificats',JSON.stringify(c));showToast('Certificat supprimé');pLog('etalon','🗑','Certificat supprimé pour <b>'+id+'</b>');}
 function chargerCE(id,input){
   const file=input.files&&input.files[0];
   if(!file)return;
   if(!file.name.toLowerCase().endsWith('.pdf')){showToast('Format PDF requis','err');return;}
   if(file.size>10*1024*1024){showToast('Fichier trop volumineux (max 10 Mo)','err');return;}
   const reader=new FileReader();
-  reader.onload=function(){setCertificat(id,reader.result);showToast('✓ Certificat ajouté pour '+id);closeM();detailE(id);};
+  reader.onload=function(){setCertificat(id,reader.result);showToast('✓ Certificat ajouté pour '+id);pLog('etalon','📄','Certificat ajouté pour <b>'+id+'</b>');closeM();detailE(id);};
   reader.onerror=function(){showToast('Erreur lecture fichier','err');};
   reader.readAsDataURL(file);
 }
@@ -1086,14 +1198,14 @@ let src={};if(cat==='Source'&&catDef){const tv=champs.find(c=>c.l==='Demi-vie (j
 const obj={id,cat,val:valStr,sv,site:document.getElementById('f_site').value.trim(),loc:document.getElementById('f_loc').value.trim(),ch:champs,src,dc:new Date().toISOString().substring(0,10),dm:'',uc:'Portail',um:'',_local:true};
 let all=getEtalons();if(editingId){const idx=all.findIndex(x=>x.id===editingId);if(idx>=0){obj.dc=all[idx].dc||obj.dc;obj.dm=new Date().toISOString().substring(0,10);obj.um='Portail';all[idx]=obj;}else all.push(obj);}
 else{if(all.find(x=>x.id===id)){toast('ID déjà existant !',true);return;}all.push(obj);}
-setEtalons(all);closeForm();refreshE();toast(editingId?'Étalon modifié ✓':'Étalon ajouté ✓');}
+setEtalons(all);closeForm();refreshE();toast(editingId?'Étalon modifié ✓':'Étalon ajouté ✓');pLog('etalon','⚗️',editingId?'Étalon modifié : <b>'+id+'</b> ('+cat+')':'Étalon créé : <b>'+id+'</b> ('+cat+')');}
 
 // ══════════════════════════════════════════════════════════
 // ÉTALONS — Suppression
 // ══════════════════════════════════════════════════════════
 let pendingDeleteId=null;
 function confirmDeleteE(id){pendingDeleteId=id;document.getElementById('confirmMsg').textContent='Supprimer l\'étalon '+id+' ?';document.getElementById('confirmSub').textContent='Cette action est irréversible.';document.getElementById('confirmYes').onclick=()=>{deleteE();closeConfirm();};document.getElementById('confirmDlg').classList.add('open');}
-function deleteE(){if(!pendingDeleteId)return;let all=getEtalons().filter(x=>x.id!==pendingDeleteId);setEtalons(all);refreshE();toast('Étalon supprimé');pendingDeleteId=null;}
+function deleteE(){if(!pendingDeleteId)return;var delId=pendingDeleteId;let all=getEtalons().filter(x=>x.id!==pendingDeleteId);setEtalons(all);refreshE();toast('Étalon supprimé');pLog('etalon','🗑','Étalon supprimé : <b>'+delId+'</b>');pendingDeleteId=null;}
 function closeConfirm(){document.getElementById('confirmDlg').classList.remove('open');pendingDeleteId=null;}
 
 // ══════════════════════════════════════════════════════════
@@ -1105,7 +1217,7 @@ headers.push('DateCreation','DateModification','UtilisateurCreation','Utilisateu
 const sep=';';const rows=[headers.join(sep)];
 all.forEach(e=>{const cat=cats.find(c=>c.nom===e.cat);const chVals=[];for(let i=0;i<maxCh;i++){const label=cat&&cat.champs&&cat.champs[i]?cat.champs[i]:'';const found=(e.ch||[]).find(c=>c.l===label);chVals.push(found?found.v:'');}
 const row=[e.id,e.cat,e.val||'',e.site,e.loc,...chVals,e.dc||'',e.dm||'',e.uc||'',e.um||''];rows.push(row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(sep));});
-const bom='\uFEFF';const blob=new Blob([bom+rows.join('\r\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='etalons_export_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('CSV exporté ✓');}
+const bom='\uFEFF';const blob=new Blob([bom+rows.join('\r\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='etalons_export_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('CSV exporté ✓');pLog('file','📊','CSV étalons exporté');}
 
 // ══════════════════════════════════════════════════════════
 // GESTION CATÉGORIES
@@ -1258,7 +1370,7 @@ function eqAdd(){
   const etiqId=eqParseId(fullId);
   eqItems.push({id:fullId,idEtiq:etiqId,des:mat?mat.des:'',type,dvp:fmtDateEtiq(dvp),val:val?fmtDateEtiq(val):'',nc:mat?mat.nc:''});
   document.getElementById('eq_input').value='';document.getElementById('eq_found').style.display='none';
-  eqRender();eqPreview();showToast('✓ '+id+' ajouté');
+  eqRender();eqPreview();showToast('✓ '+id+' ajouté');pLog('etiq','🏷','Étiquette ajoutée : <b>'+id+'</b> ('+type+')');
 }
 
 function eqRemove(i){eqItems.splice(i,1);eqRender();eqPreview();}
@@ -1373,7 +1485,7 @@ function eqStartScan(multi){
               document.getElementById('qrCount').textContent='✓ '+eqScanCount+' scanné'+(eqScanCount>1?'s':'');
             }else{
               // Single : fermer après 1 scan
-              showToast('QR: '+val);
+              showToast('QR: '+val);pLog('scan','📷','Scan QR (étiquettes) : <b>'+val+'</b>');
               eqScanStop();
             }
           }
@@ -1423,7 +1535,7 @@ function eqPrint(){
     dataUrls.forEach(url=>{html+='<div class="etiq"><img src="'+url+'"></div>';});
     html+='<script>setTimeout(()=>{window.print()},400)<\/script></body></html>';
     win.document.write(html);win.document.close();
-    showToast('✓ '+eqItems.length+' étiquette(s) générée(s)');
+    showToast('✓ '+eqItems.length+' étiquette(s) générée(s)');pLog('file','📄','PDF étiquettes généré : <b>'+eqItems.length+' étiquette(s)</b>');
   });
 }
 
@@ -1442,10 +1554,12 @@ function eqCheckPrinter(){
   dot.style.background='var(--text3)';txt.textContent='Vérification...';
   fetch(PRINT_SERVER+'/status',{signal:AbortSignal.timeout(3000)})
   .then(r=>r.json()).then(d=>{
+    var wasOK=eqPrinterOK;
     eqPrinterOK=d.printer;
     if(d.printer){
       dot.style.background='var(--green)';
       txt.textContent='🖨 Brother PT-E550W connectée ('+d.tape+')';
+      if(!wasOK)pLog('net','🖨','Imprimante Brother connectée ('+d.tape+')');
     } else {
       dot.style.background='#f59e0b';
       txt.textContent='⚠ Serveur OK mais imprimante non joignable';
@@ -1501,7 +1615,7 @@ function eqPrintSmart(){
       signal:AbortSignal.timeout(120000) // 2min pour gros batch
     }).then(function(r){return r.json();}).then(function(d){
       if(d.success){
-        showToast('✅ '+d.labels+' étiquette(s) envoyée(s) à l\'imprimante');
+        showToast('✅ '+d.labels+' étiquette(s) envoyée(s) à l\'imprimante');pLog('file','🖨','Impression directe : <b>'+d.labels+' étiquette(s)</b> envoyée(s) à Brother');
       } else {
         showToast('❌ '+d.error,'err');
       }
@@ -1891,7 +2005,7 @@ function rdAddAppareil(){
   rdSaveSession();
   rdRenderSidebar();
   rdShowItem(rdSession.items.length - 1);
-  toast('✓ ' + id_short + ' ajouté');
+  toast('✓ ' + id_short + ' ajouté');pLog('radia','☢','Radiamètre ajouté : <b>'+code+'</b>'+(desc?' — '+desc:''));
 }
 
 // ── LOAD/SAVE ITEM ─────────────────────────────────────────
@@ -2048,7 +2162,7 @@ function rdClearSession(){
   rdSaveSession();
   rdRenderSidebar();
   rdShowConfig();
-  toast('Session vidée');
+  toast('Session vidée');pLog('radia','🗑','Session radiamètres vidée');
 }
 
 // ── CSV EXPORT ─────────────────────────────────────────────
@@ -2076,7 +2190,7 @@ function rdExportCSV(){
   const dt = (rdConfig.date||new Date().toISOString().slice(0,10)).replace(/-/g,'');
   a.download = 'Radiametres_' + dt + '.csv';
   a.click();
-  toast('✓ CSV exporté');
+  toast('✓ CSV exporté');pLog('file','📊','CSV radiamètres exporté : <b>'+a.download+'</b>');
 }
 
 // ── PDF GENERATION (using pdf-lib in browser) ──────────────
@@ -2205,7 +2319,7 @@ async function rdGenOnePDF(){
     a.href = URL.createObjectURL(blob);
     a.download = rdPdfName(it);
     a.click();
-    toast('✓ PDF généré : ' + rdPdfName(it));
+    toast('✓ PDF généré : ' + rdPdfName(it));pLog('file','📄','PDF radiamètre généré : <b>'+rdPdfName(it)+'</b>');
   } catch(err) {
     toast('Erreur PDF : ' + err.message, true);
     console.error(err);
@@ -2239,13 +2353,18 @@ async function rdGenAllPDF(){
 function updateNetStatus(){
   var el = document.getElementById('scanl');
   if(!el) return;
-  if(el.classList.contains('error')) return; // erreur prioritaire
-  el.className = navigator.onLine ? 'scanl online' : 'scanl';
+  var wasOnline=el.classList.contains('online');
+  var isOnline=navigator.onLine;
+  el.className = isOnline ? 'scanl online' : 'scanl';
+  if(isOnline&&!wasOnline)pLog('net','🌐','Connexion réseau rétablie');
+  if(!isOnline&&wasOnline)pLog('net','📴','Connexion réseau perdue — mode hors-ligne');
 }
 function setErrorState(msg){
   var el = document.getElementById('scanl');
   if(el) el.className = 'scanl error';
   console.error('[PORTAIL ERREUR] ' + msg);
+  pLog('err','❌','Erreur : '+msg);
+  setTimeout(function(){updateNetStatus();}, 10000);
 }
 window.addEventListener('online', updateNetStatus);
 window.addEventListener('offline', updateNetStatus);
@@ -2355,7 +2474,7 @@ function lstClear(){
   lstItems = [];
   lstSave();
   lstRender();
-  toast('Listing vidé');
+  toast('Listing vidé');pLog('listing','🗑','Listing vidé');
 }
 
 // ── RECHERCHE / AJOUT ────────────────────────────────────
@@ -2429,7 +2548,7 @@ function lstAddFromSearch(){
   document.getElementById('lst_search').value = '';
   lstSelected = null;
   const idShort = fullScan.lastIndexOf('-')>=0 ? fullScan.substring(fullScan.lastIndexOf('-')+1) : fullScan;
-  toast('✓ ' + idShort + ' ajouté');
+  toast('✓ ' + idShort + ' ajouté');pLog('listing','📝','Listing : matériel ajouté <b>'+fullScan+'</b>'+(item.designation?' — '+item.designation:''));
 }
 
 // Fermer dropdown au clic extérieur
@@ -2490,7 +2609,7 @@ function lstExportXls(){
   const dt = new Date().toISOString().slice(0,10).replace(/-/g,'');
   a.download = 'Listing_intervention_'+dt+'.xls';
   a.click();
-  toast('✓ Excel exporté');
+  toast('✓ Excel exporté');pLog('file','📊','Excel listing exporté : <b>'+a.download+'</b> ('+lstItems.length+' matériels)');
 }
 
 // ── EXPORT → ÉTIQUETTES ──────────────────────────────────
@@ -2521,7 +2640,7 @@ function lstPushEtiq(){
   });
   eqRender();
   if(added>0) eqPreview();
-  toast('✓ '+added+' étiquette(s) ajoutée(s)');
+  toast('✓ '+added+' étiquette(s) ajoutée(s)');pLog('etiq','🏷','Listing → Étiquettes : <b>'+added+' étiquette(s)</b> transférées');
   go('etiq');
 }
 
@@ -2923,7 +3042,7 @@ function asAddItem(){
   asRenderSidebar();
   asUpdateStats();
   asShowItem(asItems.length-1);
-  showToast('✓ '+item.id+' ajouté');
+  showToast('✓ '+item.id+' ajouté');pLog('assist','🛠','Assistance : matériel ajouté <b>'+item.id+'</b>'+(item.des?' — '+item.des:''));
 }
 
 // ── Sauvegarde item courant ──────────────────────────────
@@ -3027,7 +3146,7 @@ function asStartScan(){
             document.getElementById('as_scan_input').value=val;
             asLookup();
             asScanStop();
-            showToast('QR: '+val);
+            showToast('QR: '+val);pLog('scan','📷','Scan QR (assistance) : <b>'+val+'</b>');
           }
         }).catch(function(){});
       }
@@ -3221,7 +3340,7 @@ function asAddDivers(){
   asRenderSidebar();
   asUpdateStats();
   asShowItem(asItems.length-1);
-  showToast('✓ Tâche diverse ajoutée');
+  showToast('✓ Tâche diverse ajoutée');pLog('assist','📝','Assistance : tâche diverse ajoutée');
 }
 
 // ── Copier vers OneNote (HTML simplifié) ─────────────────
@@ -3495,7 +3614,7 @@ async function asDownloadCR(){
     var a=document.createElement('a');
     a.href=url;a.download='CR_Assistance_'+siteName+'_'+d+'.pdf';
     a.click();URL.revokeObjectURL(url);
-    showToast('✅ Compte rendu téléchargé');
+    showToast('✅ Compte rendu téléchargé');pLog('file','📥','CR Assistance téléchargé : <b>CR_Assistance_'+siteName+'_'+d+'.pdf</b>');
   }catch(e){
     showToast('❌ Erreur: '+e.message,'err');
     console.error(e);
@@ -3516,7 +3635,7 @@ function asNewDay(){
   asRenderSidebar();
   asUpdateStats();
   asShowConfig();
-  showToast('✓ Nouvelle journée — session réinitialisée');
+  showToast('✓ Nouvelle journée — session réinitialisée');pLog('assist','🗑','Assistance : nouvelle journée (session vidée)');
 }
 
 // ── Init ─────────────────────────────────────────────────
