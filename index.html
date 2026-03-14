@@ -308,7 +308,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 14/03/2026 16:15</div>
+      <div class="hdate">Export: 14/03/2026 16:31</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -3259,130 +3259,60 @@ function asSendMail(){
   var subject='CR Assistance KZC — '+(asConfig.site||'Site')+' — '+d;
   var to=(asConfig.mailto||'').replace(/\s/g,'').replace(/;/g,',');
   var cc=(asConfig.mailcc||'').replace(/\s/g,'').replace(/;/g,',');
+  var textBody=asBuildText();
 
-  // Collecter toutes les photos avec CID
-  var photos=[];  // {cid, mime, b64data}
-  var cidIdx=0;
-  asItems.forEach(function(it,i){
+  // Collecter les photos comme fichiers nommés
+  var files=[];
+  asItems.forEach(function(it){
     if(it.photos&&it.photos.length){
       it.photos.forEach(function(p,j){
-        cidIdx++;
-        var cid='photo'+cidIdx+'@bertin.cr';
-        var parts=p.split(',');
-        var mime='image/jpeg';
-        try{mime=parts[0].match(/:(.*?);/)[1];}catch(e){}
-        var b64=parts.length>1?parts[1]:parts[0];
-        photos.push({cid:cid, mime:mime, b64:b64, itemIdx:i, photoIdx:j});
+        try{
+          var parts=p.split(',');
+          var mime='image/jpeg';
+          try{mime=parts[0].match(/:(.*?);/)[1];}catch(e){}
+          var bin=atob(parts[1]);
+          var arr=new Uint8Array(bin.length);
+          for(var k=0;k<bin.length;k++)arr[k]=bin.charCodeAt(k);
+          var ext=mime.includes('png')?'.png':'.jpg';
+          var label=it.divers?(it.titre||'Divers').replace(/[^a-zA-Z0-9àâäéèêëïîôùûüçÀÂÄÉÈÊËÏÎÔÙÛÜÇ _-]/g,''):it.id;
+          var name=label+' - '+(j+1)+ext;
+          files.push(new File([arr],name,{type:mime}));
+        }catch(e){}
       });
     }
   });
 
-  // Construire le HTML avec références CID pour les images
-  var htmlBody=asBuildHtmlCid(photos);
-
-  // Encoder le sujet en UTF-8 Base64
-  var subjectB64='=?UTF-8?B?'+btoa(unescape(encodeURIComponent(subject)))+'?=';
-
-  // Boundary MIME
-  var boundary='----=_Bertin_'+Date.now();
-
-  // Construire le .eml
-  var eml='';
-  eml+='From: \r\n';
-  if(to)eml+='To: '+to+'\r\n';
-  if(cc)eml+='Cc: '+cc+'\r\n';
-  eml+='Subject: '+subjectB64+'\r\n';
-  eml+='MIME-Version: 1.0\r\n';
-  eml+='Content-Type: multipart/related;\r\n boundary="'+boundary+'"\r\n';
-  eml+='\r\n';
-
-  // Partie HTML
-  eml+='--'+boundary+'\r\n';
-  eml+='Content-Type: text/html; charset=UTF-8\r\n';
-  eml+='Content-Transfer-Encoding: base64\r\n';
-  eml+='\r\n';
-  var fullHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>'+htmlBody+'</body></html>';
-  var htmlB64=btoa(unescape(encodeURIComponent(fullHtml)));
-  for(var i=0;i<htmlB64.length;i+=76){eml+=htmlB64.substring(i,i+76)+'\r\n';}
-  eml+='\r\n';
-
-  // Parties images (CID)
-  photos.forEach(function(ph){
-    eml+='--'+boundary+'\r\n';
-    eml+='Content-Type: '+ph.mime+'\r\n';
-    eml+='Content-Transfer-Encoding: base64\r\n';
-    eml+='Content-ID: <'+ph.cid+'>\r\n';
-    eml+='Content-Disposition: inline\r\n';
-    eml+='\r\n';
-    for(var i=0;i<ph.b64.length;i+=76){eml+=ph.b64.substring(i,i+76)+'\r\n';}
-    eml+='\r\n';
-  });
-
-  eml+='--'+boundary+'--\r\n';
-
-  // Télécharger le .eml
-  var blob=new Blob([eml],{type:'message/rfc822'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='CR_'+(asConfig.site||'Site').replace(/[^a-zA-Z0-9]/g,'_')+'_'+d+'.eml';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('📧 Fichier mail généré — ouvrez-le avec Outlook');
+  // Essayer navigator.share avec texte + photos
+  if(files.length&&navigator.canShare&&navigator.canShare({files:files})){
+    navigator.share({
+      title:subject,
+      text:textBody,
+      files:files
+    }).then(function(){
+      showToast('✅ Partagé avec succès');
+    }).catch(function(e){
+      if(e.name!=='AbortError')asMailto(subject,to,cc,textBody);
+    });
+  } else if(navigator.share){
+    navigator.share({
+      title:subject,
+      text:textBody
+    }).then(function(){
+      showToast('✅ Texte partagé');
+    }).catch(function(){
+      asMailto(subject,to,cc,textBody);
+    });
+  } else {
+    asMailto(subject,to,cc,textBody);
+  }
 }
 
-function asBuildHtmlCid(photos){
-  // Même HTML que asBuildHtml mais avec src="cid:xxx" pour les images
-  var d=asConfig.date||'';
-  var h='<div style="font-family:Calibri,Arial,sans-serif;max-width:800px;margin:0 auto">';
-  h+='<div style="background:#1a237e;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0">';
-  h+='<h2 style="margin:0;font-size:18px">📋 Compte rendu d\'assistance</h2>';
-  h+='<p style="margin:4px 0 0;font-size:13px;opacity:.85">'+esc(asConfig.site||'')+' — '+d+'</p>';
-  h+='</div>';
-  h+='<div style="background:#f5f5f5;padding:12px 20px;font-size:13px;border-bottom:1px solid #ddd">';
-  if(asConfig.operateur)h+='<b>Opérateur :</b> '+esc(asConfig.operateur)+(asConfig.trigramme?' ('+esc(asConfig.trigramme)+')':'')+'<br>';
-  if(asConfig.contrat)h+='<b>Contrat :</b> '+esc(asConfig.contrat)+'<br>';
-  if(asConfig.contact)h+='<b>Contact :</b> '+esc(asConfig.contact)+'<br>';
-  h+='<b>Interventions :</b> '+asItems.length;
-  h+='</div>';
-
-  asItems.forEach(function(it,i){
-    var stColor=it.statut==='requalification'||it.statut==='panne_resolue'||it.statut==='termine'?'#2e7d32':it.statut==='hors_service'?'#c62828':it.statut==='info'?'#1565c0':'#ef6c00';
-    var headerBg=it.divers?'#f3e5f5':'#e3f2fd';
-    var title=it.divers?(i+1)+'. 📝 '+(esc(it.titre)||'Tâche diverse'):(i+1)+'. '+esc(it.id)+(it.des?' — '+esc(it.des):'');
-    h+='<div style="margin:12px 0;border:1px solid #ddd;border-radius:6px;overflow:hidden">';
-    h+='<div style="background:'+headerBg+';padding:10px 16px;border-bottom:1px solid #ddd;font-weight:700;font-size:14px">';
-    h+=title+'</div>';
-    h+='<div style="padding:12px 16px;font-size:13px;line-height:1.6">';
-    if(!it.divers&&it.sn)h+='<b>N° série :</b> '+esc(it.sn)+'<br>';
-    if(!it.divers&&it.loc)h+='<b>Position :</b> '+esc(it.loc)+'<br>';
-    if(it.panne){
-      h+='<div style="background:#fff3e0;padding:8px 12px;border-left:3px solid #ff9800;margin:8px 0;border-radius:0 4px 4px 0">';
-      h+='<b>'+(it.divers?'📝 Description':'🔍 Panne constatée')+' :</b><br>'+esc(it.panne).replace(/\n/g,'<br>')+'</div>';
-    }
-    if(it.inter){
-      h+='<div style="background:#e8f5e9;padding:8px 12px;border-left:3px solid #4caf50;margin:8px 0;border-radius:0 4px 4px 0">';
-      h+='<b>🔧 '+(it.divers?'Action réalisée':'Intervention réalisée')+' :</b><br>'+esc(it.inter).replace(/\n/g,'<br>')+'</div>';
-    }
-    if(it.statut){
-      h+='<div style="display:inline-block;padding:4px 12px;background:'+stColor+';color:#fff;border-radius:4px;font-size:12px;font-weight:700;margin:8px 0">'+asStatutLabel(it.statut)+'</div>';
-    }
-    if(it.comment){h+='<br><b>Commentaires :</b> '+esc(it.comment).replace(/\n/g,'<br>');}
-    // Photos avec CID
-    var itemPhotos=photos.filter(function(p){return p.itemIdx===i;});
-    if(itemPhotos.length){
-      h+='<div style="margin-top:10px">';
-      itemPhotos.forEach(function(ph){
-        h+='<img src="cid:'+ph.cid+'" style="max-width:300px;max-height:200px;border-radius:4px;margin:4px;border:1px solid #ddd">';
-      });
-      h+='</div>';
-    }
-    h+='</div></div>';
-  });
-
-  h+='<div style="text-align:center;padding:16px;color:#999;font-size:11px">Bertin Technologies — Assistance technique</div>';
-  h+='</div>';
-  return h;
+function asMailto(subject,to,cc,textBody){
+  var mailto='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject);
+  if(cc)mailto+='&cc='+encodeURIComponent(cc);
+  mailto+='&body='+encodeURIComponent(textBody);
+  window.location.href=mailto;
+  showToast('📧 Mail ouvert');
 }
 
 // ── Nouvelle journée ─────────────────────────────────────
