@@ -37,6 +37,8 @@ self.addEventListener('message', function(e) {
 
 // ── FETCH ───────────────────────────────────────────────
 self.addEventListener('fetch', function(e) {
+  // Ne pas intercepter les requêtes vers le serveur d'impression
+  if (e.request.url.includes('localhost:8080')) return;
   if (e.request.method !== 'GET') return;
 
   var url = new URL(e.request.url);
