@@ -247,6 +247,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .rd-info-row strong{color:var(--accent)}
 .rd-info-row input{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.8rem;color:var(--text);font-family:var(--mono);transition:border-color .2s}
 .rd-info-row input:focus{border-color:var(--accent);outline:none;background:var(--bg3)}
+.as-photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.as-photos .as-ph{position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}.as-photos .as-ph img{width:100%;height:100%;object-fit:cover}.as-photos .as-ph-del{position:absolute;top:2px;right:2px;width:20px;height:20px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .rd-banc-info{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-top:8px}
 .rd-cst-header{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:.8rem;color:var(--text2)}
 .rd-stats{font-family:var(--mono);font-size:.75rem;color:var(--text2);padding:10px 0;border-top:1px solid var(--border);margin-top:12px}
@@ -307,7 +308,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 14/03/2026 14:27</div>
+      <div class="hdate">Export: 14/03/2026 15:36</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -338,6 +339,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
   <div class="tab" data-tab="calc" onclick="go('calc')"><span class="ti">🧮</span><div><div class="tt">CALCUL</div><div class="td">VÉRIF</div></div><span class="tb">⚡</span></div>
   <div class="tab" data-tab="etiq" onclick="go('etiq')"><span class="ti">🏷</span><div><div class="tt">ÉTIQUETTES</div><div class="td">IMPRESSION</div></div><span class="tb" id="betiq">0</span></div>
   <div class="tab" data-tab="listing" onclick="go('listing')"><span class="ti">📝</span><div><div class="tt">LISTING</div><div class="td">INTERV.</div></div><span class="tb" id="blisting">0</span></div>
+  <div class="tab" data-tab="assist" onclick="go('assist')"><span class="ti">🛠</span><div><div class="tt">ASSIST.</div><div class="td">KZC</div></div><span class="tb" id="bassist">0</span></div>
   <div class="tab-lock" id="tabLock" onclick="toggleTabLock()" title="Verrouiller / Déverrouiller l'ordre des onglets">🔒</div>
 </div>
 
@@ -699,6 +701,136 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
           <div style="display:flex;gap:8px;margin-top:8px">
             <button class="btn btn-primary" onclick="rdGenOnePDF()" style="flex:1">📄 PDF</button>
             <button class="btn btn-ghost" onclick="rdDeleteItem()" style="width:60px;color:var(--red)">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 8 — ASSISTANCE KZC
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="p_assist">
+  <div class="rd-layout">
+    <!-- SIDEBAR GAUCHE -->
+    <div class="rd-sidebar" id="as_sidebar">
+      <div class="rd-side-item rd-config active" onclick="asShowConfig()">
+        <div class="rd-side-icon">⚙️</div>
+        <div class="rd-side-label">CONFIG</div>
+        <div class="rd-side-status">SESSION</div>
+      </div>
+      <div id="as_list"></div>
+      <div class="rd-side-add" id="as_add_btn" onclick="asShowAdd()">
+        <div class="rd-side-icon">➕</div>
+        <div class="rd-side-label">AJOUT</div>
+      </div>
+    </div>
+
+    <!-- MAIN DROITE -->
+    <div class="rd-main" id="as_main">
+
+      <!-- ── PANNEAU CONFIG ─────────────────────── -->
+      <div class="rd-panel" id="as_config">
+        <div class="rd-title">⚙️ Configuration session</div>
+        <div class="rd-form">
+          <label>Opérateur</label>
+          <input id="as_operateur" placeholder="Nom complet" oninput="asSaveConfig()">
+          <label>Trigramme</label>
+          <input id="as_trigramme" maxlength="4" placeholder="RBD" oninput="asSaveConfig()" style="text-transform:uppercase;width:100px">
+          <label>Site CNPE</label>
+          <input id="as_site" placeholder="CNPE Bugey" oninput="asSaveConfig()">
+          <label>N° contrat d'assistance</label>
+          <input id="as_contrat" placeholder="CT-2026-XXXX" oninput="asSaveConfig()">
+          <label>Contact client</label>
+          <input id="as_contact" placeholder="Nom du contact EDF" oninput="asSaveConfig()">
+          <label>Date d'intervention</label>
+          <input type="date" id="as_date" oninput="asSaveConfig()">
+
+          <div class="rd-section">📧 Destinataires mail</div>
+          <label>Destinataires (séparés par ;)</label>
+          <input id="as_mailto" placeholder="prenom.nom@edf.fr ; autre@edf.fr" oninput="asSaveConfig()">
+          <label>CC (optionnel)</label>
+          <input id="as_mailcc" placeholder="copie@bertin.group" oninput="asSaveConfig()">
+        </div>
+        <div class="rd-stats" id="as_stats"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn btn-primary" onclick="asGenEml()" id="as_btn_eml">📧 Envoyer compte rendu</button>
+          <button class="btn btn-accent" onclick="asCopyText()" id="as_btn_copy">📋 Copier texte</button>
+          <button class="btn btn-ghost" onclick="asNewDay()">🗑 Nouvelle journée</button>
+        </div>
+      </div>
+
+      <!-- ── PANNEAU AJOUT ──────────────────────── -->
+      <div class="rd-panel" id="as_add" style="display:none">
+        <div class="rd-title">➕ Ajouter un matériel</div>
+        <div class="rd-form">
+          <label>Code matériel (scan QR ou saisie)</label>
+          <div style="display:flex;gap:8px">
+            <input id="as_scan_input" placeholder="ID ou N° série..." style="flex:1" list="as_mat_list" oninput="asLookup()">
+            <button class="btn btn-accent" onclick="asStartScan()" style="width:52px;font-size:1.3rem;padding:0">📷</button>
+          </div>
+          <datalist id="as_mat_list"></datalist>
+          <div id="as_lookup_info" style="display:none;margin-top:8px">
+            <div class="rd-info-row"><span>Désignation :</span><strong id="as_lu_des">–</strong></div>
+            <div class="rd-info-row"><span>S/N :</span><strong id="as_lu_sn">–</strong></div>
+            <div class="rd-info-row"><span>Localisation :</span><strong id="as_lu_loc">–</strong></div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" onclick="asAddItem()" id="as_add_confirm" style="width:100%;height:48px" disabled>✓ Ajouter à la session</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PANNEAU INTERVENTION (par appareil) ── -->
+      <div class="rd-panel" id="as_inter" style="display:none">
+        <div class="rd-title" id="as_inter_title">INTERVENTION</div>
+        <div id="as_inter_header" style="margin-bottom:12px"></div>
+        <div class="rd-form">
+          <div class="rd-section">📋 Identification matériel</div>
+          <label>ID</label>
+          <input id="as_i_id" readonly>
+          <label>Désignation</label>
+          <input id="as_i_des" readonly>
+          <label>N° série</label>
+          <input id="as_i_sn" oninput="asSaveItem()">
+          <label>Position / Localisation</label>
+          <input id="as_i_loc" oninput="asSaveItem()" placeholder="Bâtiment, salle, repère...">
+
+          <div class="rd-section">🔍 Panne constatée</div>
+          <label>Description de la panne</label>
+          <textarea id="as_i_panne" rows="3" oninput="asSaveItem()" placeholder="Décrire la panne / symptôme constaté..."></textarea>
+
+          <div class="rd-section">🔧 Intervention réalisée</div>
+          <label>Description de l'intervention</label>
+          <textarea id="as_i_inter" rows="4" oninput="asSaveItem()" placeholder="Actions réalisées, pièces remplacées..."></textarea>
+
+          <div class="rd-section">📊 Statut</div>
+          <label>Résultat de l'intervention</label>
+          <select id="as_i_statut" onchange="asSaveItem()" style="height:44px">
+            <option value="">— Sélectionner —</option>
+            <option value="requalification">✅ Requalification</option>
+            <option value="panne_resolue">✅ Panne résolue</option>
+            <option value="en_cours">🔧 Intervention en cours</option>
+            <option value="attente_piece">⏳ Attente de pièce</option>
+            <option value="attente_decision">⏳ Attente décision client</option>
+            <option value="hors_service">❌ Hors service</option>
+          </select>
+
+          <div class="rd-section">📷 Photos</div>
+          <label>Prendre ou ajouter des photos</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-accent" onclick="asAddPhoto()" style="height:40px">📷 Photo</button>
+            <button class="btn btn-ghost" onclick="asAddPhotoGal()" style="height:40px">🖼 Galerie</button>
+          </div>
+          <div class="as-photos" id="as_photos"></div>
+
+          <label>Commentaires</label>
+          <textarea id="as_i_comment" rows="2" oninput="asSaveItem()" placeholder="Optionnel..."></textarea>
+
+          <!-- Actions -->
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-ghost" onclick="asDeleteItem()" style="width:60px;color:var(--red)">🗑</button>
           </div>
         </div>
       </div>
@@ -2566,9 +2698,460 @@ function saveTabOrder(){
   LS.set('tab_order', order);
 }
 
+// ══════════════════════════════════════════════════════════
+// ASSISTANCE KZC — Session + Interventions + Compte rendu
+// ══════════════════════════════════════════════════════════
+var asItems=[];
+var asCurrentIdx=-1;
+var asConfig={};
+var asScannerActive=false;
+
+function asInit(){
+  var saved=LS.get('as_config');
+  if(saved)asConfig=saved;
+  document.getElementById('as_operateur').value=asConfig.operateur||'';
+  document.getElementById('as_trigramme').value=asConfig.trigramme||'';
+  document.getElementById('as_site').value=asConfig.site||'';
+  document.getElementById('as_contrat').value=asConfig.contrat||'';
+  document.getElementById('as_contact').value=asConfig.contact||'';
+  document.getElementById('as_date').value=asConfig.date||new Date().toISOString().split('T')[0];
+  document.getElementById('as_mailto').value=asConfig.mailto||'';
+  document.getElementById('as_mailcc').value=asConfig.mailcc||'';
+  var items=LS.get('as_items');
+  if(items)asItems=items;
+  asRenderSidebar();
+  asUpdateStats();
+}
+
+function asSaveConfig(){
+  asConfig.operateur=document.getElementById('as_operateur').value;
+  asConfig.trigramme=document.getElementById('as_trigramme').value;
+  asConfig.site=document.getElementById('as_site').value;
+  asConfig.contrat=document.getElementById('as_contrat').value;
+  asConfig.contact=document.getElementById('as_contact').value;
+  asConfig.date=document.getElementById('as_date').value;
+  asConfig.mailto=document.getElementById('as_mailto').value;
+  asConfig.mailcc=document.getElementById('as_mailcc').value;
+  LS.set('as_config',asConfig);
+}
+
+function asSaveItems(){LS.set('as_items',asItems);}
+
+// ── Navigation sidebar ──────────────────────────────────
+function asShowConfig(){
+  asCurrentIdx=-1;
+  document.getElementById('as_config').style.display='';
+  document.getElementById('as_add').style.display='none';
+  document.getElementById('as_inter').style.display='none';
+  asHighlightSidebar();
+}
+
+function asShowAdd(){
+  asCurrentIdx=-1;
+  document.getElementById('as_config').style.display='none';
+  document.getElementById('as_add').style.display='';
+  document.getElementById('as_inter').style.display='none';
+  document.getElementById('as_scan_input').value='';
+  document.getElementById('as_lookup_info').style.display='none';
+  document.getElementById('as_add_confirm').disabled=true;
+  asHighlightSidebar();
+}
+
+function asShowItem(idx){
+  asCurrentIdx=idx;
+  document.getElementById('as_config').style.display='none';
+  document.getElementById('as_add').style.display='none';
+  document.getElementById('as_inter').style.display='';
+  var it=asItems[idx];
+  document.getElementById('as_inter_title').textContent=it.id||'INTERVENTION';
+  document.getElementById('as_i_id').value=it.id||'';
+  document.getElementById('as_i_des').value=it.des||'';
+  document.getElementById('as_i_sn').value=it.sn||'';
+  document.getElementById('as_i_loc').value=it.loc||'';
+  document.getElementById('as_i_panne').value=it.panne||'';
+  document.getElementById('as_i_inter').value=it.inter||'';
+  document.getElementById('as_i_statut').value=it.statut||'';
+  document.getElementById('as_i_comment').value=it.comment||'';
+  asRenderPhotos();
+  asHighlightSidebar();
+}
+
+function asHighlightSidebar(){
+  var items=document.querySelectorAll('#as_sidebar .rd-side-item');
+  items.forEach(function(el,i){el.classList.remove('active');});
+  if(asCurrentIdx===-1){
+    var cfg=document.querySelector('#as_sidebar .rd-config');
+    if(cfg)cfg.classList.add('active');
+  }
+}
+
+function asRenderSidebar(){
+  var el=document.getElementById('as_list');
+  var badge=document.getElementById('bassist');
+  badge.textContent=asItems.length||'0';
+  el.innerHTML=asItems.map(function(it,i){
+    var st=asStatutIcon(it.statut);
+    var cls=i===asCurrentIdx?'rd-side-item active':'rd-side-item';
+    return '<div class="'+cls+'" onclick="asShowItem('+i+')">'+
+      '<div class="rd-side-icon">'+st+'</div>'+
+      '<div class="rd-side-label" style="font-size:.6rem;word-break:break-all">'+esc(it.id||'?')+'</div>'+
+      '<div class="rd-side-status" style="font-size:.5rem">'+esc((it.des||'').substring(0,12))+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function asStatutIcon(s){
+  if(s==='requalification'||s==='panne_resolue')return '✅';
+  if(s==='en_cours')return '🔧';
+  if(s==='attente_piece'||s==='attente_decision')return '⏳';
+  if(s==='hors_service')return '❌';
+  return '📋';
+}
+
+function asStatutLabel(s){
+  var m={'requalification':'Requalification','panne_resolue':'Panne résolue','en_cours':'Intervention en cours','attente_piece':'Attente de pièce','attente_decision':'Attente décision client','hors_service':'Hors service'};
+  return m[s]||'Non défini';
+}
+
+function asUpdateStats(){
+  var el=document.getElementById('as_stats');
+  if(!asItems.length){el.innerHTML='<div style="color:var(--text3);font-size:.8rem;padding:8px">Aucun matériel dans la session</div>';return;}
+  var counts={};
+  asItems.forEach(function(it){var s=it.statut||'non_defini';counts[s]=(counts[s]||0)+1;});
+  var h='<div style="padding:8px;font-size:.8rem"><strong style="color:var(--accent)">'+asItems.length+'</strong> matériel(s) dans la session<br>';
+  Object.keys(counts).forEach(function(k){h+='<span style="margin-right:12px">'+asStatutIcon(k)+' '+asStatutLabel(k)+': <strong>'+counts[k]+'</strong></span>';});
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+// ── Lookup matériel ──────────────────────────────────────
+var asLookupMat=null;
+function asLookup(){
+  var raw=document.getElementById('as_scan_input').value.trim();
+  if(!raw||raw.length<2){document.getElementById('as_lookup_info').style.display='none';document.getElementById('as_add_confirm').disabled=true;asLookupMat=null;return;}
+  var search=raw.toLowerCase();
+  var found=DATA_MATERIELS.filter(function(m){return m.id.toLowerCase().includes(search)||m.nc.toLowerCase().includes(search)||m.ns.toLowerCase().includes(search);}).slice(0,8);
+  var dl=document.getElementById('as_mat_list');
+  dl.innerHTML=found.map(function(m){return '<option value="'+esc(m.id)+'">'+esc(m.des)+'</option>';}).join('');
+  var exact=DATA_MATERIELS.find(function(m){return m.id.toLowerCase()===search||m.nc.toLowerCase()===search;});
+  if(!exact)exact=found.length===1?found[0]:null;
+  var info=document.getElementById('as_lookup_info');
+  if(exact){
+    asLookupMat=exact;
+    document.getElementById('as_lu_des').textContent=exact.des||'–';
+    document.getElementById('as_lu_sn').textContent=exact.ns||'–';
+    document.getElementById('as_lu_loc').textContent=(exact.cnpe||'')+' '+(exact.loc||'');
+    info.style.display='block';
+    document.getElementById('as_add_confirm').disabled=false;
+  } else {
+    asLookupMat=null;
+    info.style.display='none';
+    document.getElementById('as_add_confirm').disabled=raw.length>=2?false:true;
+  }
+}
+
+function asAddItem(){
+  var raw=document.getElementById('as_scan_input').value.trim();
+  if(!raw){showToast('Saisissez un ID','err');return;}
+  var m=asLookupMat;
+  var item={
+    id:m?m.id:raw,
+    des:m?m.des:'',
+    sn:m?m.ns:'',
+    nc:m?m.nc:'',
+    loc:m?(m.cnpe||'')+' '+(m.loc||''):'',
+    panne:'',
+    inter:'',
+    statut:'',
+    comment:'',
+    photos:[]
+  };
+  // Éviter doublon
+  if(asItems.find(function(x){return x.id===item.id;})){showToast('Déjà dans la session','err');return;}
+  asItems.push(item);
+  asSaveItems();
+  asRenderSidebar();
+  asUpdateStats();
+  asShowItem(asItems.length-1);
+  showToast('✓ '+item.id+' ajouté');
+}
+
+// ── Sauvegarde item courant ──────────────────────────────
+function asSaveItem(){
+  if(asCurrentIdx<0||asCurrentIdx>=asItems.length)return;
+  var it=asItems[asCurrentIdx];
+  it.sn=document.getElementById('as_i_sn').value;
+  it.loc=document.getElementById('as_i_loc').value;
+  it.panne=document.getElementById('as_i_panne').value;
+  it.inter=document.getElementById('as_i_inter').value;
+  it.statut=document.getElementById('as_i_statut').value;
+  it.comment=document.getElementById('as_i_comment').value;
+  asSaveItems();
+  asRenderSidebar();
+  asUpdateStats();
+}
+
+function asDeleteItem(){
+  if(asCurrentIdx<0)return;
+  if(!confirm('Supprimer ce matériel de la session ?'))return;
+  asItems.splice(asCurrentIdx,1);
+  asSaveItems();
+  asRenderSidebar();
+  asUpdateStats();
+  asShowConfig();
+}
+
+// ── Photos ───────────────────────────────────────────────
+function asAddPhoto(){
+  var inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.capture='environment';
+  inp.onchange=function(){if(inp.files[0])asProcessPhoto(inp.files[0]);};
+  inp.click();
+}
+
+function asAddPhotoGal(){
+  var inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
+  inp.onchange=function(){for(var i=0;i<inp.files.length;i++)asProcessPhoto(inp.files[i]);};
+  inp.click();
+}
+
+function asProcessPhoto(file){
+  if(asCurrentIdx<0)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    // Redimensionner pour pas surcharger le localStorage
+    var img=new Image();
+    img.onload=function(){
+      var maxW=800;var ratio=Math.min(maxW/img.width,1);
+      var c=document.createElement('canvas');c.width=img.width*ratio;c.height=img.height*ratio;
+      var ctx=c.getContext('2d');ctx.drawImage(img,0,0,c.width,c.height);
+      var b64=c.toDataURL('image/jpeg',0.7);
+      asItems[asCurrentIdx].photos.push(b64);
+      asSaveItems();
+      asRenderPhotos();
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function asRenderPhotos(){
+  if(asCurrentIdx<0)return;
+  var photos=asItems[asCurrentIdx].photos||[];
+  var el=document.getElementById('as_photos');
+  if(!photos.length){el.innerHTML='<div style="color:var(--text3);font-size:.75rem">Aucune photo</div>';return;}
+  el.innerHTML=photos.map(function(p,i){
+    return '<div class="as-ph"><img src="'+p+'"><button class="as-ph-del" onclick="asDelPhoto('+i+')">✕</button></div>';
+  }).join('');
+}
+
+function asDelPhoto(i){
+  if(asCurrentIdx<0)return;
+  asItems[asCurrentIdx].photos.splice(i,1);
+  asSaveItems();
+  asRenderPhotos();
+}
+
+// ── Scanner QR ───────────────────────────────────────────
+function asStartScan(){
+  if(!window.isSecureContext){showToast('HTTPS requis','err');return;}
+  if(!('BarcodeDetector' in window)){showToast('BarcodeDetector non supporté','err');return;}
+  asScannerActive=true;
+  var modal=document.getElementById('qrModal');modal.classList.add('open');
+  document.getElementById('qrMode').textContent='SCAN MATÉRIEL — ASSISTANCE';
+  document.getElementById('qrCount').textContent='';
+  var reader=document.getElementById('qrReader');
+  var video=document.createElement('video');video.setAttribute('playsinline','');video.autoplay=true;
+  reader.innerHTML='';reader.appendChild(video);
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(stream){
+    video.srcObject=stream;
+    var detector=new BarcodeDetector({formats:['qr_code']});
+    qrScanner=setInterval(function(){
+      if(video.readyState>=2){
+        detector.detect(video).then(function(codes){
+          if(codes.length){
+            var val=codes[0].rawValue;
+            document.getElementById('as_scan_input').value=val;
+            asLookup();
+            asScanStop();
+            showToast('QR: '+val);
+          }
+        }).catch(function(){});
+      }
+    },300);
+  }).catch(function(){showToast('Caméra refusée','err');modal.classList.remove('open');});
+}
+
+function asScanStop(){
+  asScannerActive=false;
+  if(qrScanner){clearInterval(qrScanner);qrScanner=null;}
+  var reader=document.getElementById('qrReader');var video=reader.querySelector('video');
+  if(video&&video.srcObject){video.srcObject.getTracks().forEach(function(t){t.stop();});}
+  reader.innerHTML='';document.getElementById('qrModal').classList.remove('open');
+}
+
+// ── Compte rendu texte ───────────────────────────────────
+function asBuildText(){
+  var d=asConfig.date||'';
+  var lines=[];
+  lines.push('══════════════════════════════════════════');
+  lines.push('COMPTE RENDU D\'ASSISTANCE — '+asConfig.site);
+  lines.push('══════════════════════════════════════════');
+  lines.push('Date : '+d);
+  lines.push('Opérateur : '+(asConfig.operateur||'')+(asConfig.trigramme?' ('+asConfig.trigramme+')':''));
+  lines.push('Contrat : '+(asConfig.contrat||''));
+  lines.push('Contact client : '+(asConfig.contact||''));
+  lines.push('Nombre d\'interventions : '+asItems.length);
+  lines.push('');
+
+  asItems.forEach(function(it,i){
+    lines.push('──────────────────────────────────────────');
+    lines.push((i+1)+'. '+it.id+' — '+(it.des||''));
+    lines.push('──────────────────────────────────────────');
+    lines.push('N° série : '+(it.sn||'–'));
+    lines.push('Position : '+(it.loc||'–'));
+    lines.push('');
+    lines.push('PANNE CONSTATÉE :');
+    lines.push(it.panne||'(non renseigné)');
+    lines.push('');
+    lines.push('INTERVENTION RÉALISÉE :');
+    lines.push(it.inter||'(non renseigné)');
+    lines.push('');
+    lines.push('STATUT : '+asStatutLabel(it.statut));
+    if(it.comment)lines.push('COMMENTAIRES : '+it.comment);
+    lines.push('');
+  });
+
+  lines.push('══════════════════════════════════════════');
+  lines.push('Fin du compte rendu — Bertin Technologies');
+  lines.push('══════════════════════════════════════════');
+  return lines.join('\n');
+}
+
+function asCopyText(){
+  if(!asItems.length){showToast('Aucune intervention','err');return;}
+  var txt=asBuildText();
+  navigator.clipboard.writeText(txt).then(function(){
+    showToast('✓ Compte rendu copié dans le presse-papier');
+  }).catch(function(){
+    // Fallback
+    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    showToast('✓ Compte rendu copié');
+  });
+}
+
+// ── Génération fichier .eml ──────────────────────────────
+function asBuildHtml(){
+  var d=asConfig.date||'';
+  var h='<div style="font-family:Calibri,Arial,sans-serif;max-width:800px;margin:0 auto">';
+  h+='<div style="background:#1a237e;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0">';
+  h+='<h2 style="margin:0;font-size:18px">📋 Compte rendu d\'assistance</h2>';
+  h+='<p style="margin:4px 0 0;font-size:13px;opacity:.85">'+esc(asConfig.site||'')+' — '+d+'</p>';
+  h+='</div>';
+  h+='<div style="background:#f5f5f5;padding:12px 20px;font-size:13px;border-bottom:1px solid #ddd">';
+  h+='<b>Opérateur :</b> '+esc(asConfig.operateur||'')+' ('+esc(asConfig.trigramme||'')+')<br>';
+  h+='<b>Contrat :</b> '+esc(asConfig.contrat||'')+'<br>';
+  h+='<b>Contact :</b> '+esc(asConfig.contact||'')+'<br>';
+  h+='<b>Interventions :</b> '+asItems.length;
+  h+='</div>';
+
+  asItems.forEach(function(it,i){
+    var stColor=it.statut==='requalification'||it.statut==='panne_resolue'?'#2e7d32':it.statut==='hors_service'?'#c62828':'#ef6c00';
+    h+='<div style="margin:12px 0;border:1px solid #ddd;border-radius:6px;overflow:hidden">';
+    h+='<div style="background:#e3f2fd;padding:10px 16px;border-bottom:1px solid #ddd;font-weight:700;font-size:14px">';
+    h+=(i+1)+'. '+esc(it.id)+' — '+esc(it.des||'');
+    h+='</div>';
+    h+='<div style="padding:12px 16px;font-size:13px;line-height:1.6">';
+    h+='<b>N° série :</b> '+esc(it.sn||'–')+'<br>';
+    h+='<b>Position :</b> '+esc(it.loc||'–')+'<br><br>';
+    h+='<div style="background:#fff3e0;padding:8px 12px;border-left:3px solid #ff9800;margin:8px 0;border-radius:0 4px 4px 0">';
+    h+='<b>🔍 Panne constatée :</b><br>'+esc(it.panne||'Non renseigné').replace(/\n/g,'<br>');
+    h+='</div>';
+    h+='<div style="background:#e8f5e9;padding:8px 12px;border-left:3px solid #4caf50;margin:8px 0;border-radius:0 4px 4px 0">';
+    h+='<b>🔧 Intervention réalisée :</b><br>'+esc(it.inter||'Non renseigné').replace(/\n/g,'<br>');
+    h+='</div>';
+    h+='<div style="display:inline-block;padding:4px 12px;background:'+stColor+';color:#fff;border-radius:4px;font-size:12px;font-weight:700;margin:8px 0">'+asStatutLabel(it.statut)+'</div>';
+    if(it.comment){h+='<br><b>Commentaires :</b> '+esc(it.comment).replace(/\n/g,'<br>');}
+
+    // Photos inline
+    if(it.photos&&it.photos.length){
+      h+='<div style="margin-top:10px">';
+      it.photos.forEach(function(p){
+        h+='<img src="'+p+'" style="max-width:300px;max-height:200px;border-radius:4px;margin:4px;border:1px solid #ddd">';
+      });
+      h+='</div>';
+    }
+    h+='</div></div>';
+  });
+
+  h+='<div style="text-align:center;padding:16px;color:#999;font-size:11px">Bertin Technologies — Assistance technique</div>';
+  h+='</div>';
+  return h;
+}
+
+function asGenEml(){
+  if(!asItems.length){showToast('Aucune intervention','err');return;}
+  var d=asConfig.date||new Date().toISOString().split('T')[0];
+  var subject='CR Assistance KZC — '+(asConfig.site||'Site')+' — '+d;
+  var to=(asConfig.mailto||'').replace(/\s/g,'');
+  var cc=(asConfig.mailcc||'').replace(/\s/g,'');
+  var htmlBody=asBuildHtml();
+
+  // Construire le fichier .eml (MIME)
+  var boundary='----=_Part_'+Date.now();
+  var eml='';
+  eml+='From: <>\r\n';
+  eml+='To: '+to+'\r\n';
+  if(cc)eml+='Cc: '+cc+'\r\n';
+  eml+='Subject: =?UTF-8?B?'+btoa(unescape(encodeURIComponent(subject)))+'?=\r\n';
+  eml+='MIME-Version: 1.0\r\n';
+  eml+='Content-Type: multipart/related; boundary="'+boundary+'"\r\n';
+  eml+='\r\n';
+
+  // Partie HTML
+  eml+='--'+boundary+'\r\n';
+  eml+='Content-Type: text/html; charset=UTF-8\r\n';
+  eml+='Content-Transfer-Encoding: base64\r\n';
+  eml+='\r\n';
+
+  // Encoder le HTML en base64 par lignes de 76 chars
+  var htmlB64=btoa(unescape(encodeURIComponent(htmlBody)));
+  for(var i=0;i<htmlB64.length;i+=76){eml+=htmlB64.substring(i,i+76)+'\r\n';}
+  eml+='\r\n';
+
+  eml+='--'+boundary+'--\r\n';
+
+  // Créer le blob et télécharger
+  var blob=new Blob([eml],{type:'message/rfc822'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='CR_Assistance_'+(asConfig.site||'Site').replace(/\s/g,'_')+'_'+d+'.eml';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ Fichier mail généré — ouvrez-le avec Outlook');
+}
+
+// ── Nouvelle journée ─────────────────────────────────────
+function asNewDay(){
+  if(asItems.length&&!confirm('Effacer toutes les interventions de la journée ?'))return;
+  asItems=[];
+  asSaveItems();
+  asCurrentIdx=-1;
+  asConfig.date=new Date().toISOString().split('T')[0];
+  document.getElementById('as_date').value=asConfig.date;
+  asSaveConfig();
+  asRenderSidebar();
+  asUpdateStats();
+  asShowConfig();
+  showToast('✓ Nouvelle journée — session réinitialisée');
+}
+
+// ── Init ─────────────────────────────────────────────────
+
 // Init radiamètres au chargement
 rdInit();
 lstInit();
+asInit();
 initTabDrag();
 </script>
 </body>
