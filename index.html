@@ -308,7 +308,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 14/03/2026 15:51</div>
+      <div class="hdate">Export: 14/03/2026 15:59</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -721,13 +721,15 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
         <div class="rd-side-status">SESSION</div>
       </div>
       <div id="as_list"></div>
-      <div class="rd-side-add" onclick="asShowAdd()">
-        <div class="rd-side-icon">➕</div>
-        <div class="rd-side-label">MATÉRIEL</div>
-      </div>
-      <div class="rd-side-add" onclick="asAddDivers()" style="border-top:none">
-        <div class="rd-side-icon">📝</div>
-        <div class="rd-side-label">DIVERS</div>
+      <div style="margin-top:auto">
+        <div class="rd-side-add" onclick="asShowAdd()" style="margin-top:0">
+          <div class="rd-side-icon">➕</div>
+          <div class="rd-side-label">MATÉRIEL</div>
+        </div>
+        <div class="rd-side-add" onclick="asAddDivers()" style="margin-top:0;border-top:none">
+          <div class="rd-side-icon">📝</div>
+          <div class="rd-side-label">DIVERS</div>
+        </div>
       </div>
     </div>
 
@@ -759,10 +761,9 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
         </div>
         <div class="rd-stats" id="as_stats"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn btn-primary" onclick="asSendMail()" id="as_btn_mail">📧 Préparer le mail</button>
-          <button class="btn btn-accent" onclick="asCopyHtml()" id="as_btn_copy">📋 Copier (formaté)</button>
-          <button class="btn btn-ghost" onclick="asCopyText()">📄 Copier (texte brut)</button>
-          <button class="btn btn-ghost" onclick="asNewDay()">🗑 Nouvelle journée</button>
+          <button class="btn btn-primary" onclick="asSendMail()" style="flex:1">📧 Envoyer par mail</button>
+          <button class="btn btn-accent" onclick="asCopyOneNote()" style="flex:1">📓 Copier vers OneNote</button>
+          <button class="btn btn-ghost" onclick="asNewDay()" style="width:100%">🗑 Nouvelle journée</button>
         </div>
       </div>
 
@@ -3174,60 +3175,102 @@ function asAddDivers(){
   showToast('✓ Tâche diverse ajoutée');
 }
 
-// ── Copier HTML formaté dans le presse-papier ────────────
-function asCopyHtml(){
+// ── Copier vers OneNote (HTML formaté) ───────────────────
+function asCopyOneNote(){
   if(!asItems.length){showToast('Aucune intervention','err');return;}
   var htmlBody=asBuildHtml();
-  // ClipboardItem avec HTML
   try{
     var blob=new Blob([htmlBody],{type:'text/html'});
     var blobTxt=new Blob([asBuildText()],{type:'text/plain'});
     navigator.clipboard.write([new ClipboardItem({'text/html':blob,'text/plain':blobTxt})]).then(function(){
-      showToast('✅ Compte rendu copié (formaté) — collez dans le mail');
+      showToast('✅ Copié — collez dans OneNote (appui long → Coller)');
     }).catch(function(){
-      // Fallback texte brut
       navigator.clipboard.writeText(asBuildText()).then(function(){
-        showToast('✓ Copié en texte brut (HTML non supporté)');
+        showToast('✓ Copié en texte — collez dans OneNote');
       });
     });
   }catch(e){
     navigator.clipboard.writeText(asBuildText()).then(function(){
-      showToast('✓ Copié en texte brut');
+      showToast('✓ Copié en texte — collez dans OneNote');
     });
   }
 }
 
-// ── Préparer le mail : copie HTML + ouvre mailto ─────────
+// ── Envoyer par mail via navigator.share ─────────────────
 function asSendMail(){
   if(!asItems.length){showToast('Aucune intervention','err');return;}
   var d=asConfig.date||new Date().toISOString().split('T')[0];
   var subject='CR Assistance KZC — '+(asConfig.site||'Site')+' — '+d;
   var to=(asConfig.mailto||'').replace(/\s/g,'').replace(/;/g,',');
   var cc=(asConfig.mailcc||'').replace(/\s/g,'').replace(/;/g,',');
-
-  // 1. Copier le HTML formaté dans le presse-papier
   var htmlBody=asBuildHtml();
-  var copied=false;
-  try{
-    var blob=new Blob([htmlBody],{type:'text/html'});
-    var blobTxt=new Blob([asBuildText()],{type:'text/plain'});
-    navigator.clipboard.write([new ClipboardItem({'text/html':blob,'text/plain':blobTxt})]).then(function(){
-      copied=true;
-      openMailApp();
-    }).catch(function(){
-      navigator.clipboard.writeText(asBuildText()).then(function(){copied=true;openMailApp();});
-    });
-  }catch(e){
-    navigator.clipboard.writeText(asBuildText()).then(function(){copied=true;openMailApp();});
-  }
 
-  function openMailApp(){
-    // 2. Ouvrir le client mail avec destinataires + sujet pré-remplis
-    var mailto='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject);
-    if(cc)mailto+='&cc='+encodeURIComponent(cc);
-    window.location.href=mailto;
-    showToast('✅ Compte rendu copié — collez dans le corps du mail (Ctrl+V / long appui)');
+  // Générer le fichier HTML complet
+  var fullHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+esc(subject)+'</title></head><body>'+htmlBody+'</body></html>';
+  var htmlFile=new File([fullHtml],
+    'CR_Assistance_'+(asConfig.site||'Site').replace(/\s/g,'_')+'_'+d+'.html',
+    {type:'text/html'});
+
+  // Collecter les photos comme fichiers séparés
+  var files=[htmlFile];
+  var photoIdx=0;
+  asItems.forEach(function(it,i){
+    if(it.photos&&it.photos.length){
+      it.photos.forEach(function(p,j){
+        try{
+          var parts=p.split(',');
+          var mime=parts[0].match(/:(.*?);/)[1];
+          var bin=atob(parts[1]);
+          var arr=new Uint8Array(bin.length);
+          for(var k=0;k<bin.length;k++)arr[k]=bin.charCodeAt(k);
+          photoIdx++;
+          var ext=mime.includes('png')?'.png':'.jpg';
+          var name='photo_'+(it.divers?'divers':it.id)+'_'+photoIdx+ext;
+          files.push(new File([arr],name,{type:mime}));
+        }catch(e){}
+      });
+    }
+  });
+
+  // Essayer navigator.share avec fichiers
+  if(navigator.canShare&&navigator.canShare({files:files})){
+    navigator.share({
+      title:subject,
+      text:asBuildText(),
+      files:files
+    }).then(function(){
+      showToast('✅ Partagé avec succès');
+    }).catch(function(e){
+      if(e.name!=='AbortError'){
+        // Fallback mailto
+        asFallbackMailto(subject,to,cc);
+      }
+    });
+  } else {
+    // Fallback: essayer share sans fichiers puis mailto
+    if(navigator.share){
+      navigator.share({
+        title:subject,
+        text:asBuildText()
+      }).then(function(){
+        showToast('✅ Texte partagé (sans photos)');
+      }).catch(function(){
+        asFallbackMailto(subject,to,cc);
+      });
+    } else {
+      asFallbackMailto(subject,to,cc);
+    }
   }
+}
+
+function asFallbackMailto(subject,to,cc){
+  // Copier le texte dans le presse-papier
+  navigator.clipboard.writeText(asBuildText()).catch(function(){});
+  // Ouvrir mailto
+  var mailto='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject);
+  if(cc)mailto+='&cc='+encodeURIComponent(cc);
+  window.location.href=mailto;
+  showToast('📧 Mail ouvert — le texte est copié, collez dans le corps du mail');
 }
 
 // ── Nouvelle journée ─────────────────────────────────────
