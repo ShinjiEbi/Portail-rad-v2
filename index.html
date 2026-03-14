@@ -308,7 +308,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 14/03/2026 15:59</div>
+      <div class="hdate">Export: 14/03/2026 16:15</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -3155,6 +3155,62 @@ function asBuildHtml(){
   return h;
 }
 
+// ── HTML simplifié pour OneNote (pas de bordures complexes) ──
+function asBuildOneNote(){
+  var d=asConfig.date||'';
+  var h='<div style="font-family:Calibri,sans-serif">';
+  h+='<h1 style="color:#1a237e;margin-bottom:4px">Compte rendu d\'assistance</h1>';
+  h+='<p style="color:#555;margin:0 0 12px">'+esc(asConfig.site||'')+' — '+d+'</p>';
+
+  var info=[];
+  if(asConfig.operateur)info.push('<b>Opérateur :</b> '+esc(asConfig.operateur)+(asConfig.trigramme?' ('+esc(asConfig.trigramme)+')':''));
+  if(asConfig.contrat)info.push('<b>Contrat :</b> '+esc(asConfig.contrat));
+  if(asConfig.contact)info.push('<b>Contact :</b> '+esc(asConfig.contact));
+  info.push('<b>Interventions :</b> '+asItems.length);
+  h+='<p style="color:#333;font-size:13px">'+info.join('<br>')+'</p>';
+  h+='<hr style="border:none;border-top:2px solid #1a237e;margin:16px 0">';
+
+  asItems.forEach(function(it,i){
+    var stIcon=asStatutIcon(it.statut);
+    if(it.divers){
+      h+='<h2 style="color:#7b1fa2;margin:16px 0 6px;font-size:15px">'+(i+1)+'. 📝 '+esc(it.titre||'Tâche diverse')+'</h2>';
+    } else {
+      h+='<h2 style="color:#1565c0;margin:16px 0 6px;font-size:15px">'+(i+1)+'. '+esc(it.id)+(it.des?' — '+esc(it.des):'')+'</h2>';
+    }
+
+    var details=[];
+    if(!it.divers&&it.sn)details.push('N° série : '+esc(it.sn));
+    if(!it.divers&&it.loc)details.push('Position : '+esc(it.loc));
+    if(details.length)h+='<p style="color:#666;font-size:12px;margin:2px 0">'+details.join(' | ')+'</p>';
+
+    if(it.panne){
+      h+='<p style="margin:8px 0 4px"><b>'+(it.divers?'Description':'Panne constatée')+' :</b></p>';
+      h+='<p style="margin:0 0 0 12px;color:#333">'+esc(it.panne).replace(/\n/g,'<br>')+'</p>';
+    }
+    if(it.inter){
+      h+='<p style="margin:8px 0 4px"><b>'+(it.divers?'Action réalisée':'Intervention réalisée')+' :</b></p>';
+      h+='<p style="margin:0 0 0 12px;color:#333">'+esc(it.inter).replace(/\n/g,'<br>')+'</p>';
+    }
+    if(it.statut){
+      h+='<p style="margin:8px 0 4px"><b>Statut :</b> '+stIcon+' '+asStatutLabel(it.statut)+'</p>';
+    }
+    if(it.comment){
+      h+='<p style="margin:4px 0"><b>Commentaires :</b> '+esc(it.comment).replace(/\n/g,'<br>')+'</p>';
+    }
+    if(it.photos&&it.photos.length){
+      it.photos.forEach(function(p){
+        h+='<p><img src="'+p+'" style="max-width:300px;max-height:200px"></p>';
+      });
+    }
+    if(i<asItems.length-1)h+='<hr style="border:none;border-top:1px solid #ccc;margin:12px 0">';
+  });
+
+  h+='<hr style="border:none;border-top:2px solid #1a237e;margin:16px 0">';
+  h+='<p style="color:#999;font-size:11px;text-align:center">Bertin Technologies — Assistance technique</p>';
+  h+='</div>';
+  return h;
+}
+
 // ── Ajout divers (sans matériel) ──────────────────────────
 function asAddDivers(){
   var item={
@@ -3175,15 +3231,15 @@ function asAddDivers(){
   showToast('✓ Tâche diverse ajoutée');
 }
 
-// ── Copier vers OneNote (HTML formaté) ───────────────────
+// ── Copier vers OneNote (HTML simplifié) ─────────────────
 function asCopyOneNote(){
   if(!asItems.length){showToast('Aucune intervention','err');return;}
-  var htmlBody=asBuildHtml();
+  var htmlBody=asBuildOneNote();
   try{
     var blob=new Blob([htmlBody],{type:'text/html'});
     var blobTxt=new Blob([asBuildText()],{type:'text/plain'});
     navigator.clipboard.write([new ClipboardItem({'text/html':blob,'text/plain':blobTxt})]).then(function(){
-      showToast('✅ Copié — collez dans OneNote (appui long → Coller)');
+      showToast('✅ Copié — collez dans OneNote');
     }).catch(function(){
       navigator.clipboard.writeText(asBuildText()).then(function(){
         showToast('✓ Copié en texte — collez dans OneNote');
@@ -3196,81 +3252,137 @@ function asCopyOneNote(){
   }
 }
 
-// ── Envoyer par mail via navigator.share ─────────────────
+// ── Envoyer par mail : texte brut en corps + HTML en PJ ──
 function asSendMail(){
   if(!asItems.length){showToast('Aucune intervention','err');return;}
   var d=asConfig.date||new Date().toISOString().split('T')[0];
   var subject='CR Assistance KZC — '+(asConfig.site||'Site')+' — '+d;
   var to=(asConfig.mailto||'').replace(/\s/g,'').replace(/;/g,',');
   var cc=(asConfig.mailcc||'').replace(/\s/g,'').replace(/;/g,',');
-  var htmlBody=asBuildHtml();
 
-  // Générer le fichier HTML complet
-  var fullHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+esc(subject)+'</title></head><body>'+htmlBody+'</body></html>';
-  var htmlFile=new File([fullHtml],
-    'CR_Assistance_'+(asConfig.site||'Site').replace(/\s/g,'_')+'_'+d+'.html',
-    {type:'text/html'});
-
-  // Collecter les photos comme fichiers séparés
-  var files=[htmlFile];
-  var photoIdx=0;
+  // Collecter toutes les photos avec CID
+  var photos=[];  // {cid, mime, b64data}
+  var cidIdx=0;
   asItems.forEach(function(it,i){
     if(it.photos&&it.photos.length){
       it.photos.forEach(function(p,j){
-        try{
-          var parts=p.split(',');
-          var mime=parts[0].match(/:(.*?);/)[1];
-          var bin=atob(parts[1]);
-          var arr=new Uint8Array(bin.length);
-          for(var k=0;k<bin.length;k++)arr[k]=bin.charCodeAt(k);
-          photoIdx++;
-          var ext=mime.includes('png')?'.png':'.jpg';
-          var name='photo_'+(it.divers?'divers':it.id)+'_'+photoIdx+ext;
-          files.push(new File([arr],name,{type:mime}));
-        }catch(e){}
+        cidIdx++;
+        var cid='photo'+cidIdx+'@bertin.cr';
+        var parts=p.split(',');
+        var mime='image/jpeg';
+        try{mime=parts[0].match(/:(.*?);/)[1];}catch(e){}
+        var b64=parts.length>1?parts[1]:parts[0];
+        photos.push({cid:cid, mime:mime, b64:b64, itemIdx:i, photoIdx:j});
       });
     }
   });
 
-  // Essayer navigator.share avec fichiers
-  if(navigator.canShare&&navigator.canShare({files:files})){
-    navigator.share({
-      title:subject,
-      text:asBuildText(),
-      files:files
-    }).then(function(){
-      showToast('✅ Partagé avec succès');
-    }).catch(function(e){
-      if(e.name!=='AbortError'){
-        // Fallback mailto
-        asFallbackMailto(subject,to,cc);
-      }
-    });
-  } else {
-    // Fallback: essayer share sans fichiers puis mailto
-    if(navigator.share){
-      navigator.share({
-        title:subject,
-        text:asBuildText()
-      }).then(function(){
-        showToast('✅ Texte partagé (sans photos)');
-      }).catch(function(){
-        asFallbackMailto(subject,to,cc);
-      });
-    } else {
-      asFallbackMailto(subject,to,cc);
-    }
-  }
+  // Construire le HTML avec références CID pour les images
+  var htmlBody=asBuildHtmlCid(photos);
+
+  // Encoder le sujet en UTF-8 Base64
+  var subjectB64='=?UTF-8?B?'+btoa(unescape(encodeURIComponent(subject)))+'?=';
+
+  // Boundary MIME
+  var boundary='----=_Bertin_'+Date.now();
+
+  // Construire le .eml
+  var eml='';
+  eml+='From: \r\n';
+  if(to)eml+='To: '+to+'\r\n';
+  if(cc)eml+='Cc: '+cc+'\r\n';
+  eml+='Subject: '+subjectB64+'\r\n';
+  eml+='MIME-Version: 1.0\r\n';
+  eml+='Content-Type: multipart/related;\r\n boundary="'+boundary+'"\r\n';
+  eml+='\r\n';
+
+  // Partie HTML
+  eml+='--'+boundary+'\r\n';
+  eml+='Content-Type: text/html; charset=UTF-8\r\n';
+  eml+='Content-Transfer-Encoding: base64\r\n';
+  eml+='\r\n';
+  var fullHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>'+htmlBody+'</body></html>';
+  var htmlB64=btoa(unescape(encodeURIComponent(fullHtml)));
+  for(var i=0;i<htmlB64.length;i+=76){eml+=htmlB64.substring(i,i+76)+'\r\n';}
+  eml+='\r\n';
+
+  // Parties images (CID)
+  photos.forEach(function(ph){
+    eml+='--'+boundary+'\r\n';
+    eml+='Content-Type: '+ph.mime+'\r\n';
+    eml+='Content-Transfer-Encoding: base64\r\n';
+    eml+='Content-ID: <'+ph.cid+'>\r\n';
+    eml+='Content-Disposition: inline\r\n';
+    eml+='\r\n';
+    for(var i=0;i<ph.b64.length;i+=76){eml+=ph.b64.substring(i,i+76)+'\r\n';}
+    eml+='\r\n';
+  });
+
+  eml+='--'+boundary+'--\r\n';
+
+  // Télécharger le .eml
+  var blob=new Blob([eml],{type:'message/rfc822'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='CR_'+(asConfig.site||'Site').replace(/[^a-zA-Z0-9]/g,'_')+'_'+d+'.eml';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📧 Fichier mail généré — ouvrez-le avec Outlook');
 }
 
-function asFallbackMailto(subject,to,cc){
-  // Copier le texte dans le presse-papier
-  navigator.clipboard.writeText(asBuildText()).catch(function(){});
-  // Ouvrir mailto
-  var mailto='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject);
-  if(cc)mailto+='&cc='+encodeURIComponent(cc);
-  window.location.href=mailto;
-  showToast('📧 Mail ouvert — le texte est copié, collez dans le corps du mail');
+function asBuildHtmlCid(photos){
+  // Même HTML que asBuildHtml mais avec src="cid:xxx" pour les images
+  var d=asConfig.date||'';
+  var h='<div style="font-family:Calibri,Arial,sans-serif;max-width:800px;margin:0 auto">';
+  h+='<div style="background:#1a237e;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0">';
+  h+='<h2 style="margin:0;font-size:18px">📋 Compte rendu d\'assistance</h2>';
+  h+='<p style="margin:4px 0 0;font-size:13px;opacity:.85">'+esc(asConfig.site||'')+' — '+d+'</p>';
+  h+='</div>';
+  h+='<div style="background:#f5f5f5;padding:12px 20px;font-size:13px;border-bottom:1px solid #ddd">';
+  if(asConfig.operateur)h+='<b>Opérateur :</b> '+esc(asConfig.operateur)+(asConfig.trigramme?' ('+esc(asConfig.trigramme)+')':'')+'<br>';
+  if(asConfig.contrat)h+='<b>Contrat :</b> '+esc(asConfig.contrat)+'<br>';
+  if(asConfig.contact)h+='<b>Contact :</b> '+esc(asConfig.contact)+'<br>';
+  h+='<b>Interventions :</b> '+asItems.length;
+  h+='</div>';
+
+  asItems.forEach(function(it,i){
+    var stColor=it.statut==='requalification'||it.statut==='panne_resolue'||it.statut==='termine'?'#2e7d32':it.statut==='hors_service'?'#c62828':it.statut==='info'?'#1565c0':'#ef6c00';
+    var headerBg=it.divers?'#f3e5f5':'#e3f2fd';
+    var title=it.divers?(i+1)+'. 📝 '+(esc(it.titre)||'Tâche diverse'):(i+1)+'. '+esc(it.id)+(it.des?' — '+esc(it.des):'');
+    h+='<div style="margin:12px 0;border:1px solid #ddd;border-radius:6px;overflow:hidden">';
+    h+='<div style="background:'+headerBg+';padding:10px 16px;border-bottom:1px solid #ddd;font-weight:700;font-size:14px">';
+    h+=title+'</div>';
+    h+='<div style="padding:12px 16px;font-size:13px;line-height:1.6">';
+    if(!it.divers&&it.sn)h+='<b>N° série :</b> '+esc(it.sn)+'<br>';
+    if(!it.divers&&it.loc)h+='<b>Position :</b> '+esc(it.loc)+'<br>';
+    if(it.panne){
+      h+='<div style="background:#fff3e0;padding:8px 12px;border-left:3px solid #ff9800;margin:8px 0;border-radius:0 4px 4px 0">';
+      h+='<b>'+(it.divers?'📝 Description':'🔍 Panne constatée')+' :</b><br>'+esc(it.panne).replace(/\n/g,'<br>')+'</div>';
+    }
+    if(it.inter){
+      h+='<div style="background:#e8f5e9;padding:8px 12px;border-left:3px solid #4caf50;margin:8px 0;border-radius:0 4px 4px 0">';
+      h+='<b>🔧 '+(it.divers?'Action réalisée':'Intervention réalisée')+' :</b><br>'+esc(it.inter).replace(/\n/g,'<br>')+'</div>';
+    }
+    if(it.statut){
+      h+='<div style="display:inline-block;padding:4px 12px;background:'+stColor+';color:#fff;border-radius:4px;font-size:12px;font-weight:700;margin:8px 0">'+asStatutLabel(it.statut)+'</div>';
+    }
+    if(it.comment){h+='<br><b>Commentaires :</b> '+esc(it.comment).replace(/\n/g,'<br>');}
+    // Photos avec CID
+    var itemPhotos=photos.filter(function(p){return p.itemIdx===i;});
+    if(itemPhotos.length){
+      h+='<div style="margin-top:10px">';
+      itemPhotos.forEach(function(ph){
+        h+='<img src="cid:'+ph.cid+'" style="max-width:300px;max-height:200px;border-radius:4px;margin:4px;border:1px solid #ddd">';
+      });
+      h+='</div>';
+    }
+    h+='</div></div>';
+  });
+
+  h+='<div style="text-align:center;padding:16px;color:#999;font-size:11px">Bertin Technologies — Assistance technique</div>';
+  h+='</div>';
+  return h;
 }
 
 // ── Nouvelle journée ─────────────────────────────────────
