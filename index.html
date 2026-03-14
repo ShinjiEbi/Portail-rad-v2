@@ -308,7 +308,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 14/03/2026 19:14</div>
+      <div class="hdate">Export: 14/03/2026 19:27</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -850,6 +850,45 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
             <button class="btn btn-ghost" onclick="asDeleteItem()" style="width:60px;color:var(--red)">🗑</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Préparer le mail (Assistance)
+     ══════════════════════════════════════════════════════════ -->
+<div class="mo" id="as_mail_modal" onclick="if(event.target===this)document.getElementById('as_mail_modal').classList.remove('open')">
+  <div class="md" style="max-width:500px">
+    <div class="mh"><h2>📧 Préparer le mail</h2><button class="mx" onclick="document.getElementById('as_mail_modal').classList.remove('open')">✕</button></div>
+    <div class="mb" style="padding:14px">
+      <div class="rd-form">
+        <label>Destinataires</label>
+        <input id="as_ml_to" placeholder="prenom.nom@edf.fr ; autre@edf.fr">
+        <label>CC</label>
+        <input id="as_ml_cc" placeholder="copie@bertin.group">
+        <label>Sujet</label>
+        <input id="as_ml_subject">
+
+        <div class="rd-section">📎 Pièces jointes</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:8px;margin:0;cursor:pointer;font-size:.9rem;color:var(--text);text-transform:none;letter-spacing:0">
+            <input type="checkbox" id="as_ml_pj_pdf" checked style="width:20px;height:20px;accent-color:var(--accent)">
+            📄 Compte rendu d'assistance (PDF)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;margin:0;cursor:pointer;font-size:.9rem;color:var(--text);text-transform:none;letter-spacing:0" id="as_ml_pj_xls_row">
+            <input type="checkbox" id="as_ml_pj_xls" style="width:20px;height:20px;accent-color:var(--accent)">
+            📊 Listing d'intervention (Excel)
+            <span id="as_ml_xls_count" style="font-size:.7rem;color:var(--text3)"></span>
+          </label>
+        </div>
+
+        <div class="rd-section">✉️ Corps du mail</div>
+        <textarea id="as_ml_body" rows="12" style="font-size:.85rem;line-height:1.5"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-primary" onclick="asSendMailConfirm()" id="as_ml_send" style="flex:1;height:48px;font-size:1rem">📧 Envoyer</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('as_mail_modal').classList.remove('open')">Annuler</button>
       </div>
     </div>
   </div>
@@ -3488,65 +3527,151 @@ async function asGenPdf(){
 }
 
 // ── Envoyer par mail : texte brut + PDF en PJ ───────────
-async function asSendMail(){
+// ── Ouvrir la modale de préparation mail ─────────────────
+function asSendMail(){
   if(!asItems.length){showToast('Aucune intervention','err');return;}
-  var btn=document.getElementById('as_btn_mail');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Génération PDF...';}
+  var d=asConfig.date||new Date().toISOString().split('T')[0];
+  var subject='CR Assistance KZC — '+(asConfig.site||'Site')+' — '+d;
+  var to=(asConfig.mailto||'').replace(/\s/g,'').replace(/;/g,',');
+  var cc=(asConfig.mailcc||'').replace(/\s/g,'').replace(/;/g,',');
+
+  // Résumé pré-rempli
+  var resume='Bonjour,\n\nVeuillez trouver ci-joint le compte rendu d\'assistance du '+d+'.\n\n';
+  resume+='Site : '+(asConfig.site||'')+'\n';
+  resume+='Interventions : '+asItems.length+'\n\n';
+  asItems.forEach(function(it){
+    var st=asStatutLabel(it.statut);
+    if(it.divers){
+      resume+='  • '+(it.titre||'Divers')+' : '+st+'\n';
+    } else {
+      resume+='  • '+it.id+(it.des?' — '+it.des:'')+' : '+st+'\n';
+    }
+  });
+  resume+='\nCordialement,\n'+(asConfig.operateur||'')+(asConfig.trigramme?' ('+asConfig.trigramme+')':'')+'\nBertin Technologies';
+
+  // Remplir la modale
+  document.getElementById('as_ml_to').value=to;
+  document.getElementById('as_ml_cc').value=cc;
+  document.getElementById('as_ml_subject').value=subject;
+  document.getElementById('as_ml_body').value=resume;
+  document.getElementById('as_ml_pj_pdf').checked=true;
+  document.getElementById('as_ml_pj_xls').checked=false;
+
+  // Afficher le nombre d'items listing
+  var xlsCount=typeof lstItems!=='undefined'?lstItems.length:0;
+  document.getElementById('as_ml_xls_count').textContent=xlsCount?'('+xlsCount+' matériels)':'(vide)';
+  if(!xlsCount){
+    document.getElementById('as_ml_pj_xls').disabled=true;
+    document.getElementById('as_ml_pj_xls_row').style.opacity='0.4';
+  } else {
+    document.getElementById('as_ml_pj_xls').disabled=false;
+    document.getElementById('as_ml_pj_xls_row').style.opacity='1';
+  }
+
+  // Ouvrir la modale
+  document.getElementById('as_mail_modal').classList.add('open');
+}
+
+// ── Générer le blob Excel du listing ─────────────────────
+function lstGenXlsBlob(){
+  if(typeof lstItems==='undefined'||!lstItems.length)return null;
+  var headers=['Scan','Désignation','S/N','Conformité','Correctif','Date VP','Commentaire','Dernière VP','CNPE','Localisation','N° Corim','Contrats'];
+  var table='<table border="1"><tr>'+headers.map(function(h){return '<th style="background:#1a73e8;color:white;font-weight:bold">'+h+'</th>';}).join('')+'</tr>';
+  lstItems.forEach(function(it){
+    var confColor=it.conformite==='CONFORME'?'color:green':'color:red';
+    table+='<tr>'
+      +'<td>'+esc(it.scan)+'</td>'
+      +'<td>'+esc(it.designation)+'</td>'
+      +'<td>'+esc(it.sn)+'</td>'
+      +'<td style="'+confColor+';font-weight:bold">'+esc(it.conformite)+'</td>'
+      +'<td>'+esc(it.correctif)+'</td>'
+      +'<td>'+esc(it.date_vp)+'</td>'
+      +'<td>'+esc(it.commentaire)+'</td>'
+      +'<td>'+esc(it.derniere_vp)+'</td>'
+      +'<td>'+esc(it.cnpe)+'</td>'
+      +'<td>'+esc(it.localisation)+'</td>'
+      +'<td>'+esc(it.corim)+'</td>'
+      +'<td>'+esc(it.contrats)+'</td>'
+      +'</tr>';
+  });
+  table+='</table>';
+  var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Listing</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>'+table+'</body></html>';
+  return new Blob(['\uFEFF'+html],{type:'application/vnd.ms-excel;charset=utf-8'});
+}
+
+// ── Confirmer l'envoi depuis la modale ───────────────────
+async function asSendMailConfirm(){
+  var btn=document.getElementById('as_ml_send');
+  btn.disabled=true;btn.textContent='⏳ Préparation...';
 
   try{
+    var to=document.getElementById('as_ml_to').value;
+    var cc=document.getElementById('as_ml_cc').value;
+    var subject=document.getElementById('as_ml_subject').value;
+    var body=document.getElementById('as_ml_body').value;
+    var wantPdf=document.getElementById('as_ml_pj_pdf').checked;
+    var wantXls=document.getElementById('as_ml_pj_xls').checked;
     var d=asConfig.date||new Date().toISOString().split('T')[0];
-    var subject='CR Assistance KZC — '+(asConfig.site||'Site')+' — '+d;
-    var to=(asConfig.mailto||'').replace(/\s/g,'').replace(/;/g,',');
-    var cc=(asConfig.mailcc||'').replace(/\s/g,'').replace(/;/g,',');
+    var siteName=(asConfig.site||'Site').replace(/[^a-zA-Z0-9]/g,'_');
 
-    // Résumé texte pour le corps du mail
-    var resume='Bonjour,\n\nVeuillez trouver ci-joint le compte rendu d\'assistance du '+d+'.\n';
-    resume+='Site : '+(asConfig.site||'')+'\n';
-    resume+='Interventions : '+asItems.length+'\n\n';
-    asItems.forEach(function(it,i){
-      var st=asStatutLabel(it.statut);
-      if(it.divers){
-        resume+='• '+(it.titre||'Divers')+' : '+st+'\n';
-      } else {
-        resume+='• '+it.id+(it.des?' — '+it.des:'')+' : '+st+'\n';
+    var files=[];
+
+    // Générer le PDF si coché
+    if(wantPdf){
+      btn.textContent='⏳ Génération PDF...';
+      var pdfBytes=await asGenPdf();
+      files.push(new File([pdfBytes],'CR_Assistance_'+siteName+'_'+d+'.pdf',{type:'application/pdf'}));
+    }
+
+    // Générer le XLS si coché
+    if(wantXls){
+      btn.textContent='⏳ Génération Excel...';
+      var xlsBlob=lstGenXlsBlob();
+      if(xlsBlob){
+        files.push(new File([xlsBlob],'Listing_intervention_'+d.replace(/-/g,'')+'.xls',{type:'application/vnd.ms-excel'}));
       }
-    });
-    resume+='\nCordialement,\n'+(asConfig.operateur||'')+(asConfig.trigramme?' ('+asConfig.trigramme+')':'')+'\nBertin Technologies';
+    }
 
-    // Générer le PDF
-    var pdfBytes=await asGenPdf();
-    var pdfName='CR_Assistance_'+(asConfig.site||'Site').replace(/[^a-zA-Z0-9]/g,'_')+'_'+d+'.pdf';
-    var pdfFile=new File([pdfBytes],pdfName,{type:'application/pdf'});
+    // Sauvegarder les destinataires dans la config
+    asConfig.mailto=to;asConfig.mailcc=cc;asSaveConfig();
 
-    // Essayer navigator.share avec PDF + résumé
+    btn.textContent='⏳ Envoi...';
+
+    // Essayer navigator.share avec fichiers
     var shared=false;
-    if(navigator.canShare&&navigator.canShare({files:[pdfFile]})){
+    if(files.length&&navigator.canShare&&navigator.canShare({files:files})){
       try{
-        await navigator.share({title:subject,text:resume,files:[pdfFile]});
+        await navigator.share({title:subject,text:body,files:files});
         shared=true;
         showToast('✅ Partagé avec succès');
+        document.getElementById('as_mail_modal').classList.remove('open');
       }catch(e){
         if(e.name==='AbortError'){return;}
-        // Share a échoué, on fallback
       }
     }
 
     if(!shared){
-      // Fallback : télécharger le PDF + ouvrir mailto avec résumé
-      asSavePdf(pdfBytes,pdfName);
-      // Petit délai pour que le téléchargement se lance
+      // Fallback : télécharger les fichiers + ouvrir mailto
+      files.forEach(function(f){
+        var url=URL.createObjectURL(f);
+        var a=document.createElement('a');
+        a.href=url;a.download=f.name;a.click();
+        URL.revokeObjectURL(url);
+      });
       await new Promise(function(r){setTimeout(r,500);});
       var mailto='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject);
       if(cc)mailto+='&cc='+encodeURIComponent(cc);
-      mailto+='&body='+encodeURIComponent(resume);
+      mailto+='&body='+encodeURIComponent(body);
       window.location.href=mailto;
-      showToast('📧 PDF téléchargé + mail ouvert — ajoutez le PDF en PJ');
+      var pjNames=files.map(function(f){return f.name;}).join(', ');
+      showToast('📧 Mail ouvert — ajoutez en PJ : '+pjNames);
+      document.getElementById('as_mail_modal').classList.remove('open');
     }
   }catch(e){
     showToast('❌ Erreur: '+e.message,'err');
     console.error(e);
   }finally{
-    if(btn){btn.disabled=false;btn.textContent='📧 Envoyer par mail';}
+    btn.disabled=false;btn.textContent='📧 Envoyer';
   }
 }
 
