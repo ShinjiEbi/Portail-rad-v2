@@ -308,7 +308,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 14/03/2026 15:36</div>
+      <div class="hdate">Export: 14/03/2026 15:51</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -721,9 +721,13 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
         <div class="rd-side-status">SESSION</div>
       </div>
       <div id="as_list"></div>
-      <div class="rd-side-add" id="as_add_btn" onclick="asShowAdd()">
+      <div class="rd-side-add" onclick="asShowAdd()">
         <div class="rd-side-icon">➕</div>
-        <div class="rd-side-label">AJOUT</div>
+        <div class="rd-side-label">MATÉRIEL</div>
+      </div>
+      <div class="rd-side-add" onclick="asAddDivers()" style="border-top:none">
+        <div class="rd-side-icon">📝</div>
+        <div class="rd-side-label">DIVERS</div>
       </div>
     </div>
 
@@ -755,8 +759,9 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
         </div>
         <div class="rd-stats" id="as_stats"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn btn-primary" onclick="asGenEml()" id="as_btn_eml">📧 Envoyer compte rendu</button>
-          <button class="btn btn-accent" onclick="asCopyText()" id="as_btn_copy">📋 Copier texte</button>
+          <button class="btn btn-primary" onclick="asSendMail()" id="as_btn_mail">📧 Préparer le mail</button>
+          <button class="btn btn-accent" onclick="asCopyHtml()" id="as_btn_copy">📋 Copier (formaté)</button>
+          <button class="btn btn-ghost" onclick="asCopyText()">📄 Copier (texte brut)</button>
           <button class="btn btn-ghost" onclick="asNewDay()">🗑 Nouvelle journée</button>
         </div>
       </div>
@@ -787,18 +792,26 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
         <div class="rd-title" id="as_inter_title">INTERVENTION</div>
         <div id="as_inter_header" style="margin-bottom:12px"></div>
         <div class="rd-form">
-          <div class="rd-section">📋 Identification matériel</div>
-          <label>ID</label>
-          <input id="as_i_id" readonly>
-          <label>Désignation</label>
-          <input id="as_i_des" readonly>
-          <label>N° série</label>
-          <input id="as_i_sn" oninput="asSaveItem()">
-          <label>Position / Localisation</label>
-          <input id="as_i_loc" oninput="asSaveItem()" placeholder="Bâtiment, salle, repère...">
+          <div id="as_i_mat_section">
+            <div class="rd-section">📋 Identification matériel</div>
+            <label>ID</label>
+            <input id="as_i_id" readonly>
+            <label>Désignation</label>
+            <input id="as_i_des" readonly>
+            <label>N° série</label>
+            <input id="as_i_sn" oninput="asSaveItem()">
+            <label>Position / Localisation</label>
+            <input id="as_i_loc" oninput="asSaveItem()" placeholder="Bâtiment, salle, repère...">
+          </div>
 
-          <div class="rd-section">🔍 Panne constatée</div>
-          <label>Description de la panne</label>
+          <div id="as_i_divers_section" style="display:none">
+            <div class="rd-section">📝 Tâche diverse</div>
+            <label>Titre / Objet</label>
+            <input id="as_i_titre" oninput="asSaveItem()" placeholder="Titre de la tâche...">
+          </div>
+
+          <div class="rd-section">🔍 Description</div>
+          <label id="as_i_panne_label">Description de la panne</label>
           <textarea id="as_i_panne" rows="3" oninput="asSaveItem()" placeholder="Décrire la panne / symptôme constaté..."></textarea>
 
           <div class="rd-section">🔧 Intervention réalisée</div>
@@ -806,7 +819,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
           <textarea id="as_i_inter" rows="4" oninput="asSaveItem()" placeholder="Actions réalisées, pièces remplacées..."></textarea>
 
           <div class="rd-section">📊 Statut</div>
-          <label>Résultat de l'intervention</label>
+          <label>Résultat</label>
           <select id="as_i_statut" onchange="asSaveItem()" style="height:44px">
             <option value="">— Sélectionner —</option>
             <option value="requalification">✅ Requalification</option>
@@ -815,6 +828,8 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
             <option value="attente_piece">⏳ Attente de pièce</option>
             <option value="attente_decision">⏳ Attente décision client</option>
             <option value="hors_service">❌ Hors service</option>
+            <option value="termine">✅ Terminé</option>
+            <option value="info">ℹ️ Information</option>
           </select>
 
           <div class="rd-section">📷 Photos</div>
@@ -2763,11 +2778,19 @@ function asShowItem(idx){
   document.getElementById('as_add').style.display='none';
   document.getElementById('as_inter').style.display='';
   var it=asItems[idx];
-  document.getElementById('as_inter_title').textContent=it.id||'INTERVENTION';
-  document.getElementById('as_i_id').value=it.id||'';
-  document.getElementById('as_i_des').value=it.des||'';
-  document.getElementById('as_i_sn').value=it.sn||'';
-  document.getElementById('as_i_loc').value=it.loc||'';
+  var isDivers=it.divers;
+  document.getElementById('as_inter_title').textContent=isDivers?'📝 '+(it.titre||'Divers'):it.id||'INTERVENTION';
+  document.getElementById('as_i_mat_section').style.display=isDivers?'none':'';
+  document.getElementById('as_i_divers_section').style.display=isDivers?'':'none';
+  document.getElementById('as_i_panne_label').textContent=isDivers?'Description':'Description de la panne';
+  if(!isDivers){
+    document.getElementById('as_i_id').value=it.id||'';
+    document.getElementById('as_i_des').value=it.des||'';
+    document.getElementById('as_i_sn').value=it.sn||'';
+    document.getElementById('as_i_loc').value=it.loc||'';
+  } else {
+    document.getElementById('as_i_titre').value=it.titre||'';
+  }
   document.getElementById('as_i_panne').value=it.panne||'';
   document.getElementById('as_i_inter').value=it.inter||'';
   document.getElementById('as_i_statut').value=it.statut||'';
@@ -2792,24 +2815,28 @@ function asRenderSidebar(){
   el.innerHTML=asItems.map(function(it,i){
     var st=asStatutIcon(it.statut);
     var cls=i===asCurrentIdx?'rd-side-item active':'rd-side-item';
+    var icon=it.divers?'📝':st;
+    var label=it.divers?(it.titre||'Divers').substring(0,10):esc(it.id||'?');
+    var sub=it.divers?'Divers':esc((it.des||'').substring(0,12));
     return '<div class="'+cls+'" onclick="asShowItem('+i+')">'+
-      '<div class="rd-side-icon">'+st+'</div>'+
-      '<div class="rd-side-label" style="font-size:.6rem;word-break:break-all">'+esc(it.id||'?')+'</div>'+
-      '<div class="rd-side-status" style="font-size:.5rem">'+esc((it.des||'').substring(0,12))+'</div>'+
+      '<div class="rd-side-icon">'+icon+'</div>'+
+      '<div class="rd-side-label" style="font-size:.6rem;word-break:break-all">'+label+'</div>'+
+      '<div class="rd-side-status" style="font-size:.5rem">'+sub+'</div>'+
     '</div>';
   }).join('');
 }
 
 function asStatutIcon(s){
-  if(s==='requalification'||s==='panne_resolue')return '✅';
+  if(s==='requalification'||s==='panne_resolue'||s==='termine')return '✅';
   if(s==='en_cours')return '🔧';
   if(s==='attente_piece'||s==='attente_decision')return '⏳';
   if(s==='hors_service')return '❌';
+  if(s==='info')return 'ℹ️';
   return '📋';
 }
 
 function asStatutLabel(s){
-  var m={'requalification':'Requalification','panne_resolue':'Panne résolue','en_cours':'Intervention en cours','attente_piece':'Attente de pièce','attente_decision':'Attente décision client','hors_service':'Hors service'};
+  var m={'requalification':'Requalification','panne_resolue':'Panne résolue','en_cours':'Intervention en cours','attente_piece':'Attente de pièce','attente_decision':'Attente décision client','hors_service':'Hors service','termine':'Terminé','info':'Information'};
   return m[s]||'Non défini';
 }
 
@@ -2828,26 +2855,55 @@ function asUpdateStats(){
 var asLookupMat=null;
 function asLookup(){
   var raw=document.getElementById('as_scan_input').value.trim();
-  if(!raw||raw.length<2){document.getElementById('as_lookup_info').style.display='none';document.getElementById('as_add_confirm').disabled=true;asLookupMat=null;return;}
-  var search=raw.toLowerCase();
-  var found=DATA_MATERIELS.filter(function(m){return m.id.toLowerCase().includes(search)||m.nc.toLowerCase().includes(search)||m.ns.toLowerCase().includes(search);}).slice(0,8);
-  var dl=document.getElementById('as_mat_list');
-  dl.innerHTML=found.map(function(m){return '<option value="'+esc(m.id)+'">'+esc(m.des)+'</option>';}).join('');
-  var exact=DATA_MATERIELS.find(function(m){return m.id.toLowerCase()===search||m.nc.toLowerCase()===search;});
-  if(!exact)exact=found.length===1?found[0]:null;
   var info=document.getElementById('as_lookup_info');
-  if(exact){
-    asLookupMat=exact;
-    document.getElementById('as_lu_des').textContent=exact.des||'–';
-    document.getElementById('as_lu_sn').textContent=exact.ns||'–';
-    document.getElementById('as_lu_loc').textContent=(exact.cnpe||'')+' '+(exact.loc||'');
-    info.style.display='block';
-    document.getElementById('as_add_confirm').disabled=false;
-  } else {
+  if(!raw||raw.length<2){info.style.display='none';info.innerHTML='';document.getElementById('as_add_confirm').disabled=true;asLookupMat=null;return;}
+  var search=raw.toLowerCase();
+  // Recherche par ID, N° série, désignation, localisation, CNPE
+  var found=DATA_MATERIELS.filter(function(m){
+    return m.id.toLowerCase().includes(search)||
+           m.nc.toLowerCase().includes(search)||
+           m.ns.toLowerCase().includes(search)||
+           m.des.toLowerCase().includes(search)||
+           (m.loc||'').toLowerCase().includes(search)||
+           (m.cnpe||'').toLowerCase().includes(search);
+  }).slice(0,10);
+  // Afficher la liste de résultats
+  info.style.display='block';
+  if(!found.length){
+    info.innerHTML='<div style="color:var(--text3);font-size:.8rem;padding:4px">Aucun résultat — l\'ID sera ajouté manuellement</div>';
     asLookupMat=null;
-    info.style.display='none';
-    document.getElementById('as_add_confirm').disabled=raw.length>=2?false:true;
+    document.getElementById('as_add_confirm').disabled=false;
+    return;
   }
+  info.innerHTML=found.map(function(m,i){
+    var loc=(m.cnpe||'')+(m.loc?' — '+m.loc:'');
+    return '<div style="padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s" '+
+      'onmouseenter="this.style.background=\'var(--panel2)\'" onmouseleave="this.style.background=\'none\'" '+
+      'onclick="asSelectResult('+i+')">'+
+      '<div style="font-size:.85rem;font-weight:700;color:var(--accent)">'+esc(m.id)+'</div>'+
+      '<div style="font-size:.75rem;color:var(--text)">'+esc(m.des)+'</div>'+
+      '<div style="font-size:.65rem;color:var(--text3)">S/N: '+esc(m.ns||'–')+' | '+esc(loc)+'</div>'+
+    '</div>';
+  }).join('');
+  // Stocker les résultats pour asSelectResult
+  window._asFoundResults=found;
+  asLookupMat=null;
+  document.getElementById('as_add_confirm').disabled=true;
+}
+
+function asSelectResult(i){
+  var m=window._asFoundResults[i];
+  if(!m)return;
+  asLookupMat=m;
+  document.getElementById('as_scan_input').value=m.id;
+  var info=document.getElementById('as_lookup_info');
+  var loc=(m.cnpe||'')+(m.loc?' — '+m.loc:'');
+  info.innerHTML='<div style="padding:8px;background:rgba(0,230,118,.08);border:1px solid var(--green);border-radius:6px">'+
+    '<div style="font-size:.85rem;font-weight:700;color:var(--green)">✓ '+esc(m.id)+'</div>'+
+    '<div style="font-size:.8rem;color:var(--text)">'+esc(m.des)+'</div>'+
+    '<div style="font-size:.7rem;color:var(--text2)">S/N: '+esc(m.ns||'–')+' | '+esc(loc)+'</div>'+
+  '</div>';
+  document.getElementById('as_add_confirm').disabled=false;
 }
 
 function asAddItem(){
@@ -2880,8 +2936,12 @@ function asAddItem(){
 function asSaveItem(){
   if(asCurrentIdx<0||asCurrentIdx>=asItems.length)return;
   var it=asItems[asCurrentIdx];
-  it.sn=document.getElementById('as_i_sn').value;
-  it.loc=document.getElementById('as_i_loc').value;
+  if(it.divers){
+    it.titre=document.getElementById('as_i_titre').value;
+  } else {
+    it.sn=document.getElementById('as_i_sn').value;
+    it.loc=document.getElementById('as_i_loc').value;
+  }
   it.panne=document.getElementById('as_i_panne').value;
   it.inter=document.getElementById('as_i_inter').value;
   it.statut=document.getElementById('as_i_statut').value;
@@ -2994,29 +3054,29 @@ function asBuildText(){
   var d=asConfig.date||'';
   var lines=[];
   lines.push('══════════════════════════════════════════');
-  lines.push('COMPTE RENDU D\'ASSISTANCE — '+asConfig.site);
+  lines.push('COMPTE RENDU D\'ASSISTANCE — '+(asConfig.site||''));
   lines.push('══════════════════════════════════════════');
-  lines.push('Date : '+d);
-  lines.push('Opérateur : '+(asConfig.operateur||'')+(asConfig.trigramme?' ('+asConfig.trigramme+')':''));
-  lines.push('Contrat : '+(asConfig.contrat||''));
-  lines.push('Contact client : '+(asConfig.contact||''));
+  if(d)lines.push('Date : '+d);
+  if(asConfig.operateur)lines.push('Opérateur : '+asConfig.operateur+(asConfig.trigramme?' ('+asConfig.trigramme+')':''));
+  if(asConfig.contrat)lines.push('Contrat : '+asConfig.contrat);
+  if(asConfig.contact)lines.push('Contact client : '+asConfig.contact);
   lines.push('Nombre d\'interventions : '+asItems.length);
   lines.push('');
 
   asItems.forEach(function(it,i){
     lines.push('──────────────────────────────────────────');
-    lines.push((i+1)+'. '+it.id+' — '+(it.des||''));
+    if(it.divers){
+      lines.push((i+1)+'. [DIVERS] '+(it.titre||'Tâche diverse'));
+    } else {
+      lines.push((i+1)+'. '+it.id+(it.des?' — '+it.des:''));
+    }
     lines.push('──────────────────────────────────────────');
-    lines.push('N° série : '+(it.sn||'–'));
-    lines.push('Position : '+(it.loc||'–'));
-    lines.push('');
-    lines.push('PANNE CONSTATÉE :');
-    lines.push(it.panne||'(non renseigné)');
-    lines.push('');
-    lines.push('INTERVENTION RÉALISÉE :');
-    lines.push(it.inter||'(non renseigné)');
-    lines.push('');
-    lines.push('STATUT : '+asStatutLabel(it.statut));
+    if(!it.divers&&it.sn)lines.push('N° série : '+it.sn);
+    if(!it.divers&&it.loc)lines.push('Position : '+it.loc);
+    if(!it.divers&&(it.sn||it.loc))lines.push('');
+    if(it.panne){lines.push(it.divers?'DESCRIPTION :':'PANNE CONSTATÉE :');lines.push(it.panne);lines.push('');}
+    if(it.inter){lines.push('INTERVENTION RÉALISÉE :');lines.push(it.inter);lines.push('');}
+    if(it.statut)lines.push('STATUT : '+asStatutLabel(it.statut));
     if(it.comment)lines.push('COMMENTAIRES : '+it.comment);
     lines.push('');
   });
@@ -3048,31 +3108,37 @@ function asBuildHtml(){
   h+='<p style="margin:4px 0 0;font-size:13px;opacity:.85">'+esc(asConfig.site||'')+' — '+d+'</p>';
   h+='</div>';
   h+='<div style="background:#f5f5f5;padding:12px 20px;font-size:13px;border-bottom:1px solid #ddd">';
-  h+='<b>Opérateur :</b> '+esc(asConfig.operateur||'')+' ('+esc(asConfig.trigramme||'')+')<br>';
-  h+='<b>Contrat :</b> '+esc(asConfig.contrat||'')+'<br>';
-  h+='<b>Contact :</b> '+esc(asConfig.contact||'')+'<br>';
+  if(asConfig.operateur)h+='<b>Opérateur :</b> '+esc(asConfig.operateur)+(asConfig.trigramme?' ('+esc(asConfig.trigramme)+')':'')+'<br>';
+  if(asConfig.contrat)h+='<b>Contrat :</b> '+esc(asConfig.contrat)+'<br>';
+  if(asConfig.contact)h+='<b>Contact :</b> '+esc(asConfig.contact)+'<br>';
   h+='<b>Interventions :</b> '+asItems.length;
   h+='</div>';
 
   asItems.forEach(function(it,i){
-    var stColor=it.statut==='requalification'||it.statut==='panne_resolue'?'#2e7d32':it.statut==='hors_service'?'#c62828':'#ef6c00';
+    var stColor=it.statut==='requalification'||it.statut==='panne_resolue'||it.statut==='termine'?'#2e7d32':it.statut==='hors_service'?'#c62828':it.statut==='info'?'#1565c0':'#ef6c00';
+    var headerBg=it.divers?'#f3e5f5':'#e3f2fd';
+    var title=it.divers?(i+1)+'. 📝 '+(esc(it.titre)||'Tâche diverse'):(i+1)+'. '+esc(it.id)+(it.des?' — '+esc(it.des):'');
     h+='<div style="margin:12px 0;border:1px solid #ddd;border-radius:6px;overflow:hidden">';
-    h+='<div style="background:#e3f2fd;padding:10px 16px;border-bottom:1px solid #ddd;font-weight:700;font-size:14px">';
-    h+=(i+1)+'. '+esc(it.id)+' — '+esc(it.des||'');
+    h+='<div style="background:'+headerBg+';padding:10px 16px;border-bottom:1px solid #ddd;font-weight:700;font-size:14px">';
+    h+=title;
     h+='</div>';
     h+='<div style="padding:12px 16px;font-size:13px;line-height:1.6">';
-    h+='<b>N° série :</b> '+esc(it.sn||'–')+'<br>';
-    h+='<b>Position :</b> '+esc(it.loc||'–')+'<br><br>';
-    h+='<div style="background:#fff3e0;padding:8px 12px;border-left:3px solid #ff9800;margin:8px 0;border-radius:0 4px 4px 0">';
-    h+='<b>🔍 Panne constatée :</b><br>'+esc(it.panne||'Non renseigné').replace(/\n/g,'<br>');
-    h+='</div>';
-    h+='<div style="background:#e8f5e9;padding:8px 12px;border-left:3px solid #4caf50;margin:8px 0;border-radius:0 4px 4px 0">';
-    h+='<b>🔧 Intervention réalisée :</b><br>'+esc(it.inter||'Non renseigné').replace(/\n/g,'<br>');
-    h+='</div>';
-    h+='<div style="display:inline-block;padding:4px 12px;background:'+stColor+';color:#fff;border-radius:4px;font-size:12px;font-weight:700;margin:8px 0">'+asStatutLabel(it.statut)+'</div>';
+    if(!it.divers&&it.sn)h+='<b>N° série :</b> '+esc(it.sn)+'<br>';
+    if(!it.divers&&it.loc)h+='<b>Position :</b> '+esc(it.loc)+'<br>';
+    if(it.panne){
+      h+='<div style="background:#fff3e0;padding:8px 12px;border-left:3px solid #ff9800;margin:8px 0;border-radius:0 4px 4px 0">';
+      h+='<b>'+(it.divers?'📝 Description':'🔍 Panne constatée')+' :</b><br>'+esc(it.panne).replace(/\n/g,'<br>');
+      h+='</div>';
+    }
+    if(it.inter){
+      h+='<div style="background:#e8f5e9;padding:8px 12px;border-left:3px solid #4caf50;margin:8px 0;border-radius:0 4px 4px 0">';
+      h+='<b>🔧 '+(it.divers?'Action réalisée':'Intervention réalisée')+' :</b><br>'+esc(it.inter).replace(/\n/g,'<br>');
+      h+='</div>';
+    }
+    if(it.statut){
+      h+='<div style="display:inline-block;padding:4px 12px;background:'+stColor+';color:#fff;border-radius:4px;font-size:12px;font-weight:700;margin:8px 0">'+asStatutLabel(it.statut)+'</div>';
+    }
     if(it.comment){h+='<br><b>Commentaires :</b> '+esc(it.comment).replace(/\n/g,'<br>');}
-
-    // Photos inline
     if(it.photos&&it.photos.length){
       h+='<div style="margin-top:10px">';
       it.photos.forEach(function(p){
@@ -3088,47 +3154,80 @@ function asBuildHtml(){
   return h;
 }
 
-function asGenEml(){
+// ── Ajout divers (sans matériel) ──────────────────────────
+function asAddDivers(){
+  var item={
+    divers:true,
+    titre:'',
+    id:'',des:'',sn:'',nc:'',loc:'',
+    panne:'',
+    inter:'',
+    statut:'',
+    comment:'',
+    photos:[]
+  };
+  asItems.push(item);
+  asSaveItems();
+  asRenderSidebar();
+  asUpdateStats();
+  asShowItem(asItems.length-1);
+  showToast('✓ Tâche diverse ajoutée');
+}
+
+// ── Copier HTML formaté dans le presse-papier ────────────
+function asCopyHtml(){
+  if(!asItems.length){showToast('Aucune intervention','err');return;}
+  var htmlBody=asBuildHtml();
+  // ClipboardItem avec HTML
+  try{
+    var blob=new Blob([htmlBody],{type:'text/html'});
+    var blobTxt=new Blob([asBuildText()],{type:'text/plain'});
+    navigator.clipboard.write([new ClipboardItem({'text/html':blob,'text/plain':blobTxt})]).then(function(){
+      showToast('✅ Compte rendu copié (formaté) — collez dans le mail');
+    }).catch(function(){
+      // Fallback texte brut
+      navigator.clipboard.writeText(asBuildText()).then(function(){
+        showToast('✓ Copié en texte brut (HTML non supporté)');
+      });
+    });
+  }catch(e){
+    navigator.clipboard.writeText(asBuildText()).then(function(){
+      showToast('✓ Copié en texte brut');
+    });
+  }
+}
+
+// ── Préparer le mail : copie HTML + ouvre mailto ─────────
+function asSendMail(){
   if(!asItems.length){showToast('Aucune intervention','err');return;}
   var d=asConfig.date||new Date().toISOString().split('T')[0];
   var subject='CR Assistance KZC — '+(asConfig.site||'Site')+' — '+d;
-  var to=(asConfig.mailto||'').replace(/\s/g,'');
-  var cc=(asConfig.mailcc||'').replace(/\s/g,'');
+  var to=(asConfig.mailto||'').replace(/\s/g,'').replace(/;/g,',');
+  var cc=(asConfig.mailcc||'').replace(/\s/g,'').replace(/;/g,',');
+
+  // 1. Copier le HTML formaté dans le presse-papier
   var htmlBody=asBuildHtml();
+  var copied=false;
+  try{
+    var blob=new Blob([htmlBody],{type:'text/html'});
+    var blobTxt=new Blob([asBuildText()],{type:'text/plain'});
+    navigator.clipboard.write([new ClipboardItem({'text/html':blob,'text/plain':blobTxt})]).then(function(){
+      copied=true;
+      openMailApp();
+    }).catch(function(){
+      navigator.clipboard.writeText(asBuildText()).then(function(){copied=true;openMailApp();});
+    });
+  }catch(e){
+    navigator.clipboard.writeText(asBuildText()).then(function(){copied=true;openMailApp();});
+  }
 
-  // Construire le fichier .eml (MIME)
-  var boundary='----=_Part_'+Date.now();
-  var eml='';
-  eml+='From: <>\r\n';
-  eml+='To: '+to+'\r\n';
-  if(cc)eml+='Cc: '+cc+'\r\n';
-  eml+='Subject: =?UTF-8?B?'+btoa(unescape(encodeURIComponent(subject)))+'?=\r\n';
-  eml+='MIME-Version: 1.0\r\n';
-  eml+='Content-Type: multipart/related; boundary="'+boundary+'"\r\n';
-  eml+='\r\n';
-
-  // Partie HTML
-  eml+='--'+boundary+'\r\n';
-  eml+='Content-Type: text/html; charset=UTF-8\r\n';
-  eml+='Content-Transfer-Encoding: base64\r\n';
-  eml+='\r\n';
-
-  // Encoder le HTML en base64 par lignes de 76 chars
-  var htmlB64=btoa(unescape(encodeURIComponent(htmlBody)));
-  for(var i=0;i<htmlB64.length;i+=76){eml+=htmlB64.substring(i,i+76)+'\r\n';}
-  eml+='\r\n';
-
-  eml+='--'+boundary+'--\r\n';
-
-  // Créer le blob et télécharger
-  var blob=new Blob([eml],{type:'message/rfc822'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='CR_Assistance_'+(asConfig.site||'Site').replace(/\s/g,'_')+'_'+d+'.eml';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('✓ Fichier mail généré — ouvrez-le avec Outlook');
+  function openMailApp(){
+    // 2. Ouvrir le client mail avec destinataires + sujet pré-remplis
+    var mailto='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject);
+    if(cc)mailto+='&cc='+encodeURIComponent(cc);
+    window.location.href=mailto;
+    showToast('✅ Compte rendu copié — collez dans le corps du mail (Ctrl+V / long appui)');
+  }
 }
 
 // ── Nouvelle journée ─────────────────────────────────────
