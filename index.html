@@ -353,7 +353,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 16/03/2026 10:05</div>
+      <div class="hdate">Export: 16/03/2026 19:48</div>
       <div class="hdate">Étalons: 03/03/2026 13:16</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -549,17 +549,21 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
           <input id="lst_search" placeholder="Rechercher : ID, S/N, désignation, CNPE, localisation…" oninput="lstAutoSearch()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:.85rem">
           <div class="lst-dropdown" id="lst_dropdown"></div>
         </div>
+        <button class="btn btn-accent" onclick="lstStartScan()" style="height:42px;width:52px;font-size:1.3rem;padding:0" title="Scanner QR">📷</button>
         <button class="btn btn-primary" onclick="lstAddFromSearch()" style="height:42px;white-space:nowrap">➕ Ajouter</button>
       </div>
     </div>
     <!-- ACTIONS -->
-    <div class="calc-section" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <span style="font-family:var(--mono);font-size:.8rem;color:var(--text2)"><span id="lst_count">0</span> matériel(s)</span>
-      <div style="flex:1"></div>
-      <button class="btn btn-accent" onclick="lstExportXls()" id="lst_btn_xls">📊 Export Excel</button>
-      <button class="btn btn-primary" onclick="lstPushEtiq()">🏷 → Étiquettes</button>
-      <button class="btn btn-ghost" onclick="lstMajBase()">🔄 MAJ base</button>
-      <button class="btn btn-ghost" onclick="lstClear()" style="color:var(--red)">🗑 Vider</button>
+    <div class="calc-section" style="padding:10px">
+      <div style="display:flex;align-items:center;margin-bottom:10px">
+        <span style="font-family:var(--mono);font-size:.8rem;color:var(--text2)"><span id="lst_count">0</span> matériel(s)</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-accent" onclick="lstExportXls()" id="lst_btn_xls" style="height:42px;font-size:.82rem">📊 Export Excel</button>
+        <button class="btn btn-accent" onclick="lstPushEtiq()" style="height:42px;font-size:.82rem">🏷 → Étiquettes</button>
+        <button class="btn btn-ghost" onclick="lstMajBase()" style="height:42px;font-size:.82rem">🔄 MAJ base</button>
+        <button class="btn btn-ghost" onclick="lstClear()" style="height:42px;font-size:.82rem;color:var(--red)">🗑 Vider</button>
+      </div>
     </div>
     <!-- TABLEAU -->
     <div class="lst-wrap">
@@ -644,9 +648,10 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
         </div>
         <div class="rd-stats" id="rd_stats"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn btn-primary" onclick="rdGenAllPDF()" id="rd_btn_pdf" disabled>📄 Générer tous les PDF</button>
-          <button class="btn btn-accent" onclick="rdExportCSV()" id="rd_btn_csv" disabled>📊 Export CSV</button>
-          <button class="btn btn-ghost" onclick="rdClearSession()">🗑 Vider session</button>
+          <button class="btn btn-primary" onclick="rdGenAllPDF()" id="rd_btn_pdf" disabled style="flex:1;height:42px;font-size:.82rem">📄 Générer tous les PDF</button>
+          <button class="btn btn-accent" onclick="rdExportCSV()" id="rd_btn_csv" disabled style="flex:1;height:42px;font-size:.82rem">📊 Export CSV</button>
+          <button class="btn btn-accent" onclick="rdPushToListing()" id="rd_btn_lst" disabled style="width:100%;height:42px;font-size:.82rem">📝 → Transférer au Listing</button>
+          <button class="btn btn-ghost" onclick="rdClearSession()" style="width:100%;height:42px;font-size:.82rem">🗑 Vider session</button>
         </div>
       </div>
 
@@ -900,7 +905,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
   <div id="qrMode" style="font-family:var(--mono);font-size:.65rem;color:var(--green);margin-bottom:12px;letter-spacing:.08em"></div>
   <div id="qrReader" style="width:90%;max-width:400px"></div>
   <div id="qrCount" style="font-family:var(--mono);font-size:.9rem;color:var(--green);margin-top:12px"></div>
-  <button class="qr-close" onclick="eqScanStop()">✕ Fermer</button>
+  <button class="qr-close" onclick="if(lstScannerActive){lstScanStop();}else if(asScannerActive){asScanStop();}else{eqScanStop();}">✕ Fermer</button>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1872,6 +1877,7 @@ function rdUpdateStats(){
   }
   document.getElementById('rd_btn_pdf').disabled = total===0;
   document.getElementById('rd_btn_csv').disabled = total===0;
+  document.getElementById('rd_btn_lst').disabled = total===0;
   // Update tab badge
   const badge = document.getElementById('bradia');
   if(badge) badge.textContent = total || '0';
@@ -2191,6 +2197,53 @@ function rdExportCSV(){
   a.download = 'Radiametres_' + dt + '.csv';
   a.click();
   toast('✓ CSV exporté');pLog('file','📊','CSV radiamètres exporté : <b>'+a.download+'</b>');
+}
+
+// ── TRANSFERT VERS LISTING ────────────────────────────────
+function rdPushToListing(){
+  if(!rdSession.items.length){ toast('Session vide',true); return; }
+  var added=0;
+  rdSession.items.forEach(function(it){
+    var fullScan=it.code||'';
+    // Vérifier doublon dans lstItems
+    if(typeof lstItems!=='undefined'&&lstItems.find(function(l){return l.scan===fullScan;})) return;
+    // Calculer le jugement
+    var jug=rdCalcJugementFor(it);
+    var conformite='';
+    if(jug==='CONFORME')conformite='CONFORME';
+    else if(jug==='NON CONFORME')conformite='NON CONFORME';
+    // Chercher dans DATA_MATERIELS pour infos complémentaires
+    var m=null;
+    if(typeof DATA_MATERIELS!=='undefined'){
+      m=DATA_MATERIELS.find(function(x){return (x.id||'')=== fullScan;});
+    }
+    var item={
+      scan:fullScan,
+      designation:it.type_radia||(m?m.des:''),
+      sn:it.sn||(m?m.ns:''),
+      conformite:conformite,
+      correctif:'',
+      date_vp:typeof lstFmtDateVP==='function'?lstFmtDateVP(new Date()):'',
+      commentaire:it.comment||'',
+      derniere_vp:m&&m.dvp?(typeof lstFmtDateVP==='function'?lstFmtDateVP(m.dvp):''):'',
+      cnpe:m?(m.cnpe||''):(typeof rdConfig!=='undefined'?rdConfig.site||'':''),
+      localisation:m?(m.loc||''):'',
+      corim:it.corim||(m?m.nc:''),
+      contrats:m?(m.ctr||''):''
+    };
+    if(typeof lstItems!=='undefined'){
+      lstItems.push(item);
+      added++;
+    }
+  });
+  if(typeof lstSave==='function')lstSave();
+  if(typeof lstRender==='function')lstRender();
+  if(added>0){
+    toast('✓ '+added+' radiamètre(s) transféré(s) au listing');
+    pLog('listing','📝','Radiamètres → Listing : <b>'+added+' matériel(s)</b> transférés');
+  } else {
+    toast('Aucun nouveau matériel à transférer (déjà dans le listing)',true);
+  }
 }
 
 // ── PDF GENERATION (using pdf-lib in browser) ──────────────
@@ -2642,6 +2695,95 @@ function lstPushEtiq(){
   if(added>0) eqPreview();
   toast('✓ '+added+' étiquette(s) ajoutée(s)');pLog('etiq','🏷','Listing → Étiquettes : <b>'+added+' étiquette(s)</b> transférées');
   go('etiq');
+}
+
+// ── SCAN QR LISTING ──────────────────────────────────────
+var lstScannerActive=false;
+var lstScanMulti=false;
+var lstScanCount=0;
+
+function lstStartScan(){
+  if(!window.isSecureContext){showToast('HTTPS requis','err');return;}
+  if(!('BarcodeDetector' in window)){showToast('BarcodeDetector non supporté','err');return;}
+  lstScannerActive=true;
+  lstScanMulti=true;
+  lstScanCount=0;
+  var lastScanned='';
+  var modal=document.getElementById('qrModal');modal.classList.add('open');
+  document.getElementById('qrMode').textContent='SCAN LISTING — MODE MULTI-SCAN';
+  document.getElementById('qrCount').textContent='';
+  var reader=document.getElementById('qrReader');
+  var video=document.createElement('video');video.setAttribute('playsinline','');video.autoplay=true;
+  reader.innerHTML='';reader.appendChild(video);
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(stream){
+    video.srcObject=stream;
+    var detector=new BarcodeDetector({formats:['qr_code']});
+    qrScanner=setInterval(function(){
+      if(video.readyState>=2){
+        detector.detect(video).then(function(codes){
+          if(codes.length){
+            var val=codes[0].rawValue;
+            if(val===lastScanned)return;
+            lastScanned=val;
+            setTimeout(function(){if(lastScanned===val)lastScanned='';},2000);
+            // Bip
+            try{var actx=new (window.AudioContext||window.webkitAudioContext)();var osc=actx.createOscillator();var gain=actx.createGain();osc.connect(gain);gain.connect(actx.destination);osc.type='sine';osc.frequency.value=1200;gain.gain.value=0.3;osc.start();osc.stop(actx.currentTime+0.12);}catch(e){}
+            // Chercher dans la base
+            var id=val;
+            var m=DATA_MATERIELS.find(function(x){return x.id===id;});
+            if(!m){
+              // Essayer avec le suffixe après le dernier -
+              var short=id.lastIndexOf('-')>=0?id.substring(id.lastIndexOf('-')+1):id;
+              m=DATA_MATERIELS.find(function(x){
+                var xs=x.id.lastIndexOf('-')>=0?x.id.substring(x.id.lastIndexOf('-')+1):x.id;
+                return xs.toLowerCase()===short.toLowerCase();
+              });
+              if(m)id=m.id;
+            }
+            // Vérifier doublon
+            if(lstItems.find(function(it){return it.scan===id;})){
+              document.getElementById('qrCount').textContent='⚠ '+id+' déjà dans le listing';
+              return;
+            }
+            // Ajouter
+            var item={
+              scan:id,
+              designation:m?(m.des||''):'',
+              sn:m?(m.ns||''):'',
+              conformite:'',
+              correctif:'',
+              date_vp:lstFmtDateVP(new Date()),
+              commentaire:m?(m.obs||''):'',
+              derniere_vp:m&&m.dvp?lstFmtDateVP(m.dvp):'',
+              cnpe:m?(m.cnpe||''):'',
+              localisation:m?(m.loc||''):'',
+              corim:m?(m.nc||''):'',
+              contrats:m?(m.ctr||''):''
+            };
+            lstItems.push(item);
+            lstScanCount++;
+            lstSave();
+            lstRender();
+            document.getElementById('qrCount').textContent='✓ '+lstScanCount+' scanné'+(lstScanCount>1?'s':'')+' — dernier: '+(m?m.des:id);
+            pLog('scan','📷','Scan QR (listing) : <b>'+id+'</b>'+(m?' — '+m.des:''));
+          }
+        }).catch(function(){});
+      }
+    },300);
+  }).catch(function(){showToast('Caméra refusée','err');modal.classList.remove('open');});
+}
+
+function lstScanStop(){
+  lstScannerActive=false;
+  if(qrScanner){clearInterval(qrScanner);qrScanner=null;}
+  var reader=document.getElementById('qrReader');var video=reader.querySelector('video');
+  if(video&&video.srcObject){video.srcObject.getTracks().forEach(function(t){t.stop();});}
+  reader.innerHTML='';document.getElementById('qrModal').classList.remove('open');
+  if(lstScanCount>0){
+    showToast('✓ '+lstScanCount+' matériel(s) scanné(s)');
+    pLog('listing','📷','Scan listing terminé : <b>'+lstScanCount+' matériel(s)</b> ajoutés');
+  }
+  lstScanCount=0;
 }
 
 // ── INIT LISTING ─────────────────────────────────────────
