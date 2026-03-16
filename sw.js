@@ -3,7 +3,7 @@
 // Stratégie : network-first pour index.html (détecte les MAJ)
 //             cache-first pour le reste (offline)
 // ══════════════════════════════════════════════════════════
-const CACHE = 'portail-tech-v13';
+const CACHE = 'portail-tech-v14';
 
 // ── INSTALL ─────────────────────────────────────────────
 self.addEventListener('install', function(e) {
