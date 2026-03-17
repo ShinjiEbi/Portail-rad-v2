@@ -295,15 +295,15 @@ body.light header{--bg-header1:#d0d8e8}
 .tabs.reorder .tab::before{content:'⠿';position:absolute;left:2px;top:50%;transform:translateY(-50%);font-size:.7rem;color:var(--text3);opacity:.5}
 /* ── LISTING TABLE ────────────────────────────────────── */
 .lst-wrap{overflow-x:auto;margin-top:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg2)}
-.lst-table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:1100px}
+.lst-table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:1100px}
 .lst-table thead{background:var(--bg3);position:sticky;top:0;z-index:2}
-.lst-table th{padding:8px 6px;text-align:left;font-family:var(--title);font-size:.7rem;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap;user-select:none}
-.lst-table td{padding:5px 4px;border-bottom:1px solid var(--border);vertical-align:middle}
+.lst-table th{padding:10px 8px;text-align:left;font-family:var(--title);font-size:.85rem;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap;user-select:none}
+.lst-table td{padding:8px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
 .lst-table tbody tr:hover{background:rgba(0,194,255,.04)}
-.lst-table input,.lst-table select{width:100%;padding:4px 5px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--text);font-size:.78rem;font-family:var(--mono)}
+.lst-table input,.lst-table select{width:100%;padding:6px 8px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--text);font-size:.9rem;font-family:var(--mono)}
 .lst-table input:focus,.lst-table select:focus{border-color:var(--accent);background:var(--bg3);outline:none}
 .lst-table select{cursor:pointer;appearance:auto}
-.lst-table .lst-scan{font-family:var(--mono);font-size:.72rem;color:var(--accent);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lst-table .lst-scan{font-family:var(--mono);font-size:.85rem;color:var(--accent);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lst-th-act{width:32px}
 .lst-del{width:26px;height:26px;border:none;background:transparent;color:var(--red);cursor:pointer;font-size:1rem;border-radius:4px;display:flex;align-items:center;justify-content:center}
 .lst-del:hover{background:rgba(255,61,61,.15)}
@@ -361,7 +361,7 @@ body.light header{--bg-header1:#d0d8e8}
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 17/03/2026 10:55</div>
+      <div class="hdate">Export: 17/03/2026 11:21</div>
       <div class="hdate">Étalons: 17/03/2026 10:55</div>
       <div class="hdate">Matériels: 13/03/2026 11:22</div>
     </div>
@@ -848,9 +848,9 @@ body.light header{--bg-header1:#d0d8e8}
           <div id="as_i_mat_section">
             <div class="rd-section">📋 Identification matériel</div>
             <label>ID</label>
-            <input id="as_i_id" readonly>
+            <input id="as_i_id" oninput="asSaveItem()">
             <label>Désignation</label>
-            <input id="as_i_des" readonly>
+            <input id="as_i_des" oninput="asSaveItem()">
             <label>N° série</label>
             <input id="as_i_sn" oninput="asSaveItem()">
             <label>Position / Localisation</label>
@@ -2501,9 +2501,11 @@ function lstRender(){
       +'<td><div class="lst-scan" title="'+esc(it.scan)+'">'+esc(it.scan)+'</div></td>'
       +'<td><input value="'+esc(it.designation)+'" onchange="lstEdit('+i+',\'designation\',this.value)"></td>'
       +'<td><input value="'+esc(it.sn)+'" onchange="lstEdit('+i+',\'sn\',this.value)" style="width:90px"></td>'
-      +'<td><select class="'+confClass+'" onchange="lstEdit('+i+',\'conformite\',this.value);this.className=this.value===\'CONFORME\'?\'lst-conf-c\':this.value===\'NON CONFORME\'?\'lst-conf-nc\':\'\'">'
+      +'<td><select class="'+confClass+'" onchange="lstEdit('+i+',\'conformite\',this.value);this.className=(this.value===\'CONFORME\'||this.value===\'CONFORME APRES AJUSTAGE\'||this.value===\'CONFORME AVEC FNC\')?\'lst-conf-c\':this.value===\'NON CONFORME\'?\'lst-conf-nc\':\'\'">'
       +'<option value="">—</option>'
       +'<option value="CONFORME"'+(it.conformite==='CONFORME'?' selected':'')+'>CONFORME</option>'
+      +'<option value="CONFORME APRES AJUSTAGE"'+(it.conformite==='CONFORME APRES AJUSTAGE'?' selected':'')+'>CONFORME APRES AJUSTAGE</option>'
+      +'<option value="CONFORME AVEC FNC"'+(it.conformite==='CONFORME AVEC FNC'?' selected':'')+'>CONFORME AVEC FNC</option>'
       +'<option value="NON CONFORME"'+(it.conformite==='NON CONFORME'?' selected':'')+'>NON CONFORME</option>'
       +'</select></td>'
       +'<td><select onchange="lstEdit('+i+',\'correctif\',this.value)">'
@@ -2514,10 +2516,10 @@ function lstRender(){
       +'<td><input value="'+esc(it.date_vp)+'" onchange="lstEdit('+i+',\'date_vp\',this.value)" placeholder="JJ MMM AAAA" style="width:120px"></td>'
       +'<td><input value="'+esc(it.commentaire)+'" onchange="lstEdit('+i+',\'commentaire\',this.value)"></td>'
       +'<td style="font-size:.72rem;color:var(--text3);white-space:nowrap">'+esc(it.derniere_vp)+'</td>'
-      +'<td><input value="'+esc(it.cnpe)+'" onchange="lstEdit('+i+',\'cnpe\',this.value)" style="width:80px"></td>'
+      +'<td><select onchange="lstEdit('+i+',\'cnpe\',this.value)" style="width:80px;background:var(--panel);color:var(--text);border:1px solid var(--border)"><option value="">—</option><option value="BUGEY"'+(it.cnpe==='BUGEY'?' selected':'')+'>BUGEY</option><option value="CREYS-MALVILLE"'+(it.cnpe==='CREYS-MALVILLE'?' selected':'')+'>CREYS-MALVILLE</option><option value="ST ALBAN"'+(it.cnpe==='ST ALBAN'?' selected':'')+'>ST ALBAN</option><option value="TRICASTIN"'+(it.cnpe==='TRICASTIN'?' selected':'')+'>TRICASTIN</option></select></td>'
       +'<td><input value="'+esc(it.localisation)+'" onchange="lstEdit('+i+',\'localisation\',this.value)" style="width:80px"></td>'
-      +'<td style="font-size:.72rem;color:var(--text2)">'+esc(it.corim)+'</td>'
-      +'<td style="font-size:.72rem;color:var(--text2)">'+esc(it.contrats)+'</td>'
+      +'<td><input value="'+esc(it.corim)+'" onchange="lstEdit('+i+',\'corim\',this.value)" style="width:70px"></td>'
+      +'<td><select onchange="lstEdit('+i+',\'contrats\',this.value)" style="width:70px;background:var(--panel);color:var(--text);border:1px solid var(--border)"><option value="">—</option><option value="RPM"'+(it.contrats==='RPM'?' selected':'')+'>RPM</option><option value="KZC"'+(it.contrats==='KZC'?' selected':'')+'>KZC</option><option value="KRS"'+(it.contrats==='KRS'?' selected':'')+'>KRS</option><option value="KRT"'+(it.contrats==='KRT'?' selected':'')+'>KRT</option><option value="CRCV"'+(it.contrats==='CRCV'?' selected':'')+'>CRCV</option></select></td>'
       +'</tr>';
   }).join('');
 }
