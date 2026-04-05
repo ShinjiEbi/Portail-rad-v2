@@ -427,7 +427,7 @@ body.light header{--bg-header1:#d0d8e8}
       <div class="hsub">BERTIN · ZONE CONTRÔLÉE</div>
     </div>
     <div class="hright">
-      <div class="hdate">Export: 05/04/2026 16:43</div>
+      <div class="hdate">Export: 05/04/2026 16:54</div>
       <div class="hdate">Étalons: 17/03/2026 10:55</div>
       <div class="hdate">Matériels: 05/04/2026 16:43</div>
     </div>
@@ -3104,10 +3104,24 @@ function updateNetStatus(){
   var el = document.getElementById('scanl');
   if(!el) return;
   var wasOnline=el.classList.contains('online');
-  var isOnline=navigator.onLine;
-  el.className = isOnline ? 'scanl online' : 'scanl';
-  if(isOnline&&!wasOnline)pLog('net','🌐','Connexion réseau rétablie');
-  if(!isOnline&&wasOnline)pLog('net','📴','Connexion réseau perdue — mode hors-ligne');
+
+  if(!navigator.onLine){
+    // Pas de réseau du tout → bleu
+    el.className = 'scanl';
+    if(wasOnline)pLog('net','📴','Connexion réseau perdue — mode hors-ligne');
+    return;
+  }
+
+  // Réseau détecté → vérifier si internet réel
+  // On fetch une URL externe (mode no-cors = pas de CORS, juste résolution réseau)
+  fetch('https://www.gstatic.com/generate_204',{mode:'no-cors',cache:'no-store',signal:AbortSignal.timeout(4000)})
+  .then(function(){
+      el.className = 'scanl online';  // Vert = vrai internet
+      if(!wasOnline)pLog('net','🌐','Connexion internet rétablie');
+  }).catch(function(){
+    el.className = 'scanl';  // Bleu = réseau sans internet
+    if(wasOnline)pLog('net','📶','Réseau local uniquement (Wi-Fi imprimante ?)');
+  });
 }
 function setErrorState(msg){
   var el = document.getElementById('scanl');
@@ -3118,6 +3132,7 @@ function setErrorState(msg){
 }
 window.addEventListener('online', updateNetStatus);
 window.addEventListener('offline', updateNetStatus);
+setInterval(updateNetStatus, 30000);  // Revérifier toutes les 30s
 updateNetStatus();
 
 // Détection erreurs critiques

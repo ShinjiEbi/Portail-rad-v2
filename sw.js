@@ -3,7 +3,7 @@
 // Stratégie : network-first pour index.html (détecte les MAJ)
 //             cache-first pour le reste (offline)
 // ══════════════════════════════════════════════════════════
-const CACHE = 'portail-tech-v15';
+const CACHE = 'portail-tech-v1';
 
 // ── INSTALL ─────────────────────────────────────────────
 self.addEventListener('install', function(e) {
@@ -37,11 +37,12 @@ self.addEventListener('message', function(e) {
 
 // ── FETCH ───────────────────────────────────────────────
 self.addEventListener('fetch', function(e) {
-  // Ne pas intercepter les requêtes vers le serveur d'impression
-  if (e.request.url.includes('localhost:8080')) return;
   if (e.request.method !== 'GET') return;
 
   var url = new URL(e.request.url);
+
+  // Ne pas intercepter les requêtes cross-origin (ex: test connectivité)
+  if (url.origin !== self.location.origin) return;
 
   // Network-first pour index.html (détecte les MAJ à chaque ouverture)
   if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
