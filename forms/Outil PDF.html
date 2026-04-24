@@ -120,14 +120,8 @@
     border-color: var(--accent);
     background: rgba(88, 166, 255, 0.05);
   }
-  .drop-zone p {
-    margin: 0;
-    color: var(--muted);
-  }
-  .drop-zone .hint {
-    font-size: 0.85rem;
-    margin-top: 6px;
-  }
+  .drop-zone p { margin: 0; color: var(--muted); }
+  .drop-zone .hint { font-size: 0.85rem; margin-top: 6px; }
   input[type="file"] { display: none; }
   .file-list {
     margin-top: 12px;
@@ -184,30 +178,108 @@
     background: rgba(88, 166, 255, 0.12);
     color: var(--accent);
   }
-  .signature-preview {
+
+  /* Bibliothèque de signatures */
+  .sig-library {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
     margin-top: 12px;
-    padding: 12px;
+  }
+  .sig-card {
+    background: var(--panel-2);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .sig-card:hover { border-color: var(--accent); }
+  .sig-card.active {
+    border-color: var(--accent);
+    background: rgba(88, 166, 255, 0.12);
+  }
+  .sig-card .sig-thumb {
+    width: 100%;
+    height: 60px;
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .sig-card .sig-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .sig-card .sig-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sig-card .sig-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: none;
+    line-height: 1;
+    padding: 0;
+  }
+  .sig-card:hover .sig-delete { display: block; }
+  .sig-card .sig-delete:hover { background: var(--error); }
+
+  .sig-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
     background: var(--panel-2);
     border-radius: 6px;
-    text-align: center;
+    margin-top: 12px;
   }
-  .signature-preview img {
-    max-height: 80px;
-    max-width: 100%;
-    background: white;
-    padding: 6px;
-    border-radius: 4px;
-  }
-  .signature-preview p {
-    margin: 6px 0 0;
-    font-size: 0.8rem;
+
+  .add-sig-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: var(--panel-2);
+    border: 2px dashed var(--border);
+    border-radius: 6px;
     color: var(--muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    width: 100%;
+    margin-top: 12px;
+    transition: all 0.15s;
+  }
+  .add-sig-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   /* Champs texte */
-  .field {
-    margin-bottom: 12px;
-  }
+  .field { margin-bottom: 12px; }
   .field label {
     display: block;
     font-size: 0.9rem;
@@ -225,15 +297,67 @@
     font-size: 0.95rem;
     font-family: inherit;
   }
-  .field input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
+  .field input:focus { outline: none; border-color: var(--accent); }
   .field-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 10px;
   }
+
+  /* Case à cocher custom */
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--panel-2);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .checkbox-row:hover { background: rgba(88, 166, 255, 0.05); }
+  .checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .checkbox-row .check-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .checkbox-row .check-hint {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: normal;
+    margin-top: 2px;
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 450px;
+    width: 100%;
+  }
+  .modal-content h3 { margin: 0 0 16px; font-size: 1.1rem; }
 
   .action-bar {
     display: flex;
@@ -307,15 +431,8 @@
     border-radius: 6px;
     text-align: center;
   }
-  .summary-card .num {
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-  .summary-card .label {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+  .summary-card .num { font-size: 1.5rem; font-weight: 700; }
+  .summary-card .label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
   .summary-card.ok .num { color: var(--success); }
   .summary-card.err .num { color: var(--error); }
   footer {
@@ -362,16 +479,15 @@
     </div>
 
     <div class="step">
-      <h2 class="step-title"><span class="step-num">2</span> Image de signature</h2>
-      <div class="drop-zone" id="zoneSig">
-        <p><strong>Cliquez ou glissez votre signature</strong></p>
-        <p class="hint">PNG avec fond transparent recommandé</p>
+      <h2 class="step-title"><span class="step-num">2</span> Choix de la signature</h2>
+      <div id="sigEmpty" class="sig-empty">
+        Aucune signature enregistrée. Ajoutez-en une ci-dessous.
       </div>
-      <input type="file" id="inputSig" accept="image/png,image/jpeg">
-      <div class="signature-preview" id="apercuSig" style="display:none">
-        <img id="imgSig" alt="Aperçu signature">
-        <p id="infoSig"></p>
-      </div>
+      <div id="sigLibrary" class="sig-library" style="display:none"></div>
+      <button class="add-sig-btn" id="btnAddSig">
+        <span>＋</span><span>Ajouter une nouvelle signature</span>
+      </button>
+      <input type="file" id="inputNewSig" accept="image/png,image/jpeg">
     </div>
 
     <div class="step">
@@ -415,19 +531,29 @@
     </div>
 
     <div class="step">
-      <h2 class="step-title"><span class="step-num">2</span> Page de garde signature</h2>
-      <div class="field">
-        <label for="ctNom">Nom du Contrôleur Technique</label>
-        <input type="text" id="ctNom" placeholder="ex : DUPONT Jean" autocomplete="off">
-      </div>
-      <div class="field-grid">
+      <h2 class="step-title"><span class="step-num">2</span> Page de garde</h2>
+      <label class="checkbox-row" for="chkPageGarde">
+        <input type="checkbox" id="chkPageGarde" checked>
+        <span class="check-label">
+          Ajouter une page de garde signature au début du PDF
+          <span class="check-hint">Titre, nom du Contrôleur Technique, date et référence</span>
+        </span>
+      </label>
+
+      <div id="pageGardeFields" style="margin-top:16px">
         <div class="field">
-          <label for="ctDate">Date</label>
-          <input type="date" id="ctDate">
+          <label for="ctNom">Nom du Contrôleur Technique</label>
+          <input type="text" id="ctNom" placeholder="ex : DUPONT Jean" autocomplete="off">
         </div>
-        <div class="field">
-          <label for="ctReference">Référence (optionnel)</label>
-          <input type="text" id="ctReference" placeholder="ex : Lot 2026-04" autocomplete="off">
+        <div class="field-grid">
+          <div class="field">
+            <label for="ctDate">Date</label>
+            <input type="date" id="ctDate">
+          </div>
+          <div class="field">
+            <label for="ctReference">Référence (optionnel)</label>
+            <input type="text" id="ctReference" placeholder="ex : Lot 2026-04" autocomplete="off">
+          </div>
         </div>
       </div>
     </div>
@@ -457,6 +583,25 @@
 
 </div>
 
+<!-- Modal pour nommer une nouvelle signature -->
+<div class="modal" id="modalNewSig">
+  <div class="modal-content">
+    <h3>Nommer cette signature</h3>
+    <div class="field">
+      <label for="newSigNom">Nom (ex : "Signature bleue", "R. Dupont"...)</label>
+      <input type="text" id="newSigNom" placeholder="Nom de la signature" autocomplete="off">
+    </div>
+    <div id="newSigPreview" style="text-align:center;margin:12px 0;background:white;padding:12px;border-radius:6px">
+      <img id="newSigImg" style="max-height:80px;max-width:100%">
+    </div>
+    <p style="font-size:0.8rem;color:var(--muted);margin:0 0 16px" id="newSigInfo"></p>
+    <div style="display:flex;gap:10px">
+      <button class="secondary" id="btnCancelSig" style="flex:1">Annuler</button>
+      <button class="primary" id="btnSaveSig">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Bibliothèques -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -468,16 +613,76 @@
 const HAUTEUR_A4 = 842;
 const LARGEUR_A4 = 595;
 
-// Coordonnées calibrées (origine bas-gauche pdf-lib)
-// Conversion depuis PyMuPDF : y = 842 - y_haut
 const POSITIONS = {
-  operateur:  { x: 370, y: HAUTEUR_A4 - 440, width: 80, height: 35 },
-  controleur: { x: 370, y: HAUTEUR_A4 - 468, width: 80, height: 35 }
+  operateur:  { x: 305, y: HAUTEUR_A4 - 450, width: 190, height: 35 },
+  controleur: { x: 305, y: HAUTEUR_A4 - 478, width: 190, height: 35 }
 };
 
 const LARGEUR_MAX_SIGNATURE = 800;
+const STORAGE_KEY = 'outils_pdf_signatures';
 
 const $ = (id) => document.getElementById(id);
+
+// ============================================================
+// STOCKAGE LOCAL DES SIGNATURES (localStorage)
+// ============================================================
+// Format stocké :
+// [{ id, nom, dataUrl, largeur, hauteur, dateAjout }]
+//
+// dataUrl est l'image PNG base64 déjà redimensionnée — utilisée à la
+// fois pour l'aperçu et pour être ré-embarquée dans les PDF.
+// ============================================================
+function chargerSignatures() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn('Impossible de charger les signatures :', e);
+    return [];
+  }
+}
+
+function sauverSignatures(sigs) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sigs));
+    return true;
+  } catch (e) {
+    alert('Impossible de sauvegarder : stockage plein ou indisponible.\n' + e.message);
+    return false;
+  }
+}
+
+function ajouterSignature(nom, dataUrl, largeur, hauteur) {
+  const sigs = chargerSignatures();
+  const nouvelle = {
+    id: 'sig_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+    nom,
+    dataUrl,
+    largeur,
+    hauteur,
+    dateAjout: new Date().toISOString()
+  };
+  sigs.push(nouvelle);
+  sauverSignatures(sigs);
+  return nouvelle;
+}
+
+function supprimerSignature(id) {
+  const sigs = chargerSignatures().filter(s => s.id !== id);
+  sauverSignatures(sigs);
+}
+
+// Convertit un dataURL (base64) en ArrayBuffer, utilisable par pdf-lib
+function dataUrlToArrayBuffer(dataUrl) {
+  const base64 = dataUrl.split(',')[1];
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
 
 // ============================================================
 // GESTION ONGLETS
@@ -492,7 +697,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 // ============================================================
-// HELPERS COMMUNS
+// HELPERS
 // ============================================================
 function formatTaille(bytes) {
   if (bytes < 1024) return bytes + ' o';
@@ -526,8 +731,8 @@ function logTo(elementId, msg, type = 'info') {
   $(elementId).scrollTop = $(elementId).scrollHeight;
 }
 
-// Réduction d'image via Canvas, retourne ArrayBuffer PNG
-async function reduireImage(file, largeurMax = LARGEUR_MAX_SIGNATURE, format = 'image/png') {
+// Réduction d'image via Canvas → dataUrl PNG
+async function reduireImage(file, largeurMax = LARGEUR_MAX_SIGNATURE) {
   const url = URL.createObjectURL(file);
   const img = new Image();
   await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
@@ -550,18 +755,16 @@ async function reduireImage(file, largeurMax = LARGEUR_MAX_SIGNATURE, format = '
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, largeur, hauteur);
 
-  const blob = await new Promise(res => canvas.toBlob(res, format, 0.92));
-  const bytes = await blob.arrayBuffer();
+  const dataUrl = canvas.toDataURL('image/png');
   URL.revokeObjectURL(url);
 
   return {
-    bytes,
+    dataUrl,
     largeur,
     hauteur,
     largeurOrig: img.naturalWidth,
     hauteurOrig: img.naturalHeight,
-    redimensionnee: redim,
-    dataUrl: canvas.toDataURL('image/png')
+    redimensionnee: redim
   };
 }
 
@@ -572,27 +775,15 @@ async function reduireImage(file, largeurMax = LARGEUR_MAX_SIGNATURE, format = '
 // ============================================================
 const stateSign = {
   pdfFiles: [],
-  sigFile: null,
-  sigBytes: null,
-  role: 'operateur'
+  selectedSigId: null,     // id de la signature active dans la biblio
+  role: 'operateur',
+  pendingSig: null         // résultat de reduireImage en attente de nommage
 };
 
 setupDropZone('zonePdf', 'inputPdf', (files) => {
   const pdfs = files.filter(f => f.name.toLowerCase().endsWith('.pdf'));
   stateSign.pdfFiles = pdfs;
   afficherListePdf();
-  majBoutonSign();
-});
-
-setupDropZone('zoneSig', 'inputSig', async (files) => {
-  if (!files.length) return;
-  const file = files[0];
-  if (!file.type.startsWith('image/')) {
-    alert('Veuillez sélectionner une image (PNG ou JPEG)');
-    return;
-  }
-  stateSign.sigFile = file;
-  await preparerSignatureSign(file);
   majBoutonSign();
 });
 
@@ -617,17 +808,128 @@ function afficherListePdf() {
   });
 }
 
-async function preparerSignatureSign(file) {
-  const result = await reduireImage(file, LARGEUR_MAX_SIGNATURE, 'image/png');
-  stateSign.sigBytes = result.bytes;
-  $('imgSig').src = result.dataUrl;
-  $('apercuSig').style.display = 'block';
-  const tailleKo = (result.bytes.byteLength / 1024).toFixed(1);
-  $('infoSig').textContent = result.redimensionnee
-    ? `${result.largeurOrig}×${result.hauteurOrig} → réduite à ${result.largeur}×${result.hauteur} (${tailleKo} Ko)`
-    : `${result.largeur}×${result.hauteur} (${tailleKo} Ko)`;
+// ============================================================
+// Bibliothèque de signatures — affichage
+// ============================================================
+function rafraichirBibliotheque() {
+  const sigs = chargerSignatures();
+  const lib = $('sigLibrary');
+  const empty = $('sigEmpty');
+
+  if (!sigs.length) {
+    empty.style.display = 'block';
+    lib.style.display = 'none';
+    stateSign.selectedSigId = null;
+    return;
+  }
+
+  empty.style.display = 'none';
+  lib.style.display = 'grid';
+  lib.innerHTML = '';
+
+  sigs.forEach(sig => {
+    const card = document.createElement('div');
+    card.className = 'sig-card';
+    if (sig.id === stateSign.selectedSigId) card.classList.add('active');
+    card.dataset.id = sig.id;
+    card.innerHTML = `
+      <button class="sig-delete" title="Supprimer" data-id="${sig.id}">✕</button>
+      <div class="sig-thumb"><img src="${sig.dataUrl}" alt="${sig.nom}"></div>
+      <div class="sig-label" title="${sig.nom}">${sig.nom}</div>
+    `;
+
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('sig-delete')) return;
+      stateSign.selectedSigId = sig.id;
+      rafraichirBibliotheque();
+      majBoutonSign();
+    });
+
+    card.querySelector('.sig-delete').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`Supprimer la signature « ${sig.nom} » ?`)) {
+        supprimerSignature(sig.id);
+        if (stateSign.selectedSigId === sig.id) stateSign.selectedSigId = null;
+        rafraichirBibliotheque();
+        majBoutonSign();
+      }
+    });
+
+    lib.appendChild(card);
+  });
 }
 
+// Ajout d'une nouvelle signature
+$('btnAddSig').addEventListener('click', () => $('inputNewSig').click());
+
+$('inputNewSig').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('Veuillez sélectionner une image (PNG ou JPEG)');
+    return;
+  }
+
+  try {
+    const result = await reduireImage(file);
+    stateSign.pendingSig = result;
+
+    // Aperçu dans le modal
+    $('newSigImg').src = result.dataUrl;
+    const tailleKo = (result.dataUrl.length * 0.75 / 1024).toFixed(1);
+    $('newSigInfo').textContent = result.redimensionnee
+      ? `${result.largeurOrig}×${result.hauteurOrig} → réduite à ${result.largeur}×${result.hauteur} (≈${tailleKo} Ko)`
+      : `${result.largeur}×${result.hauteur} (≈${tailleKo} Ko)`;
+
+    // Nom par défaut = nom du fichier sans extension
+    const nomDefaut = file.name.replace(/\.[^.]+$/, '');
+    $('newSigNom').value = nomDefaut;
+
+    // Ouvre le modal
+    $('modalNewSig').classList.add('active');
+    setTimeout(() => $('newSigNom').focus(), 100);
+  } catch (err) {
+    alert('Erreur lors du chargement de l\'image : ' + err.message);
+  }
+
+  // Reset l'input pour permettre la re-sélection du même fichier
+  e.target.value = '';
+});
+
+$('btnCancelSig').addEventListener('click', () => {
+  $('modalNewSig').classList.remove('active');
+  stateSign.pendingSig = null;
+});
+
+$('btnSaveSig').addEventListener('click', () => {
+  const nom = $('newSigNom').value.trim();
+  if (!nom) {
+    alert('Veuillez donner un nom à la signature');
+    return;
+  }
+  if (!stateSign.pendingSig) return;
+
+  const nouvelle = ajouterSignature(
+    nom,
+    stateSign.pendingSig.dataUrl,
+    stateSign.pendingSig.largeur,
+    stateSign.pendingSig.hauteur
+  );
+
+  stateSign.pendingSig = null;
+  stateSign.selectedSigId = nouvelle.id;  // auto-sélection
+  $('modalNewSig').classList.remove('active');
+  rafraichirBibliotheque();
+  majBoutonSign();
+});
+
+// Valider avec Entrée dans le modal
+$('newSigNom').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') $('btnSaveSig').click();
+  if (e.key === 'Escape') $('btnCancelSig').click();
+});
+
+// Rôle
 document.querySelectorAll('#panel-signer .role-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('#panel-signer .role-btn').forEach(b => b.classList.remove('active'));
@@ -637,18 +939,15 @@ document.querySelectorAll('#panel-signer .role-btn').forEach(btn => {
 });
 
 function majBoutonSign() {
-  $('btnSigner').disabled = !(stateSign.pdfFiles.length && stateSign.sigBytes);
+  $('btnSigner').disabled = !(stateSign.pdfFiles.length && stateSign.selectedSigId);
 }
 
 $('btnResetSign').addEventListener('click', () => {
   stateSign.pdfFiles = [];
-  stateSign.sigFile = null;
-  stateSign.sigBytes = null;
   stateSign.role = 'operateur';
+  // On ne reset PAS selectedSigId : l'utilisateur veut souvent resigner d'autres PDF avec la même signature
   $('inputPdf').value = '';
-  $('inputSig').value = '';
   $('listePdf').style.display = 'none';
-  $('apercuSig').style.display = 'none';
   $('zoneTraitement').style.display = 'none';
   $('summary').style.display = 'none';
   $('log').innerHTML = '';
@@ -659,20 +958,26 @@ $('btnResetSign').addEventListener('click', () => {
 });
 
 $('btnSigner').addEventListener('click', async () => {
+  const sigs = chargerSignatures();
+  const sigChoisie = sigs.find(s => s.id === stateSign.selectedSigId);
+  if (!sigChoisie) {
+    alert('Signature introuvable');
+    return;
+  }
+
   $('btnSigner').disabled = true;
   $('zoneTraitement').style.display = 'block';
   $('summary').style.display = 'none';
   $('log').innerHTML = '';
   $('progress').style.width = '0%';
 
-  logTo('log', 'Préparation de la signature...');
+  logTo('log', `Signature : ${sigChoisie.nom} · Rôle : ${stateSign.role}`);
 
   const position = POSITIONS[stateSign.role];
+  const sigBytes = dataUrlToArrayBuffer(sigChoisie.dataUrl);
   const zip = new JSZip();
   const total = stateSign.pdfFiles.length;
   let nbOk = 0, nbErr = 0;
-
-  logTo('log', `${total} PDF à traiter, rôle : ${stateSign.role}`);
 
   for (let i = 0; i < total; i++) {
     const file = stateSign.pdfFiles[i];
@@ -682,7 +987,7 @@ $('btnSigner').addEventListener('click', async () => {
       const pages = pdfDoc.getPages();
       if (!pages.length) throw new Error('PDF vide');
 
-      const sigImage = await pdfDoc.embedPng(stateSign.sigBytes);
+      const sigImage = await pdfDoc.embedPng(sigBytes);
       const page = pages[0];
       const { height: pageHeight } = page.getSize();
       const ratioY = pageHeight / HAUTEUR_A4;
@@ -742,18 +1047,26 @@ $('btnSigner').addEventListener('click', async () => {
   $('btnSigner').disabled = false;
 });
 
+// Init bibliothèque au démarrage
+rafraichirBibliotheque();
+
 // ============================================================
 // ============================================================
 // ONGLET 2 : COMBINAISON
 // ============================================================
 // ============================================================
 const stateCombi = {
-  files: []  // { file, type: 'pdf'|'image' }
+  files: []
 };
 
-// Initialise la date du jour dans l'input
 const today = new Date().toISOString().slice(0, 10);
 $('ctDate').value = today;
+
+// Toggle de la page de garde
+$('chkPageGarde').addEventListener('change', (e) => {
+  $('pageGardeFields').style.display = e.target.checked ? 'block' : 'none';
+  majBoutonCombi();
+});
 
 setupDropZone('zoneCombi', 'inputCombi', (files) => {
   const acceptes = files.filter(f => {
@@ -796,9 +1109,8 @@ function afficherListeCombi() {
     liste.appendChild(row);
   });
 
-  // Wire les boutons
   liste.querySelectorAll('.file-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const idx = parseInt(btn.dataset.idx);
       const action = btn.dataset.action;
       if (action === 'up' && idx > 0) {
@@ -815,7 +1127,9 @@ function afficherListeCombi() {
 }
 
 function majBoutonCombi() {
-  $('btnCombiner').disabled = !(stateCombi.files.length && $('ctNom').value.trim());
+  const avecPG = $('chkPageGarde').checked;
+  const nomOk = !avecPG || $('ctNom').value.trim().length > 0;
+  $('btnCombiner').disabled = !(stateCombi.files.length && nomOk);
 }
 
 $('ctNom').addEventListener('input', majBoutonCombi);
@@ -831,12 +1145,11 @@ $('btnResetCombi').addEventListener('click', () => {
   $('ctDate').value = today;
   $('ctReference').value = '';
   $('combiNom').value = '';
+  $('chkPageGarde').checked = true;
+  $('pageGardeFields').style.display = 'block';
   majBoutonCombi();
 });
 
-// ============================================================
-// Génération de la page de garde
-// ============================================================
 function formatDateFr(isoDate) {
   if (!isoDate) return '';
   const [annee, mois, jour] = isoDate.split('-');
@@ -853,17 +1166,13 @@ async function creerPageGarde(pdfDoc, nomCT, dateISO, reference) {
   const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
   const helveticaOblique = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaOblique);
 
-  // Cadre décoratif
   page.drawRectangle({
-    x: 40,
-    y: 40,
-    width: width - 80,
-    height: height - 80,
+    x: 40, y: 40,
+    width: width - 80, height: height - 80,
     borderColor: PDFLib.rgb(0.2, 0.2, 0.2),
     borderWidth: 1
   });
 
-  // Titre
   const titre = 'CONTRÔLE TECHNIQUE';
   const titreSize = 32;
   const titreWidth = helveticaBold.widthOfTextAtSize(titre, titreSize);
@@ -875,7 +1184,6 @@ async function creerPageGarde(pdfDoc, nomCT, dateISO, reference) {
     color: PDFLib.rgb(0.1, 0.1, 0.1)
   });
 
-  // Sous-titre
   const sousTitre = 'Document signé et validé';
   const sousTitreSize = 14;
   const sousTitreWidth = helveticaOblique.widthOfTextAtSize(sousTitre, sousTitreSize);
@@ -887,7 +1195,6 @@ async function creerPageGarde(pdfDoc, nomCT, dateISO, reference) {
     color: PDFLib.rgb(0.4, 0.4, 0.4)
   });
 
-  // Ligne séparatrice
   page.drawLine({
     start: { x: 100, y: height - 250 },
     end: { x: width - 100, y: height - 250 },
@@ -895,83 +1202,62 @@ async function creerPageGarde(pdfDoc, nomCT, dateISO, reference) {
     color: PDFLib.rgb(0.3, 0.3, 0.3)
   });
 
-  // Bloc d'info — labels alignés à gauche
   const labelX = 100;
   const valueX = 250;
   let curY = height - 320;
   const lineHeight = 40;
-  const labelSize = 12;
-  const valueSize = 16;
 
-  // Nom CT
   page.drawText('Contrôleur Technique', {
-    x: labelX, y: curY,
-    size: labelSize, font: helvetica,
+    x: labelX, y: curY, size: 12, font: helvetica,
     color: PDFLib.rgb(0.4, 0.4, 0.4)
   });
   page.drawText(nomCT, {
-    x: valueX, y: curY - 4,
-    size: valueSize, font: helveticaBold,
+    x: valueX, y: curY - 4, size: 16, font: helveticaBold,
     color: PDFLib.rgb(0.05, 0.05, 0.05)
   });
   curY -= lineHeight;
 
-  // Date
   page.drawText('Date', {
-    x: labelX, y: curY,
-    size: labelSize, font: helvetica,
+    x: labelX, y: curY, size: 12, font: helvetica,
     color: PDFLib.rgb(0.4, 0.4, 0.4)
   });
   page.drawText(formatDateFr(dateISO), {
-    x: valueX, y: curY - 4,
-    size: valueSize, font: helveticaBold,
+    x: valueX, y: curY - 4, size: 16, font: helveticaBold,
     color: PDFLib.rgb(0.05, 0.05, 0.05)
   });
   curY -= lineHeight;
 
-  // Référence (optionnelle)
   if (reference && reference.trim()) {
     page.drawText('Référence', {
-      x: labelX, y: curY,
-      size: labelSize, font: helvetica,
+      x: labelX, y: curY, size: 12, font: helvetica,
       color: PDFLib.rgb(0.4, 0.4, 0.4)
     });
     page.drawText(reference, {
-      x: valueX, y: curY - 4,
-      size: valueSize, font: helveticaBold,
+      x: valueX, y: curY - 4, size: 16, font: helveticaBold,
       color: PDFLib.rgb(0.05, 0.05, 0.05)
     });
     curY -= lineHeight;
   }
 
-  // Nb de documents
   page.drawText('Nombre de documents', {
-    x: labelX, y: curY,
-    size: labelSize, font: helvetica,
+    x: labelX, y: curY, size: 12, font: helvetica,
     color: PDFLib.rgb(0.4, 0.4, 0.4)
   });
   page.drawText(String(stateCombi.files.length), {
-    x: valueX, y: curY - 4,
-    size: valueSize, font: helveticaBold,
+    x: valueX, y: curY - 4, size: 16, font: helveticaBold,
     color: PDFLib.rgb(0.05, 0.05, 0.05)
   });
 
-  // Pied de page
   const piedTexte = `Document généré le ${formatDateFr(today)}`;
   const piedSize = 9;
   const piedWidth = helvetica.widthOfTextAtSize(piedTexte, piedSize);
   page.drawText(piedTexte, {
-    x: (width - piedWidth) / 2,
-    y: 60,
-    size: piedSize,
-    font: helvetica,
+    x: (width - piedWidth) / 2, y: 60,
+    size: piedSize, font: helvetica,
     color: PDFLib.rgb(0.5, 0.5, 0.5)
   });
 }
 
-// ============================================================
-// Ajout d'une page image au PDF
-// ============================================================
 async function ajouterImagePage(pdfDoc, fichierImage) {
   const bytes = await fichierImage.arrayBuffer();
   const ext = fichierImage.name.toLowerCase();
@@ -982,10 +1268,8 @@ async function ajouterImagePage(pdfDoc, fichierImage) {
     img = await pdfDoc.embedJpg(bytes);
   }
 
-  // Page A4, image centrée et dimensionnée pour tenir dans la page
   const page = pdfDoc.addPage([LARGEUR_A4, HAUTEUR_A4]);
-  const margeX = 30;
-  const margeY = 30;
+  const margeX = 30, margeY = 30;
   const dispoW = LARGEUR_A4 - 2 * margeX;
   const dispoH = HAUTEUR_A4 - 2 * margeY;
 
@@ -996,21 +1280,18 @@ async function ajouterImagePage(pdfDoc, fichierImage) {
   page.drawImage(img, {
     x: (LARGEUR_A4 - w) / 2,
     y: (HAUTEUR_A4 - h) / 2,
-    width: w,
-    height: h
+    width: w, height: h
   });
 }
 
-// ============================================================
-// Lancement combinaison
-// ============================================================
 $('btnCombiner').addEventListener('click', async () => {
+  const avecPG = $('chkPageGarde').checked;
   const nomCT = $('ctNom').value.trim();
   const dateISO = $('ctDate').value || today;
   const reference = $('ctReference').value.trim();
 
-  if (!nomCT) {
-    alert('Le nom du Contrôleur Technique est obligatoire');
+  if (avecPG && !nomCT) {
+    alert('Le nom du Contrôleur Technique est obligatoire pour la page de garde');
     return;
   }
 
@@ -1023,11 +1304,13 @@ $('btnCombiner').addEventListener('click', async () => {
     logTo('logCombi', 'Création du document...');
     const pdfDoc = await PDFLib.PDFDocument.create();
 
-    // Page de garde
-    logTo('logCombi', 'Génération de la page de garde');
-    await creerPageGarde(pdfDoc, nomCT, dateISO, reference);
+    if (avecPG) {
+      logTo('logCombi', 'Génération de la page de garde');
+      await creerPageGarde(pdfDoc, nomCT, dateISO, reference);
+    } else {
+      logTo('logCombi', 'Sans page de garde');
+    }
 
-    // Ajout des fichiers dans l'ordre
     const total = stateCombi.files.length;
     for (let i = 0; i < total; i++) {
       const item = stateCombi.files[i];
@@ -1053,7 +1336,6 @@ $('btnCombiner').addEventListener('click', async () => {
     logTo('logCombi', 'Sauvegarde du PDF...');
     const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
 
-    // Téléchargement
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
