@@ -1,6 +1,6 @@
 {
-  "name": "Portail Tech – Bertin",
-  "short_name": "Portail Tech",
+  "name": "Portail Tech",
+  "short_name": "Portail TECH",
   "description": "Portail de gestion étalons, matériels et constats de vérification",
   "start_url": "/Portail-rad-v2/index.html",
   "scope": "/Portail-rad-v2/",
