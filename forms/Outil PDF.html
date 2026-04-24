@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outils PDF — Signature & Combinaison</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a2129;
+    --panel-2: #232c37;
+    --border: #2d3a47;
+    --text: #e6edf3;
+    --muted: #8b98a5;
+    --accent: #58a6ff;
+    --accent-hover: #79b8ff;
+    --success: #3fb950;
+    --error: #f85149;
+    --warning: #d29922;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* Onglets */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--panel);
+    padding: 6px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .step {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .step-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 6px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--panel-2);
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(88, 166, 255, 0.05);
+  }
+  .drop-zone p {
+    margin: 0;
+    color: var(--muted);
+  }
+  .drop-zone .hint {
+    font-size: 0.85rem;
+    margin-top: 6px;
+  }
+  input[type="file"] { display: none; }
+  .file-list {
+    margin-top: 12px;
+    max-height: 240px;
+    overflow-y: auto;
+    background: var(--panel-2);
+    border-radius: 6px;
+    padding: 8px;
+  }
+  .file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    gap: 8px;
+  }
+  .file-item:nth-child(odd) { background: rgba(255,255,255,0.02); }
+  .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .file-size { color: var(--muted); font-size: 0.8rem; }
+  .file-actions { display: flex; gap: 4px; }
+  .file-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .file-btn:hover { color: var(--text); border-color: var(--accent); }
+  .file-btn.danger:hover { color: var(--error); border-color: var(--error); }
+
+  .role-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .role-btn {
+    padding: 14px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .role-btn:hover { border-color: var(--accent); }
+  .role-btn.active {
+    border-color: var(--accent);
+    background: rgba(88, 166, 255, 0.12);
+    color: var(--accent);
+  }
+  .signature-preview {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--panel-2);
+    border-radius: 6px;
+    text-align: center;
+  }
+  .signature-preview img {
+    max-height: 80px;
+    max-width: 100%;
+    background: white;
+    padding: 6px;
+    border-radius: 4px;
+  }
+  .signature-preview p {
+    margin: 6px 0 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* Champs texte */
+  .field {
+    margin-bottom: 12px;
+  }
+  .field label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .field input[type="text"],
+  .field input[type="date"] {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: inherit;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+  }
+
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  button.primary {
+    flex: 1;
+    padding: 14px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+  button.primary:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+  button.secondary {
+    padding: 14px 20px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.secondary:hover { border-color: var(--accent); }
+  .progress-bar {
+    height: 8px;
+    background: var(--panel-2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.2s;
+  }
+  .log {
+    margin-top: 16px;
+    background: var(--panel-2);
+    border-radius: 6px;
+    padding: 12px;
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .log-line { display: flex; gap: 8px; }
+  .log-ok { color: var(--success); }
+  .log-err { color: var(--error); }
+  .log-info { color: var(--muted); }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .summary-card {
+    background: var(--panel-2);
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .summary-card .num {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .summary-card .label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .summary-card.ok .num { color: var(--success); }
+  .summary-card.err .num { color: var(--error); }
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  @media (max-width: 600px) {
+    .summary { grid-template-columns: 1fr; }
+    .action-bar { flex-direction: column; }
+    .field-grid { grid-template-columns: 1fr; }
+    .role-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Outils PDF</h1>
+    <p>Signature en lot · Combinaison de fichiers</p>
+  </header>
+
+  <!-- Onglets -->
+  <div class="tabs">
+    <button class="tab active" data-tab="signer">☢ Signer en lot</button>
+    <button class="tab" data-tab="combiner">📎 Combiner en PDF</button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ONGLET 1 : SIGNATURE EN LOT                                  -->
+  <!-- ============================================================ -->
+  <div class="tab-panel active" id="panel-signer">
+
+    <div class="step">
+      <h2 class="step-title"><span class="step-num">1</span> PDF à signer</h2>
+      <div class="drop-zone" id="zonePdf">
+        <p><strong>Cliquez ou glissez vos PDF ici</strong></p>
+        <p class="hint">Sélection multiple possible</p>
+      </div>
+      <input type="file" id="inputPdf" accept="application/pdf" multiple>
+      <div class="file-list" id="listePdf" style="display:none"></div>
+    </div>
+
+    <div class="step">
+      <h2 class="step-title"><span class="step-num">2</span> Image de signature</h2>
+      <div class="drop-zone" id="zoneSig">
+        <p><strong>Cliquez ou glissez votre signature</strong></p>
+        <p class="hint">PNG avec fond transparent recommandé</p>
+      </div>
+      <input type="file" id="inputSig" accept="image/png,image/jpeg">
+      <div class="signature-preview" id="apercuSig" style="display:none">
+        <img id="imgSig" alt="Aperçu signature">
+        <p id="infoSig"></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <h2 class="step-title"><span class="step-num">3</span> Rôle de la signature</h2>
+      <div class="role-grid">
+        <button class="role-btn active" data-role="operateur">👷 Opérateur</button>
+        <button class="role-btn" data-role="controleur">🔍 Contrôleur Technique</button>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="primary" id="btnSigner" disabled>Signer et télécharger ZIP</button>
+      <button class="secondary" id="btnResetSign">Réinitialiser</button>
+    </div>
+
+    <div id="zoneTraitement" style="display:none">
+      <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+      <div class="log" id="log"></div>
+      <div class="summary" id="summary" style="display:none">
+        <div class="summary-card ok"><div class="num" id="numOk">0</div><div class="label">Signés</div></div>
+        <div class="summary-card err"><div class="num" id="numErr">0</div><div class="label">Erreurs</div></div>
+        <div class="summary-card"><div class="num" id="numTaille">—</div><div class="label">Taille ZIP</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ONGLET 2 : COMBINAISON PDF/IMAGES                            -->
+  <!-- ============================================================ -->
+  <div class="tab-panel" id="panel-combiner">
+
+    <div class="step">
+      <h2 class="step-title"><span class="step-num">1</span> Fichiers à combiner</h2>
+      <div class="drop-zone" id="zoneCombi">
+        <p><strong>Cliquez ou glissez vos fichiers ici</strong></p>
+        <p class="hint">PDF, PNG, JPEG · L'ordre détermine la séquence du PDF final</p>
+      </div>
+      <input type="file" id="inputCombi" accept="application/pdf,image/png,image/jpeg" multiple>
+      <div class="file-list" id="listeCombi" style="display:none"></div>
+    </div>
+
+    <div class="step">
+      <h2 class="step-title"><span class="step-num">2</span> Page de garde signature</h2>
+      <div class="field">
+        <label for="ctNom">Nom du Contrôleur Technique</label>
+        <input type="text" id="ctNom" placeholder="ex : DUPONT Jean" autocomplete="off">
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="ctDate">Date</label>
+          <input type="date" id="ctDate">
+        </div>
+        <div class="field">
+          <label for="ctReference">Référence (optionnel)</label>
+          <input type="text" id="ctReference" placeholder="ex : Lot 2026-04" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <h2 class="step-title"><span class="step-num">3</span> Nom du fichier de sortie</h2>
+      <div class="field">
+        <input type="text" id="combiNom" placeholder="ex : Lot_signe_2026-04-21" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="primary" id="btnCombiner" disabled>Générer le PDF combiné</button>
+      <button class="secondary" id="btnResetCombi">Réinitialiser</button>
+    </div>
+
+    <div id="zoneTraitementCombi" style="display:none">
+      <div class="progress-bar"><div class="progress-fill" id="progressCombi" style="width:0%"></div></div>
+      <div class="log" id="logCombi"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    Tout est traité localement dans votre navigateur. Aucun fichier n'est envoyé sur internet.
+  </footer>
+
+</div>
+
+<!-- Bibliothèques -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const HAUTEUR_A4 = 842;
+const LARGEUR_A4 = 595;
+
+// Coordonnées calibrées (origine bas-gauche pdf-lib)
+// Conversion depuis PyMuPDF : y = 842 - y_haut
+const POSITIONS = {
+  operateur:  { x: 370, y: HAUTEUR_A4 - 440, width: 80, height: 35 },
+  controleur: { x: 370, y: HAUTEUR_A4 - 468, width: 80, height: 35 }
+};
+
+const LARGEUR_MAX_SIGNATURE = 800;
+
+const $ = (id) => document.getElementById(id);
+
+// ============================================================
+// GESTION ONGLETS
+// ============================================================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    $('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ============================================================
+// HELPERS COMMUNS
+// ============================================================
+function formatTaille(bytes) {
+  if (bytes < 1024) return bytes + ' o';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' Ko';
+  return (bytes/(1024*1024)).toFixed(1) + ' Mo';
+}
+
+function setupDropZone(zoneId, inputId, onFiles) {
+  const zone = $(zoneId);
+  const input = $(inputId);
+  zone.addEventListener('click', () => input.click());
+  input.addEventListener('change', (e) => onFiles([...e.target.files]));
+  ['dragover', 'dragenter'].forEach(ev =>
+    zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('dragover'); })
+  );
+  ['dragleave', 'dragend', 'drop'].forEach(ev =>
+    zone.addEventListener(ev, () => zone.classList.remove('dragover'))
+  );
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    onFiles([...e.dataTransfer.files]);
+  });
+}
+
+function logTo(elementId, msg, type = 'info') {
+  const line = document.createElement('div');
+  line.className = `log-line log-${type}`;
+  const icon = type === 'ok' ? '✓' : type === 'err' ? '✗' : '•';
+  line.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  $(elementId).appendChild(line);
+  $(elementId).scrollTop = $(elementId).scrollHeight;
+}
+
+// Réduction d'image via Canvas, retourne ArrayBuffer PNG
+async function reduireImage(file, largeurMax = LARGEUR_MAX_SIGNATURE, format = 'image/png') {
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+
+  let largeur = img.naturalWidth;
+  let hauteur = img.naturalHeight;
+  let redim = false;
+
+  if (largeur > largeurMax) {
+    const ratio = largeurMax / largeur;
+    largeur = largeurMax;
+    hauteur = Math.round(hauteur * ratio);
+    redim = true;
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = largeur;
+  canvas.height = hauteur;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, largeur, hauteur);
+
+  const blob = await new Promise(res => canvas.toBlob(res, format, 0.92));
+  const bytes = await blob.arrayBuffer();
+  URL.revokeObjectURL(url);
+
+  return {
+    bytes,
+    largeur,
+    hauteur,
+    largeurOrig: img.naturalWidth,
+    hauteurOrig: img.naturalHeight,
+    redimensionnee: redim,
+    dataUrl: canvas.toDataURL('image/png')
+  };
+}
+
+// ============================================================
+// ============================================================
+// ONGLET 1 : SIGNATURE EN LOT
+// ============================================================
+// ============================================================
+const stateSign = {
+  pdfFiles: [],
+  sigFile: null,
+  sigBytes: null,
+  role: 'operateur'
+};
+
+setupDropZone('zonePdf', 'inputPdf', (files) => {
+  const pdfs = files.filter(f => f.name.toLowerCase().endsWith('.pdf'));
+  stateSign.pdfFiles = pdfs;
+  afficherListePdf();
+  majBoutonSign();
+});
+
+setupDropZone('zoneSig', 'inputSig', async (files) => {
+  if (!files.length) return;
+  const file = files[0];
+  if (!file.type.startsWith('image/')) {
+    alert('Veuillez sélectionner une image (PNG ou JPEG)');
+    return;
+  }
+  stateSign.sigFile = file;
+  await preparerSignatureSign(file);
+  majBoutonSign();
+});
+
+function afficherListePdf() {
+  const liste = $('listePdf');
+  if (!stateSign.pdfFiles.length) {
+    liste.style.display = 'none';
+    return;
+  }
+  liste.style.display = 'block';
+  liste.innerHTML = `<div style="padding:4px 10px;font-size:0.85rem;color:var(--muted);">
+    ${stateSign.pdfFiles.length} fichier(s) sélectionné(s)
+  </div>`;
+  stateSign.pdfFiles.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'file-item';
+    row.innerHTML = `
+      <span class="file-name">📄 ${f.name}</span>
+      <span class="file-size">${formatTaille(f.size)}</span>
+    `;
+    liste.appendChild(row);
+  });
+}
+
+async function preparerSignatureSign(file) {
+  const result = await reduireImage(file, LARGEUR_MAX_SIGNATURE, 'image/png');
+  stateSign.sigBytes = result.bytes;
+  $('imgSig').src = result.dataUrl;
+  $('apercuSig').style.display = 'block';
+  const tailleKo = (result.bytes.byteLength / 1024).toFixed(1);
+  $('infoSig').textContent = result.redimensionnee
+    ? `${result.largeurOrig}×${result.hauteurOrig} → réduite à ${result.largeur}×${result.hauteur} (${tailleKo} Ko)`
+    : `${result.largeur}×${result.hauteur} (${tailleKo} Ko)`;
+}
+
+document.querySelectorAll('#panel-signer .role-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#panel-signer .role-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    stateSign.role = btn.dataset.role;
+  });
+});
+
+function majBoutonSign() {
+  $('btnSigner').disabled = !(stateSign.pdfFiles.length && stateSign.sigBytes);
+}
+
+$('btnResetSign').addEventListener('click', () => {
+  stateSign.pdfFiles = [];
+  stateSign.sigFile = null;
+  stateSign.sigBytes = null;
+  stateSign.role = 'operateur';
+  $('inputPdf').value = '';
+  $('inputSig').value = '';
+  $('listePdf').style.display = 'none';
+  $('apercuSig').style.display = 'none';
+  $('zoneTraitement').style.display = 'none';
+  $('summary').style.display = 'none';
+  $('log').innerHTML = '';
+  $('progress').style.width = '0%';
+  document.querySelectorAll('#panel-signer .role-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#panel-signer [data-role="operateur"]').classList.add('active');
+  majBoutonSign();
+});
+
+$('btnSigner').addEventListener('click', async () => {
+  $('btnSigner').disabled = true;
+  $('zoneTraitement').style.display = 'block';
+  $('summary').style.display = 'none';
+  $('log').innerHTML = '';
+  $('progress').style.width = '0%';
+
+  logTo('log', 'Préparation de la signature...');
+
+  const position = POSITIONS[stateSign.role];
+  const zip = new JSZip();
+  const total = stateSign.pdfFiles.length;
+  let nbOk = 0, nbErr = 0;
+
+  logTo('log', `${total} PDF à traiter, rôle : ${stateSign.role}`);
+
+  for (let i = 0; i < total; i++) {
+    const file = stateSign.pdfFiles[i];
+    try {
+      const bytes = await file.arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+      const pages = pdfDoc.getPages();
+      if (!pages.length) throw new Error('PDF vide');
+
+      const sigImage = await pdfDoc.embedPng(stateSign.sigBytes);
+      const page = pages[0];
+      const { height: pageHeight } = page.getSize();
+      const ratioY = pageHeight / HAUTEUR_A4;
+
+      page.drawImage(sigImage, {
+        x: position.x,
+        y: position.y * ratioY,
+        width: position.width,
+        height: position.height * ratioY
+      });
+
+      const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+      zip.file(file.name, pdfBytes);
+
+      nbOk++;
+      logTo('log', file.name, 'ok');
+    } catch (e) {
+      nbErr++;
+      logTo('log', `${file.name} : ${e.message}`, 'err');
+    }
+
+    const pct = Math.round(((i + 1) / total) * 100);
+    $('progress').style.width = pct + '%';
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  if (nbOk === 0) {
+    logTo('log', 'Aucun PDF signé, rien à télécharger', 'err');
+    $('btnSigner').disabled = false;
+    return;
+  }
+
+  logTo('log', 'Génération du ZIP...');
+  const zipBlob = await zip.generateAsync({
+    type: 'blob',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 }
+  });
+
+  const url = URL.createObjectURL(zipBlob);
+  const date = new Date().toISOString().slice(0, 10);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `PDF_signes_${stateSign.role}_${date}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  logTo('log', 'ZIP téléchargé', 'ok');
+
+  $('numOk').textContent = nbOk;
+  $('numErr').textContent = nbErr;
+  $('numTaille').textContent = formatTaille(zipBlob.size);
+  $('summary').style.display = 'grid';
+
+  $('btnSigner').disabled = false;
+});
+
+// ============================================================
+// ============================================================
+// ONGLET 2 : COMBINAISON
+// ============================================================
+// ============================================================
+const stateCombi = {
+  files: []  // { file, type: 'pdf'|'image' }
+};
+
+// Initialise la date du jour dans l'input
+const today = new Date().toISOString().slice(0, 10);
+$('ctDate').value = today;
+
+setupDropZone('zoneCombi', 'inputCombi', (files) => {
+  const acceptes = files.filter(f => {
+    const ext = f.name.toLowerCase();
+    return ext.endsWith('.pdf') || ext.endsWith('.png') ||
+           ext.endsWith('.jpg') || ext.endsWith('.jpeg');
+  });
+  acceptes.forEach(f => {
+    const type = f.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image';
+    stateCombi.files.push({ file: f, type });
+  });
+  afficherListeCombi();
+  majBoutonCombi();
+});
+
+function afficherListeCombi() {
+  const liste = $('listeCombi');
+  if (!stateCombi.files.length) {
+    liste.style.display = 'none';
+    return;
+  }
+  liste.style.display = 'block';
+  liste.innerHTML = `<div style="padding:4px 10px;font-size:0.85rem;color:var(--muted);">
+    ${stateCombi.files.length} fichier(s) — utilisez ↑↓ pour réordonner
+  </div>`;
+
+  stateCombi.files.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'file-item';
+    const icon = item.type === 'pdf' ? '📄' : '🖼️';
+    row.innerHTML = `
+      <span class="file-name">${icon} ${item.file.name}</span>
+      <span class="file-size">${formatTaille(item.file.size)}</span>
+      <span class="file-actions">
+        <button class="file-btn" data-action="up" data-idx="${idx}" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''}>↑</button>
+        <button class="file-btn" data-action="down" data-idx="${idx}" ${idx === stateCombi.files.length - 1 ? 'disabled style="opacity:0.3"' : ''}>↓</button>
+        <button class="file-btn danger" data-action="del" data-idx="${idx}">✕</button>
+      </span>
+    `;
+    liste.appendChild(row);
+  });
+
+  // Wire les boutons
+  liste.querySelectorAll('.file-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(btn.dataset.idx);
+      const action = btn.dataset.action;
+      if (action === 'up' && idx > 0) {
+        [stateCombi.files[idx-1], stateCombi.files[idx]] = [stateCombi.files[idx], stateCombi.files[idx-1]];
+      } else if (action === 'down' && idx < stateCombi.files.length - 1) {
+        [stateCombi.files[idx+1], stateCombi.files[idx]] = [stateCombi.files[idx], stateCombi.files[idx+1]];
+      } else if (action === 'del') {
+        stateCombi.files.splice(idx, 1);
+      }
+      afficherListeCombi();
+      majBoutonCombi();
+    });
+  });
+}
+
+function majBoutonCombi() {
+  $('btnCombiner').disabled = !(stateCombi.files.length && $('ctNom').value.trim());
+}
+
+$('ctNom').addEventListener('input', majBoutonCombi);
+
+$('btnResetCombi').addEventListener('click', () => {
+  stateCombi.files = [];
+  $('inputCombi').value = '';
+  $('listeCombi').style.display = 'none';
+  $('zoneTraitementCombi').style.display = 'none';
+  $('logCombi').innerHTML = '';
+  $('progressCombi').style.width = '0%';
+  $('ctNom').value = '';
+  $('ctDate').value = today;
+  $('ctReference').value = '';
+  $('combiNom').value = '';
+  majBoutonCombi();
+});
+
+// ============================================================
+// Génération de la page de garde
+// ============================================================
+function formatDateFr(isoDate) {
+  if (!isoDate) return '';
+  const [annee, mois, jour] = isoDate.split('-');
+  const moisLabels = ['janvier','février','mars','avril','mai','juin',
+                      'juillet','août','septembre','octobre','novembre','décembre'];
+  return `${parseInt(jour)} ${moisLabels[parseInt(mois)-1]} ${annee}`;
+}
+
+async function creerPageGarde(pdfDoc, nomCT, dateISO, reference) {
+  const page = pdfDoc.addPage([LARGEUR_A4, HAUTEUR_A4]);
+  const { width, height } = page.getSize();
+
+  const helveticaBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const helveticaOblique = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaOblique);
+
+  // Cadre décoratif
+  page.drawRectangle({
+    x: 40,
+    y: 40,
+    width: width - 80,
+    height: height - 80,
+    borderColor: PDFLib.rgb(0.2, 0.2, 0.2),
+    borderWidth: 1
+  });
+
+  // Titre
+  const titre = 'CONTRÔLE TECHNIQUE';
+  const titreSize = 32;
+  const titreWidth = helveticaBold.widthOfTextAtSize(titre, titreSize);
+  page.drawText(titre, {
+    x: (width - titreWidth) / 2,
+    y: height - 180,
+    size: titreSize,
+    font: helveticaBold,
+    color: PDFLib.rgb(0.1, 0.1, 0.1)
+  });
+
+  // Sous-titre
+  const sousTitre = 'Document signé et validé';
+  const sousTitreSize = 14;
+  const sousTitreWidth = helveticaOblique.widthOfTextAtSize(sousTitre, sousTitreSize);
+  page.drawText(sousTitre, {
+    x: (width - sousTitreWidth) / 2,
+    y: height - 215,
+    size: sousTitreSize,
+    font: helveticaOblique,
+    color: PDFLib.rgb(0.4, 0.4, 0.4)
+  });
+
+  // Ligne séparatrice
+  page.drawLine({
+    start: { x: 100, y: height - 250 },
+    end: { x: width - 100, y: height - 250 },
+    thickness: 1,
+    color: PDFLib.rgb(0.3, 0.3, 0.3)
+  });
+
+  // Bloc d'info — labels alignés à gauche
+  const labelX = 100;
+  const valueX = 250;
+  let curY = height - 320;
+  const lineHeight = 40;
+  const labelSize = 12;
+  const valueSize = 16;
+
+  // Nom CT
+  page.drawText('Contrôleur Technique', {
+    x: labelX, y: curY,
+    size: labelSize, font: helvetica,
+    color: PDFLib.rgb(0.4, 0.4, 0.4)
+  });
+  page.drawText(nomCT, {
+    x: valueX, y: curY - 4,
+    size: valueSize, font: helveticaBold,
+    color: PDFLib.rgb(0.05, 0.05, 0.05)
+  });
+  curY -= lineHeight;
+
+  // Date
+  page.drawText('Date', {
+    x: labelX, y: curY,
+    size: labelSize, font: helvetica,
+    color: PDFLib.rgb(0.4, 0.4, 0.4)
+  });
+  page.drawText(formatDateFr(dateISO), {
+    x: valueX, y: curY - 4,
+    size: valueSize, font: helveticaBold,
+    color: PDFLib.rgb(0.05, 0.05, 0.05)
+  });
+  curY -= lineHeight;
+
+  // Référence (optionnelle)
+  if (reference && reference.trim()) {
+    page.drawText('Référence', {
+      x: labelX, y: curY,
+      size: labelSize, font: helvetica,
+      color: PDFLib.rgb(0.4, 0.4, 0.4)
+    });
+    page.drawText(reference, {
+      x: valueX, y: curY - 4,
+      size: valueSize, font: helveticaBold,
+      color: PDFLib.rgb(0.05, 0.05, 0.05)
+    });
+    curY -= lineHeight;
+  }
+
+  // Nb de documents
+  page.drawText('Nombre de documents', {
+    x: labelX, y: curY,
+    size: labelSize, font: helvetica,
+    color: PDFLib.rgb(0.4, 0.4, 0.4)
+  });
+  page.drawText(String(stateCombi.files.length), {
+    x: valueX, y: curY - 4,
+    size: valueSize, font: helveticaBold,
+    color: PDFLib.rgb(0.05, 0.05, 0.05)
+  });
+
+  // Pied de page
+  const piedTexte = `Document généré le ${formatDateFr(today)}`;
+  const piedSize = 9;
+  const piedWidth = helvetica.widthOfTextAtSize(piedTexte, piedSize);
+  page.drawText(piedTexte, {
+    x: (width - piedWidth) / 2,
+    y: 60,
+    size: piedSize,
+    font: helvetica,
+    color: PDFLib.rgb(0.5, 0.5, 0.5)
+  });
+}
+
+// ============================================================
+// Ajout d'une page image au PDF
+// ============================================================
+async function ajouterImagePage(pdfDoc, fichierImage) {
+  const bytes = await fichierImage.arrayBuffer();
+  const ext = fichierImage.name.toLowerCase();
+  let img;
+  if (ext.endsWith('.png')) {
+    img = await pdfDoc.embedPng(bytes);
+  } else {
+    img = await pdfDoc.embedJpg(bytes);
+  }
+
+  // Page A4, image centrée et dimensionnée pour tenir dans la page
+  const page = pdfDoc.addPage([LARGEUR_A4, HAUTEUR_A4]);
+  const margeX = 30;
+  const margeY = 30;
+  const dispoW = LARGEUR_A4 - 2 * margeX;
+  const dispoH = HAUTEUR_A4 - 2 * margeY;
+
+  const ratio = Math.min(dispoW / img.width, dispoH / img.height);
+  const w = img.width * ratio;
+  const h = img.height * ratio;
+
+  page.drawImage(img, {
+    x: (LARGEUR_A4 - w) / 2,
+    y: (HAUTEUR_A4 - h) / 2,
+    width: w,
+    height: h
+  });
+}
+
+// ============================================================
+// Lancement combinaison
+// ============================================================
+$('btnCombiner').addEventListener('click', async () => {
+  const nomCT = $('ctNom').value.trim();
+  const dateISO = $('ctDate').value || today;
+  const reference = $('ctReference').value.trim();
+
+  if (!nomCT) {
+    alert('Le nom du Contrôleur Technique est obligatoire');
+    return;
+  }
+
+  $('btnCombiner').disabled = true;
+  $('zoneTraitementCombi').style.display = 'block';
+  $('logCombi').innerHTML = '';
+  $('progressCombi').style.width = '0%';
+
+  try {
+    logTo('logCombi', 'Création du document...');
+    const pdfDoc = await PDFLib.PDFDocument.create();
+
+    // Page de garde
+    logTo('logCombi', 'Génération de la page de garde');
+    await creerPageGarde(pdfDoc, nomCT, dateISO, reference);
+
+    // Ajout des fichiers dans l'ordre
+    const total = stateCombi.files.length;
+    for (let i = 0; i < total; i++) {
+      const item = stateCombi.files[i];
+      try {
+        if (item.type === 'pdf') {
+          const bytes = await item.file.arrayBuffer();
+          const srcDoc = await PDFLib.PDFDocument.load(bytes);
+          const pages = await pdfDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+          pages.forEach(p => pdfDoc.addPage(p));
+          logTo('logCombi', `${item.file.name} (${pages.length} page(s))`, 'ok');
+        } else {
+          await ajouterImagePage(pdfDoc, item.file);
+          logTo('logCombi', `${item.file.name}`, 'ok');
+        }
+      } catch (e) {
+        logTo('logCombi', `${item.file.name} : ${e.message}`, 'err');
+      }
+      const pct = Math.round(((i + 1) / total) * 100);
+      $('progressCombi').style.width = pct + '%';
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    logTo('logCombi', 'Sauvegarde du PDF...');
+    const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+
+    // Téléchargement
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    let nomSortie = $('combiNom').value.trim();
+    if (!nomSortie) {
+      nomSortie = `Combine_${dateISO}`;
+    }
+    if (!nomSortie.toLowerCase().endsWith('.pdf')) nomSortie += '.pdf';
+    a.href = url;
+    a.download = nomSortie;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    logTo('logCombi', `PDF téléchargé (${formatTaille(pdfBytes.byteLength)})`, 'ok');
+  } catch (e) {
+    logTo('logCombi', `Erreur : ${e.message}`, 'err');
+  } finally {
+    $('btnCombiner').disabled = false;
+  }
+});
+
+</script>
+</body>
+</html>
