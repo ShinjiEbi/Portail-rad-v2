@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <script>
@@ -798,7 +799,6 @@ main {
   <button class="tab" data-tab="list">Mes Notes</button>
   <button class="tab" data-tab="imputations">Imputations</button>
   <button class="tab" data-tab="plafonds">Plafonds</button>
-  <button class="tab" data-tab="settings">Réglages</button>
 </nav>
 
 <main>
@@ -1032,104 +1032,6 @@ main {
     </div>
   </section>
 
-  <!-- ============== SETTINGS VIEW ============== -->
-  <section class="view" id="view-settings">
-    <div class="card">
-      <div class="card-title">🤖 Moteur d'extraction IA</div>
-      <p style="color:var(--text-2); font-size:13px; margin-bottom:14px; line-height:1.5;">
-        Choisis le service IA qui analysera tes tickets. Tu peux changer à tout moment.
-      </p>
-
-      <div class="form-grid">
-        <div class="field full">
-          <label>Service IA</label>
-          <select id="fProvider">
-            <option value="claude">Claude Haiku 4.5 (Anthropic) — flexible, ~0,002€/ticket</option>
-            <option value="azure">Azure Document Intelligence — 500 tickets/mois gratuits</option>
-          </select>
-          <div class="field-hint" id="providerHint">
-            Le choix se sauvegarde automatiquement.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bloc Claude -->
-    <div class="card" id="claudeBlock">
-      <div class="card-title">🟣 Configuration Claude (Anthropic)</div>
-      <p style="color:var(--text-2); font-size:12px; margin-bottom:14px;">
-        Modèle <span class="mono" style="color:var(--accent);">claude-haiku-4-5</span>.
-        Très bon en compréhension contextuelle (déduit le nb de personnes d'un repas, la durée d'un séjour…).
-      </p>
-
-      <div class="form-grid">
-        <div class="field full">
-          <label>Clé API Anthropic</label>
-          <input type="password" id="fApiKey" placeholder="sk-ant-api03-..." autocomplete="off">
-          <div class="field-hint">Stockée localement, envoyée uniquement à api.anthropic.com</div>
-        </div>
-      </div>
-
-      <div class="scan-actions" style="margin-top:14px;">
-        <button class="btn btn-primary" id="btnSaveApiKey">💾 Enregistrer</button>
-        <button class="btn btn-ghost" id="btnTestApiKey">🧪 Tester</button>
-      </div>
-      <div id="apiKeyStatus" style="margin-top:14px;"></div>
-
-      <details style="margin-top:14px; color:var(--text-2); font-size:12px;">
-        <summary style="cursor:pointer;">Comment obtenir une clé Anthropic ?</summary>
-        <ol style="margin-top:8px; line-height:1.7; padding-left:20px;">
-          <li>Va sur <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--accent);">console.anthropic.com/settings/keys</a></li>
-          <li>Crée un compte (5 $ de crédit gratuit)</li>
-          <li>Clique <em>Create Key</em>, copie la clé <span class="mono">sk-ant-api03-...</span></li>
-        </ol>
-      </details>
-    </div>
-
-    <!-- Bloc Azure -->
-    <div class="card" id="azureBlock">
-      <div class="card-title">🔷 Configuration Azure Document Intelligence</div>
-      <p style="color:var(--text-2); font-size:12px; margin-bottom:14px;">
-        Modèle pré-entraîné <span class="mono" style="color:var(--accent);">prebuilt-receipt</span>.
-        Spécialisé tickets/factures avec champs structurés (MerchantName, TransactionDate, Total…).
-        500 pages/mois gratuites avec le tier F0.
-      </p>
-
-      <div class="form-grid">
-        <div class="field full">
-          <label>Endpoint Azure</label>
-          <input type="text" id="fAzureEndpoint" placeholder="https://votre-resource.cognitiveservices.azure.com/" autocomplete="off">
-          <div class="field-hint">Affiché dans Azure Portal → ta ressource Document Intelligence → Keys and Endpoint</div>
-        </div>
-        <div class="field full">
-          <label>Clé API Azure</label>
-          <input type="password" id="fAzureKey" placeholder="32 caractères" autocomplete="off">
-          <div class="field-hint">"Key 1" dans la même page Azure Portal</div>
-        </div>
-      </div>
-
-      <div class="scan-actions" style="margin-top:14px;">
-        <button class="btn btn-primary" id="btnSaveAzureKey">💾 Enregistrer</button>
-        <button class="btn btn-ghost" id="btnTestAzureKey">🧪 Tester</button>
-      </div>
-      <div id="azureKeyStatus" style="margin-top:14px;"></div>
-
-      <details style="margin-top:14px; color:var(--text-2); font-size:12px;">
-        <summary style="cursor:pointer;">Comment obtenir clé + endpoint Azure ?</summary>
-        <ol style="margin-top:8px; line-height:1.7; padding-left:20px;">
-          <li>Va sur <a href="https://portal.azure.com" target="_blank" style="color:var(--accent);">portal.azure.com</a> (compte gratuit possible avec 200$ de crédit)</li>
-          <li>Clique <em>Créer une ressource</em> → cherche <em>Document Intelligence</em> → <em>Créer</em></li>
-          <li>Choisis le tier <strong>Free F0</strong> (500 pages/mois gratuites à vie)</li>
-          <li>Une fois la ressource créée, va dans <em>Keys and Endpoint</em></li>
-          <li>Copie <em>Endpoint</em> (URL en .cognitiveservices.azure.com) et <em>KEY 1</em></li>
-        </ol>
-        <p style="margin-top:8px; font-style:italic;">
-          ⚠ Note : Azure F0 limite à 4 Mo par fichier et 2 pages max par PDF. Pour les factures multi-pages, utilise plutôt Claude.
-        </p>
-      </details>
-    </div>
-  </section>
-
 </main>
 
 <div class="toast" id="toast"></div>
@@ -1352,229 +1254,682 @@ const setConfig = (k, v) => new Promise((res, rej) => {
 });
 
 // =====================================================================
-// EXTRACTION IA — Claude Haiku 4.5 (Anthropic)
+// OCR
 // =====================================================================
 
-const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
-const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
+let ocrWorker = null;
 
-async function getApiKey() {
-  return await getConfig('claudeApiKey');
-}
-
-async function setApiKey(key) {
-  await setConfig('claudeApiKey', key);
-}
-
-// Convertit dataURL → base64 pur (sans le prefix "data:image/...;base64,")
-function dataUrlToBase64(dataUrl) {
-  const idx = dataUrl.indexOf(',');
-  return idx >= 0 ? dataUrl.slice(idx + 1) : dataUrl;
-}
-
-function dataUrlToMediaType(dataUrl) {
-  const m = dataUrl.match(/^data:([^;]+);/);
-  return m ? m[1] : 'image/jpeg';
-}
-
-// Catégories Bertin envoyées en contexte au modèle (liste fixe pour qu'il choisisse exactement)
-function buildCategoryList() {
-  return categories.map(c => c.name).join(', ');
-}
-
-// Prompt système : indique exactement quoi extraire
-function buildPrompt() {
-  const today = new Date().toISOString().slice(0, 10);
-  const catList = buildCategoryList();
-  return `Tu es un expert en analyse de tickets de caisse et factures français pour notes de frais professionnelles.
-
-Analyse l'image ci-jointe et extrais STRICTEMENT les informations suivantes au format JSON, sans aucun texte autour :
-
-{
-  "date": "YYYY-MM-DD",         // Date du ticket (ou null si illisible)
-  "time": "HH:MM",              // Heure (ou null)
-  "amountTTC": 12.50,           // Montant TOTAL TTC payé (number, jamais string)
-  "category": "Repas - Midi",   // OBLIGATOIREMENT une de ces valeurs : ${catList}
-  "nights": 1,                  // Nombre de nuits si hôtel/facture multi-nuits, sinon 1
-  "people": 1,                  // Nb personnes si repas (déduit du nombre de couverts/menus), sinon 1
-  "guests": "",                 // Si repas d'affaires : "Société X — M. Untel". Vide sinon
-  "siret": "",                  // SIRET si visible (14 chiffres), sinon vide
-  "vendor": "Nom du commerçant",// Le vrai nom (pas "TOTAL"/"TICKET")
-  "rawNotes": ""                // Détails utiles supplémentaires (n° facture, lieu...) ou ""
-}
-
-Règles strictes :
-- Date au format ISO (aujourd'hui = ${today}). Privilégie la date la plus récente cohérente.
-- Heure au format 24h "HH:MM" (ex 14:32). Si écrit "14h32" → "14:32".
-- Montant = total TTC à payer (jamais sous-total, HT, ou montant en espèces rendues).
-- Catégorie : choisis la valeur exacte de la liste fournie. Pour les repas : déduis du contexte (heure, items) si Petit-déj/Midi/Soir.
-- Pour un hôtel : nights = nombre de nuits facturées. Détecte depuis "x 2", "2 nuits", "Du JJ/MM au JJ/MM".
-- Pour un restaurant : people = nb de couverts (souvent indiqué "Table X - 2 cvts" ou déduit du nombre de menus).
-- guests : ne remplis QUE si visible explicitement (rare sur les tickets — laisse vide en général).
-- Aucun champ ne doit être absent. Utilise null pour les valeurs inconnues, "" pour les strings vides.
-
-Réponds UNIQUEMENT avec le JSON, sans markdown, sans \`\`\`json, sans commentaire.`;
-}
-
-async function callClaudeAPI(imageDataUrl) {
-  const apiKey = await getApiKey();
-  if (!apiKey) {
-    throw new Error('Clé API non configurée. Va dans Réglages → renseigne ta clé Anthropic.');
-  }
-
-  const base64 = dataUrlToBase64(imageDataUrl);
-  const mediaType = dataUrlToMediaType(imageDataUrl);
-
-  setProgress('Analyse IA en cours…', 30);
-
-  const response = await fetch(CLAUDE_API_URL, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: CLAUDE_MODEL,
-      max_tokens: 1024,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-          { type: 'text', text: buildPrompt() },
-        ],
-      }],
-    }),
+async function getWorker() {
+  if (ocrWorker) return ocrWorker;
+  setProgress('Chargement moteur OCR…', 5);
+  ocrWorker = await Tesseract.createWorker('fra', 1, {
+    logger: m => {
+      if (m.status === 'recognizing text') {
+        setProgress('Reconnaissance OCR…', Math.round(m.progress * 100));
+      } else if (m.status === 'loading tesseract core' || m.status === 'initializing tesseract') {
+        setProgress('Init Tesseract…', Math.round(m.progress * 30));
+      } else if (m.status === 'loading language traineddata') {
+        setProgress('Chargement français…', 40 + Math.round(m.progress * 30));
+      }
+    }
   });
-
-  setProgress('Lecture réponse IA…', 80);
-
-  if (!response.ok) {
-    let errMsg = `HTTP ${response.status}`;
-    try {
-      const err = await response.json();
-      errMsg = err.error?.message || err.message || errMsg;
-    } catch (_) {}
-    throw new Error('Claude API : ' + errMsg);
-  }
-
-  const data = await response.json();
-  console.log('[Claude] tokens utilisés:', data.usage);
-
-  // Extraire le texte de la réponse
-  const textBlock = data.content?.find(c => c.type === 'text');
-  if (!textBlock || !textBlock.text) {
-    throw new Error('Réponse Claude vide');
-  }
-
-  // Parser le JSON (parfois Claude ajoute du markdown malgré les instructions)
-  let jsonText = textBlock.text.trim();
-  const codeBlockMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  if (codeBlockMatch) jsonText = codeBlockMatch[1].trim();
-
-  let parsed;
-  try {
-    parsed = JSON.parse(jsonText);
-  } catch (err) {
-    console.error('[Claude] JSON invalide:', jsonText);
-    throw new Error('Réponse IA non parsable en JSON');
-  }
-
-  return parsed;
+  return ocrWorker;
 }
 
-// Test simple de la clé API : envoie un message minimal
-async function testApiKey(apiKey) {
-  const response = await fetch(CLAUDE_API_URL, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: CLAUDE_MODEL,
-      max_tokens: 10,
-      messages: [{ role: 'user', content: 'Réponds juste "OK"' }],
-    }),
-  });
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${response.status}`);
-  }
-  const data = await response.json();
-  return data.content?.[0]?.text || 'OK';
+async function runOCR(imageData) {
+  const worker = await getWorker();
+  const { data } = await worker.recognize(imageData);
+  return data.text;
 }
 
-// =====================================================================
-// EXTRACTION IA — Azure Document Intelligence (prebuilt-receipt)
-// =====================================================================
+// === Extraction heuristique ===
 
-const AZURE_API_VERSION = '2024-11-30';
-const AZURE_MODEL_ID = 'prebuilt-receipt';
-
-async function getAzureConfig() {
-  const endpoint = await getConfig('azureEndpoint');
-  const apiKey = await getConfig('azureApiKey');
-  return { endpoint, apiKey };
-}
-
-async function setAzureConfig(endpoint, apiKey) {
-  await setConfig('azureEndpoint', endpoint);
-  await setConfig('azureApiKey', apiKey);
-}
-
-// Normalise l'endpoint (retire / final, accepte avec ou sans https://)
-function normalizeAzureEndpoint(endpoint) {
-  if (!endpoint) return '';
-  let e = endpoint.trim();
-  if (!e.startsWith('http')) e = 'https://' + e;
-  return e.replace(/\/+$/, '');
-}
-
-// Essaie d'extraire la valeur "réelle" d'un champ Azure (qui peut être imbriqué)
-function azureFieldValue(field) {
-  if (!field) return null;
-  // Champs typés selon doc Azure
-  if (field.valueString != null) return field.valueString;
-  if (field.valueDate != null) return field.valueDate;       // YYYY-MM-DD
-  if (field.valueTime != null) return field.valueTime;       // HH:MM:SS
-  if (field.valueNumber != null) return field.valueNumber;
-  if (field.valueInteger != null) return field.valueInteger;
-  if (field.valueCurrency != null) return field.valueCurrency.amount;
-  if (field.valuePhoneNumber != null) return field.valuePhoneNumber;
-  if (field.valueAddress != null) return field.valueAddress.streetAddress || field.content;
-  if (field.content != null) return field.content;
-  return null;
-}
-
-// Devine la catégorie Bertin la plus proche selon ReceiptType / MerchantName
-function azureGuessCategory(receiptType, merchantName, time) {
-  const v = ((receiptType || '') + ' ' + (merchantName || '')).toLowerCase();
-  // Heure → créneau pour repas
-  let creneau = '';
-  if (time) {
-    const h = parseInt(time.split(':')[0], 10);
-    if (!isNaN(h)) {
-      if (h < 11) creneau = 'petit';
-      else if (h < 16) creneau = 'midi';
-      else creneau = 'soir';
+function extractDate(text) {
+  const re = /(\b\d{1,2})[\s\/\-\.](\d{1,2})[\s\/\-\.](\d{2,4})\b/g;
+  const candidates = [];
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    let [_, d, mm, y] = m;
+    d = parseInt(d, 10); mm = parseInt(mm, 10); y = parseInt(y, 10);
+    if (y < 100) y += 2000;
+    if (d >= 1 && d <= 31 && mm >= 1 && mm <= 12 && y >= 2000 && y <= 2100) {
+      candidates.push(new Date(y, mm - 1, d));
     }
   }
-  // Mots-clés vendeur
-  if (/(restaurant|brasserie|pizzer|kebab|sushi|burger|caf[eé]|boulangerie|bistro|meal)/i.test(v)) {
-    if (creneau) return categories.find(c => new RegExp(creneau, 'i').test(c.name))?.name;
+  const now = new Date();
+  const valid = candidates.filter(d => d <= now);
+  if (valid.length === 0) return candidates[0] || null;
+  return valid.sort((a, b) => b - a)[0];
+}
+
+// Renvoie l'heure formatée HH:MM (ou null) extraite du texte
+function extractTime(text) {
+  if (!text) return null;
+  const candidates = [];
+
+  // Pattern 1 : 12:34 / 12h34 / 12H34 / 12 h 34 (avec espaces possibles)
+  // On exige juste un word-boundary AVANT, mais APRÈS on accepte tout (secondes, m, etc.)
+  const re1 = /\b([0-2]?\d)\s*[:hH]\s*([0-5]\d)(?!\d)/g;
+  let m;
+  while ((m = re1.exec(text)) !== null) {
+    const h = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10);
+    if (h <= 23 && mm <= 59) candidates.push({ h, mm, idx: m.index });
+  }
+
+  // Pattern 2 : ISO 8601 (2025-04-15T13:45:00 ou avec espace)
+  const re2 = /\d{4}-\d{2}-\d{2}[T\s](\d{2}):(\d{2})/g;
+  while ((m = re2.exec(text)) !== null) {
+    const h = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10);
+    if (h <= 23 && mm <= 59) candidates.push({ h, mm, idx: m.index });
+  }
+
+  if (candidates.length === 0) return null;
+
+  // Filtrer les "fausses heures" : 00:00 c'est souvent un placeholder
+  const realCandidates = candidates.filter(c => !(c.h === 0 && c.mm === 0));
+  const pool = realCandidates.length > 0 ? realCandidates : candidates;
+
+  // Préférer une heure cohérente avec un repas/horaire normal (6h-23h)
+  // Si plusieurs candidats, on prend le plus fréquent ou à défaut le médian
+  const counts = {};
+  for (const c of pool) {
+    const k = c.h + ':' + c.mm;
+    counts[k] = (counts[k] || 0) + 1;
+  }
+  // Trier par fréquence puis par "plausibilité" (heures de journée privilégiées)
+  const sorted = pool.slice().sort((a, b) => {
+    const ka = a.h + ':' + a.mm;
+    const kb = b.h + ':' + b.mm;
+    if (counts[kb] !== counts[ka]) return counts[kb] - counts[ka];
+    // À fréquence égale, préférer une heure entre 6h et 23h (vie réelle)
+    const aPlausible = (a.h >= 6 && a.h <= 23) ? 1 : 0;
+    const bPlausible = (b.h >= 6 && b.h <= 23) ? 1 : 0;
+    return bPlausible - aPlausible;
+  });
+
+  const t = sorted[0];
+  return String(t.h).padStart(2, '0') + ':' + String(t.mm).padStart(2, '0');
+}
+
+// À partir d'une heure HH:MM, retourne le créneau de repas interne
+function timeToCreneau(timeStr) {
+  if (!timeStr) return '';
+  const h = parseInt(timeStr.split(':')[0], 10);
+  if (isNaN(h)) return '';
+  if (h < 11) return 'Petit-déj';
+  if (h < 16) return 'Midi';
+  return 'Soir';
+}
+
+function extractAmount(text) {
+  const lines = text.split('\n');
+  const keywords = [
+    /\bTTC\b/i,
+    /TOTAL\s*(NET\s*)?(\u00c0\s*PAYER|A\s*PAYER)/i,
+    /MONTANT\s*(TTC|TOTAL|\u00c0\s*PAYER)/i,
+    /TOTAL/i,
+    /\u00c0\s*PAYER/i,
+    /A\s*PAYER/i,
+    /SOMME\s*DUE/i,
+  ];
+  const amountRe = /(\d{1,4}(?:[\s.]\d{3})*[,.]\d{2})\s*\u20ac?/g;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i];
+    for (const kw of keywords) {
+      if (kw.test(line)) {
+        let match = [...line.matchAll(amountRe)];
+        if (match.length === 0 && i + 1 < lines.length) {
+          match = [...lines[i + 1].matchAll(amountRe)];
+        }
+        if (match.length > 0) {
+          const last = match[match.length - 1][1];
+          return parseAmount(last);
+        }
+      }
+    }
+  }
+  const all = [...text.matchAll(amountRe)].map(m => parseAmount(m[1])).filter(n => !isNaN(n));
+  if (all.length === 0) return null;
+  return Math.max(...all);
+}
+
+function parseAmount(s) {
+  return parseFloat(s.replace(/\s/g, '').replace(/\.(?=\d{3})/g, '').replace(',', '.'));
+}
+
+function extractVendor(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+  for (const line of lines.slice(0, 8)) {
+    if (/^[\d\s\.\-\/:]+$/.test(line)) continue;
+    if (/^(ticket|facture|recu|reçu|caisse|date)/i.test(line)) continue;
+    if (line.length >= 3) return line.replace(/\s+/g, ' ').trim();
+  }
+  return '';
+}
+
+// =====================================================================
+// IMPUTATIONS COMPTABLES (Excel Bertin)
+// =====================================================================
+
+// Détection des colonnes par mots-clés (insensible à la casse, accents)
+const IMPUT_COLUMN_HINTS = {
+  client:      ['client', 'societe', 'société'],
+  projectName: ['nom projet', 'designation projet', 'libelle projet', 'libellé projet'],
+  projectNum:  ['num projet', 'numero projet', 'n° projet', 'no projet', 'code projet', 'projets', 'projet'],
+  taskCode:    ['tache', 'tâche', 'code tache', 'n° tache'],
+  taskName:    ['nom de la tache', 'libelle tache', 'libellé tâche', 'descriptif de la tache', 'descriptif'],
+};
+
+function normalize(s) {
+  if (s == null) return '';
+  return String(s).toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function detectColumns(headerRow) {
+  const map = {};
+  for (let c = 0; c < headerRow.length; c++) {
+    const cell = normalize(headerRow[c]);
+    if (!cell) continue;
+    for (const [field, hints] of Object.entries(IMPUT_COLUMN_HINTS)) {
+      if (map[field] != null) continue;
+      if (hints.some(h => cell.includes(normalize(h)))) {
+        map[field] = c;
+        break;
+      }
+    }
+  }
+  return map;
+}
+
+/**
+ * Parse un workbook XLSX et extrait toutes les imputations.
+ * Stratégie : pour chaque feuille, cherche la ligne d'en-tête (1ère ligne avec ≥3 colonnes connues),
+ * puis fill-down les valeurs vides pour Client / NomProjet / NumProjet.
+ */
+function parseImputationsWorkbook(wb) {
+  const allImputations = [];
+  const issues = [];
+
+  for (const sheetName of wb.SheetNames) {
+    const ws = wb.Sheets[sheetName];
+    if (!ws) continue;
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+    if (rows.length < 2) continue;
+
+    // Trouver la ligne d'en-tête : on cherche celle qui matche le plus de colonnes
+    let bestHeaderIdx = -1;
+    let bestColMap = null;
+    for (let r = 0; r < Math.min(rows.length, 10); r++) {
+      const colMap = detectColumns(rows[r] || []);
+      if (Object.keys(colMap).length >= 3) {
+        bestHeaderIdx = r;
+        bestColMap = colMap;
+        break;
+      }
+    }
+
+    if (bestHeaderIdx === -1) {
+      issues.push(`Feuille "${sheetName}" : aucune en-tête reconnue, ignorée`);
+      continue;
+    }
+
+    // Vérifier qu'on a au moins projet + tâche
+    if (bestColMap.projectNum == null || bestColMap.taskCode == null) {
+      issues.push(`Feuille "${sheetName}" : colonnes Projet ou Tâche manquantes`);
+      continue;
+    }
+
+    // Fill-down sur les colonnes parents (client, projectName, projectNum)
+    let lastClient = null, lastProjName = null, lastProjNum = null;
+
+    for (let r = bestHeaderIdx + 1; r < rows.length; r++) {
+      const row = rows[r] || [];
+      const client = row[bestColMap.client];
+      const projName = row[bestColMap.projectName];
+      const projNum = row[bestColMap.projectNum];
+      const taskCode = row[bestColMap.taskCode];
+      const taskName = bestColMap.taskName != null ? row[bestColMap.taskName] : null;
+
+      if (client != null && String(client).trim()) lastClient = String(client).trim();
+      if (projName != null && String(projName).trim()) lastProjName = String(projName).trim();
+      if (projNum != null && String(projNum).trim()) lastProjNum = String(projNum).trim();
+
+      if (!taskCode || !String(taskCode).trim()) continue;
+      if (!lastProjNum) continue; // pas de projet parent → on ignore
+
+      const tcode = String(taskCode).trim();
+      const tname = taskName ? String(taskName).trim() : '';
+
+      allImputations.push({
+        client: lastClient || '',
+        projectNum: lastProjNum,
+        projectName: lastProjName || '',
+        taskCode: tcode,
+        taskName: tname,
+        sheet: sheetName,
+        key: `${lastProjNum}|${tcode}`,
+      });
+    }
+  }
+
+  return { imputations: allImputations, issues };
+}
+
+/**
+ * Diff entre l'existant et le nouveau set
+ */
+function diffImputations(oldList, newList) {
+  const oldMap = new Map(oldList.map(i => [i.key, i]));
+  const newMap = new Map(newList.map(i => [i.key, i]));
+
+  const added = newList.filter(i => !oldMap.has(i.key));
+  const removed = oldList.filter(i => !newMap.has(i.key));
+  const changed = [];
+  const unchanged = [];
+
+  for (const n of newList) {
+    const o = oldMap.get(n.key);
+    if (!o) continue;
+    const fields = ['client', 'projectName', 'taskName'];
+    const diff = fields.filter(f => (o[f] || '') !== (n[f] || ''));
+    if (diff.length > 0) {
+      changed.push({ old: o, new: n, fields: diff });
+    } else {
+      unchanged.push(n);
+    }
+  }
+
+  return { added, removed, changed, unchanged };
+}
+
+// === UI ===
+
+function bindImputationsHandlers() {
+  if (window._imputBound) return;
+  window._imputBound = true;
+
+  $('btnImportImput').addEventListener('click', () => $('imputFile').click());
+
+  $('imputFile').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+
+    $('imputPreview').innerHTML = '<div style="padding:14px; color:var(--text-2); font-family:\'IBM Plex Mono\',monospace; font-size:12px;">⏳ Lecture du fichier…</div>';
+
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const { imputations: newList, issues } = parseImputationsWorkbook(wb);
+
+      if (newList.length === 0) {
+        $('imputPreview').innerHTML = `
+          <div class="diff-summary" style="border-left-color: var(--err);">
+            <div class="label">⚠ Aucune imputation détectée</div>
+            <div style="color: var(--text-1); font-size: 12px;">
+              ${issues.length > 0 ? issues.map(i => '• ' + escapeHtml(i)).join('<br>') : 'Vérifie que ton fichier contient les colonnes Client / Num Projet / Tâche.'}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const diff = diffImputations(imputations, newList);
+      showImputDiffPreview(file.name, newList, diff, issues);
+    } catch (err) {
+      toast('Erreur lecture Excel : ' + err.message);
+      console.error(err);
+      $('imputPreview').innerHTML = '';
+    }
+  });
+
+  $('btnClearImput').addEventListener('click', async () => {
+    if (imputations.length === 0) return;
+    if (!confirm(`Effacer les ${imputations.length} imputations enregistrées ?`)) return;
+    imputations = [];
+    imputationsMeta = null;
+    await setConfig('imputations', []);
+    await setConfig('imputationsMeta', null);
+    renderImputationsView();
+    populateProjectDatalist();
+    toast('Imputations effacées');
+  });
+
+  // Filtre live sur la table imputations
+  document.addEventListener('input', e => {
+    if (e.target.id === 'imputSearch') {
+      renderImputationsTable(e.target.value);
+    }
+  });
+}
+
+function showImputDiffPreview(fileName, newList, diff, issues) {
+  const isFirstImport = imputations.length === 0;
+  const totalChanges = diff.added.length + diff.removed.length + diff.changed.length;
+
+  let html = `
+    <div class="diff-summary">
+      <div class="label">📊 Analyse du fichier "${escapeHtml(fileName)}"</div>
+      <div class="diff-row"><span>Total imputations détectées</span><strong class="mono">${newList.length}</strong></div>
+  `;
+
+  if (isFirstImport) {
+    html += `
+      <div class="diff-row"><span class="added">➕ Nouvelles imputations</span><strong class="mono">${newList.length}</strong></div>
+    </div>
+    <div class="scan-actions" style="margin-top:14px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('imputPreview').innerHTML=''">Annuler</button>
+      <button class="btn btn-primary" id="btnConfirmImport">✓ Importer ${newList.length} imputations</button>
+    </div>
+    `;
+  } else {
+    html += `
+      <div class="diff-row"><span class="added">➕ Ajoutées</span><strong class="mono">${diff.added.length}</strong></div>
+      <div class="diff-row"><span class="changed">✎ Modifiées</span><strong class="mono">${diff.changed.length}</strong></div>
+      <div class="diff-row"><span class="removed">✗ Supprimées (n'existent plus)</span><strong class="mono">${diff.removed.length}</strong></div>
+      <div class="diff-row"><span class="unchanged">= Inchangées</span><strong class="mono">${diff.unchanged.length}</strong></div>
+    </div>
+    `;
+
+    if (diff.added.length > 0) {
+      html += `<div style="margin-top:10px;"><div class="label" style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ok); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;">➕ Nouvelles</div>`;
+      diff.added.slice(0, 10).forEach(i => {
+        html += `<div style="font-size:12px; padding:4px 0; border-bottom:1px dashed var(--border);"><span class="mono" style="color:var(--accent);">${escapeHtml(i.projectNum)}.${escapeHtml(i.taskCode)}</span> — ${escapeHtml(i.client)} ${escapeHtml(i.projectName)}</div>`;
+      });
+      if (diff.added.length > 10) html += `<div style="color:var(--text-2); font-size:11px; margin-top:4px;">… et ${diff.added.length - 10} autre(s)</div>`;
+      html += `</div>`;
+    }
+
+    if (diff.changed.length > 0) {
+      html += `<div style="margin-top:10px;"><div class="label" style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--accent); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;">✎ Modifiées</div>`;
+      diff.changed.slice(0, 10).forEach(c => {
+        html += `<div style="font-size:12px; padding:4px 0; border-bottom:1px dashed var(--border);"><span class="mono" style="color:var(--accent);">${escapeHtml(c.new.projectNum)}.${escapeHtml(c.new.taskCode)}</span> — ${c.fields.map(f => `<em style="color:var(--text-2);">${f}</em>`).join(', ')} changé(s)</div>`;
+      });
+      if (diff.changed.length > 10) html += `<div style="color:var(--text-2); font-size:11px; margin-top:4px;">… et ${diff.changed.length - 10} autre(s)</div>`;
+      html += `</div>`;
+    }
+
+    if (diff.removed.length > 0) {
+      html += `<div style="margin-top:10px;"><div class="label" style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--err); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;">✗ Supprimées (absentes du nouveau fichier)</div>`;
+      diff.removed.slice(0, 10).forEach(i => {
+        html += `<div style="font-size:12px; padding:4px 0; border-bottom:1px dashed var(--border); color:var(--text-2);"><span class="mono">${escapeHtml(i.projectNum)}.${escapeHtml(i.taskCode)}</span> — ${escapeHtml(i.client)} ${escapeHtml(i.projectName)}</div>`;
+      });
+      if (diff.removed.length > 10) html += `<div style="color:var(--text-2); font-size:11px; margin-top:4px;">… et ${diff.removed.length - 10} autre(s)</div>`;
+      html += `</div>`;
+    }
+
+    if (totalChanges === 0) {
+      html += `<div style="margin-top:14px; padding:10px; background:var(--ok-soft); border-left:3px solid var(--ok); color:var(--ok); font-size:13px;">✓ Aucun changement — ton fichier est déjà à jour.</div>`;
+      html += `<div class="scan-actions" style="margin-top:14px;">
+        <button class="btn btn-ghost" onclick="document.getElementById('imputPreview').innerHTML=''">Fermer</button>
+      </div>`;
+    } else {
+      html += `<div class="scan-actions" style="margin-top:14px;">
+        <button class="btn btn-ghost" onclick="document.getElementById('imputPreview').innerHTML=''">Annuler</button>
+        <button class="btn btn-primary" id="btnConfirmImport">✓ Appliquer (${totalChanges} changement${totalChanges>1?'s':''})</button>
+      </div>`;
+    }
+  }
+
+  if (issues.length > 0) {
+    html += `<div style="margin-top:14px; padding:10px; background:var(--accent-soft); border-left:3px solid var(--accent); color:var(--accent); font-size:12px;">⚠ ${issues.map(i => escapeHtml(i)).join('<br>')}</div>`;
+  }
+
+  $('imputPreview').innerHTML = html;
+
+  const confirmBtn = $('btnConfirmImport');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', async () => {
+      imputations = newList;
+      imputationsMeta = {
+        sourceFile: fileName,
+        importedAt: new Date().toISOString(),
+        count: newList.length,
+      };
+      await setConfig('imputations', imputations);
+      await setConfig('imputationsMeta', imputationsMeta);
+      $('imputPreview').innerHTML = '';
+      renderImputationsView();
+      populateProjectDatalist();
+      toast(`✓ ${newList.length} imputations enregistrées`, 2500);
+    });
+  }
+}
+
+function renderImputationsView() {
+  if (imputationsMeta && imputations.length > 0) {
+    $('imputMetaCard').style.display = 'block';
+    const d = new Date(imputationsMeta.importedAt);
+    $('imputMetaInfo').innerHTML = `
+      <strong>${imputations.length}</strong> imputations chargées<br>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-2);">
+        Source : ${escapeHtml(imputationsMeta.sourceFile)} · Importé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}
+      </span>
+    `;
+    $('imputListCard').style.display = 'block';
+    renderImputationsTable();
+  } else {
+    $('imputMetaCard').style.display = 'none';
+    $('imputListCard').style.display = 'none';
+  }
+}
+
+function renderImputationsTable(filter = '') {
+  const f = normalize(filter);
+  const filtered = f
+    ? imputations.filter(i =>
+        normalize(i.client).includes(f) ||
+        normalize(i.projectNum).includes(f) ||
+        normalize(i.projectName).includes(f) ||
+        normalize(i.taskCode).includes(f) ||
+        normalize(i.taskName).includes(f)
+      )
+    : imputations;
+
+  let html = `
+    <div class="imput-row header">
+      <div>Projet</div>
+      <div>Tâche</div>
+      <div>Description</div>
+      <div>Client</div>
+    </div>
+  `;
+  if (filtered.length === 0) {
+    html += `<div style="padding:20px; text-align:center; color:var(--text-2); font-size:12px;">Aucun résultat</div>`;
+  } else {
+    filtered.slice(0, 200).forEach(i => {
+      html += `
+        <div class="imput-row">
+          <div class="imput-cell-num">${escapeHtml(i.projectNum)}</div>
+          <div class="imput-cell-task">${escapeHtml(i.taskCode)}</div>
+          <div>${escapeHtml(i.projectName)} ${i.taskName ? `<span style="color:var(--text-2); font-size:11px;">— ${escapeHtml(i.taskName)}</span>` : ''}</div>
+          <div><span class="imput-cell-client">${escapeHtml(i.client || '—')}</span></div>
+        </div>
+      `;
+    });
+    if (filtered.length > 200) {
+      html += `<div style="padding:10px; text-align:center; color:var(--text-2); font-size:11px;">… ${filtered.length - 200} autre(s) — affine ta recherche</div>`;
+    }
+  }
+  $('imputTable').innerHTML = html;
+}
+
+// === Datalist projets dans le formulaire de note ===
+function populateProjectDatalist() {
+  const dl = $('fProjectList');
+  if (!dl) return;
+  // On dédoublonne par projectNum
+  const projects = new Map();
+  imputations.forEach(i => {
+    if (!projects.has(i.projectNum)) {
+      projects.set(i.projectNum, { num: i.projectNum, client: i.client, name: i.projectName });
+    }
+  });
+  dl.innerHTML = [...projects.values()]
+    .map(p => `<option value="${escapeHtml(p.num)} - ${escapeHtml(p.client)} - ${escapeHtml(p.name)}"></option>`)
+    .join('');
+}
+
+// Quand l'utilisateur tape ou sélectionne un projet → mettre à jour le select tâches
+function bindProjectFieldHandlers() {
+  const projInput = $('fProjectSearch');
+  if (!projInput || projInput._bound) return;
+  projInput._bound = true;
+
+  projInput.addEventListener('input', () => {
+    const val = projInput.value.trim();
+    // Extraire le numéro de projet (premier segment avant " - ")
+    const projNum = val.split(' - ')[0].trim();
+    updateTaskSelectForProject(projNum);
+  });
+}
+
+function updateTaskSelectForProject(projectNum) {
+  const sel = $('fTask');
+  if (!sel) return;
+  if (!projectNum) {
+    sel.innerHTML = '<option value="">— Choisir un projet —</option>';
+    return;
+  }
+  const tasks = imputations.filter(i => i.projectNum === projectNum);
+  if (tasks.length === 0) {
+    sel.innerHTML = '<option value="">— Aucune tâche pour ce projet —</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">— Sélectionner —</option>' +
+    tasks.map(t =>
+      `<option value="${escapeHtml(t.taskCode)}">${escapeHtml(t.taskCode)} — ${escapeHtml(t.taskName || t.projectName)}</option>`
+    ).join('');
+}
+
+async function renderPdfPageToDataUrl(page, scale = 2) {
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+  return canvas.toDataURL('image/jpeg', 0.85);
+}
+
+async function getPageText(page) {
+  const content = await page.getTextContent();
+  const lineMap = {};
+  for (const item of content.items) {
+    const y = Math.round(item.transform[5] * 2) / 2;
+    if (!lineMap[y]) lineMap[y] = [];
+    lineMap[y].push({ x: item.transform[4], str: item.str });
+  }
+  const ys = Object.keys(lineMap).map(Number).sort((a, b) => b - a);
+  return ys.map(y =>
+    lineMap[y].sort((a, b) => a.x - b.x).map(it => it.str).join(' ').trim()
+  ).filter(Boolean).join('\n');
+}
+
+/**
+ * Lit un PDF et retourne un tableau de factures détectées.
+ * Chaque entrée : { text, image, pages: [n,...] }
+ * - PDF 1 page → 1 facture
+ * - PDF multi-pages : découpe selon scorePageAsInvoice
+ *   Une page "non-facture" est rattachée à la facture précédente
+ *   Si aucune page ne scoring assez → fallback 1 seule facture sur tout
+ */
+async function extractInvoicesFromPdf(pdf, progressCb = null) {
+  // 1) Récupérer texte (intégré ou OCR) + image de chaque page
+  const pageData = [];
+  for (let p = 1; p <= pdf.numPages; p++) {
+    if (progressCb) progressCb(p, pdf.numPages, 'lecture');
+    const page = await pdf.getPage(p);
+    let text = await getPageText(page);
+    const image = await renderPdfPageToDataUrl(page, 2);
+
+    // Si pas de texte intégré, OCR sur l'image
+    if (text.replace(/\s+/g, ' ').trim().length < 40) {
+      if (progressCb) progressCb(p, pdf.numPages, 'ocr');
+      try {
+        text = await runOCR(image);
+      } catch (err) {
+        console.warn(`[PDF] OCR page ${p} échoué:`, err);
+        text = '';
+      }
+    }
+    pageData.push({ pageNum: p, text, image });
+  }
+
+  // 2) Cas trivial : 1 page
+  if (pageData.length === 1) {
+    return [{
+      text: pageData[0].text,
+      image: pageData[0].image,
+      pages: [1],
+    }];
+  }
+
+  // 3) Scorer chaque page
+  const scores = pageData.map(p => scorePageAsInvoice(p.text));
+  console.log('[PDF] Scores par page:', scores);
+
+  // 4) Découpage : une page avec score >= 2 démarre une nouvelle facture
+  const invoices = [];
+  for (let i = 0; i < pageData.length; i++) {
+    if (scores[i] >= 2 || invoices.length === 0) {
+      // Nouvelle facture
+      invoices.push({
+        text: pageData[i].text,
+        image: pageData[i].image, // image = 1ère page de la facture
+        pages: [pageData[i].pageNum],
+      });
+    } else {
+      // Continuation : on fusionne le texte dans la dernière facture
+      const last = invoices[invoices.length - 1];
+      last.text += '\n\n' + pageData[i].text;
+      last.pages.push(pageData[i].pageNum);
+    }
+  }
+
+  // 5) Fallback : si aucune facture viable détectée → tout le PDF = 1 facture
+  if (invoices.length === 0 || invoices.every(inv => !extractAmount(inv.text))) {
+    console.log('[PDF] Aucune facture autonome détectée → fallback agrégé');
+    return [{
+      text: pageData.map(p => p.text).join('\n\n'),
+      image: pageData[0].image,
+      pages: pageData.map(p => p.pageNum),
+    }];
+  }
+
+  return invoices;
+}
+// Renvoie un score de 0 à 5 ; ≥ 2 = page = facture distincte
+function scorePageAsInvoice(text) {
+  let score = 0;
+  const hasAmount = extractAmount(text);
+  if (hasAmount && hasAmount > 0) score += 2;
+  if (extractDate(text)) score += 1;
+  if (/\b(facture|ticket|re[çc]u|invoice|n[°o]\s*\d)/i.test(text)) score += 1;
+  // Mot-clé fort de total payé
+  if (/(total\s+(ttc|net|\u00e0\s*payer|a\s*payer))|montant\s+ttc|net\s+\u00e0\s+payer/i.test(text)) score += 1;
+  return score;
+}
+
+function suggestCategory(vendor, text, creneau, categories) {
+  const v = (vendor + ' ' + text).toLowerCase();
+
+  if (creneau === 'Petit-déj') return categories.find(c => /petit/i.test(c.name))?.name;
+  if (creneau === 'Midi') return categories.find(c => /midi/i.test(c.name))?.name;
+  if (creneau === 'Soir') return categories.find(c => /soir/i.test(c.name))?.name;
+
+  if (/(restaurant|brasserie|pizzer|kebab|sushi|burger|caf[eé]|boulangerie|bistro)/i.test(v)) {
     return categories.find(c => /midi/i.test(c.name))?.name;
   }
-  if (/(total|esso|shell|\bbp\b|station|sp95|sp98|gazole|diesel|gas|fuel)/i.test(v)) {
+  if (/(total|esso|shell|\bbp\b|carrefour\s*pass|leclerc\s*sp|station|gpl|sp95|sp98|gazole|diesel)/i.test(v)) {
     return categories.find(c => /carburant/i.test(c.name))?.name;
   }
-  if (/(vinci|sanef|aprr|asf|p[eé]age|autoroute|toll)/i.test(v)) {
+  if (/(vinci|sanef|aprr|asf|p[eé]age|autoroute)/i.test(v)) {
     return categories.find(c => /p[eé]age/i.test(c.name))?.name;
   }
-  if (/(sncf|tgv|ouigo|trainline|train|air\s*france|easyjet|ryanair|airline)/i.test(v)) {
+  if (/(sncf|tgv|ouigo|trainline|air\s*france|easyjet|ryanair)/i.test(v)) {
     return categories.find(c => /train/i.test(c.name))?.name;
   }
   if (/(uber|bolt|taxi|g7|kapten)/i.test(v)) {
@@ -1583,175 +1938,10 @@ function azureGuessCategory(receiptType, merchantName, time) {
   if (/(parking|saemes|q-park|indigo|effia)/i.test(v)) {
     return categories.find(c => /parking/i.test(c.name))?.name;
   }
-  if (/(h[oô]tel|ibis|mercure|novotel|kyriad|campanile|b&b|booking|hotel|lodging)/i.test(v)) {
+  if (/(h[oô]tel|ibis|mercure|novotel|kyriad|campanile|b&b|booking|airbnb|aguado|birdy|ekho|abbaye)/i.test(v)) {
     return categories.find(c => /autres r[eé]gions/i.test(c.name))?.name;
   }
-  // Fallback selon créneau si on en a un
-  if (creneau) return categories.find(c => new RegExp(creneau, 'i').test(c.name))?.name;
   return categories[0]?.name || '';
-}
-
-async function callAzureAPI(imageDataUrl) {
-  const { endpoint, apiKey } = await getAzureConfig();
-  if (!endpoint || !apiKey) {
-    throw new Error('Configuration Azure incomplète. Va dans Réglages → renseigne endpoint + clé.');
-  }
-  const ep = normalizeAzureEndpoint(endpoint);
-  const base64 = dataUrlToBase64(imageDataUrl);
-
-  setProgress('Envoi à Azure…', 20);
-
-  // 1) POST pour démarrer l'analyse
-  const analyzeUrl = `${ep}/documentintelligence/documentModels/${AZURE_MODEL_ID}:analyze?api-version=${AZURE_API_VERSION}`;
-  const initResp = await fetch(analyzeUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Ocp-Apim-Subscription-Key': apiKey,
-    },
-    body: JSON.stringify({ base64Source: base64 }),
-  });
-
-  if (!initResp.ok) {
-    let errMsg = `HTTP ${initResp.status}`;
-    try {
-      const err = await initResp.json();
-      errMsg = err.error?.message || err.message || errMsg;
-    } catch (_) {}
-    throw new Error('Azure : ' + errMsg);
-  }
-
-  // 2) Récupérer Operation-Location pour le poll
-  const opLocation = initResp.headers.get('Operation-Location') || initResp.headers.get('operation-location');
-  if (!opLocation) throw new Error('Azure : pas de Operation-Location dans la réponse');
-
-  // 3) Poll jusqu'à status="succeeded" (max 30s)
-  setProgress('Analyse en cours…', 40);
-  let attempts = 0;
-  let result = null;
-  while (attempts < 30) {
-    await new Promise(r => setTimeout(r, 1000));
-    attempts++;
-    const pollResp = await fetch(opLocation, {
-      headers: { 'Ocp-Apim-Subscription-Key': apiKey },
-    });
-    if (!pollResp.ok) {
-      throw new Error('Azure poll : HTTP ' + pollResp.status);
-    }
-    const pollData = await pollResp.json();
-    setProgress(`Analyse… (${attempts}s)`, 40 + Math.min(attempts * 2, 50));
-
-    if (pollData.status === 'succeeded') {
-      result = pollData.analyzeResult;
-      break;
-    } else if (pollData.status === 'failed') {
-      throw new Error('Azure analyse échouée : ' + (pollData.error?.message || 'inconnu'));
-    }
-    // sinon "running" ou "notStarted" → on retente
-  }
-  if (!result) throw new Error('Azure : timeout (>30s)');
-
-  console.log('[Azure] résultat brut:', result);
-
-  // 4) Convertir au format unifié de l'app
-  const doc = result.documents?.[0];
-  if (!doc) throw new Error('Azure : aucun ticket détecté dans l\'image');
-
-  const fields = doc.fields || {};
-  const merchantName = azureFieldValue(fields.MerchantName) || '';
-  const transactionDate = azureFieldValue(fields.TransactionDate) || ''; // YYYY-MM-DD
-  const transactionTime = azureFieldValue(fields.TransactionTime) || ''; // HH:MM:SS
-  // Convertir HH:MM:SS → HH:MM
-  const time = transactionTime ? transactionTime.slice(0, 5) : '';
-
-  // Total (souvent number, parfois currency)
-  let amount = azureFieldValue(fields.Total);
-  if (amount == null) amount = azureFieldValue(fields.Subtotal);
-  if (typeof amount === 'string') amount = parseFloat(amount.replace(',', '.'));
-
-  // ReceiptType : Meal, Hotel, Other, etc.
-  const receiptType = azureFieldValue(fields.ReceiptType) || '';
-  const cat = azureGuessCategory(receiptType, merchantName, time);
-
-  // Pour les hôtels : Items[].DateRange parfois présent. Sinon, par défaut 1.
-  let nights = 1;
-  const items = fields.Items?.valueArray || [];
-  if (/hotel|lodging/i.test(receiptType)) {
-    // On regarde s'il y a plusieurs items "nuit" → on additionne les Quantity
-    let nightsSum = 0;
-    for (const it of items) {
-      const desc = azureFieldValue(it.valueObject?.Description) || '';
-      const qty = azureFieldValue(it.valueObject?.Quantity);
-      if (/nuit|night|chambre|room/i.test(desc) && qty) nightsSum += qty;
-    }
-    if (nightsSum > 0) nights = nightsSum;
-  }
-
-  return {
-    date: transactionDate || new Date().toISOString().slice(0, 10),
-    time: time,
-    amountTTC: amount || 0,
-    category: cat || categories[0]?.name || '',
-    nights: nights,
-    people: 1,        // Azure ne le déduit pas explicitement
-    guests: '',
-    siret: '',
-    vendor: merchantName,
-    rawNotes: receiptType ? `Type Azure: ${receiptType}` : '',
-  };
-}
-
-async function testAzureKey(endpoint, apiKey) {
-  const ep = normalizeAzureEndpoint(endpoint);
-  // On envoie une mini image PNG transparente 1x1 — juste pour tester l'auth
-  const tinyPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==';
-  const url = `${ep}/documentintelligence/documentModels/${AZURE_MODEL_ID}:analyze?api-version=${AZURE_API_VERSION}`;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Ocp-Apim-Subscription-Key': apiKey,
-    },
-    body: JSON.stringify({ base64Source: tinyPng }),
-  });
-  // Azure peut renvoyer 202 (accepté) même pour une image "vide" → c'est bon signe (auth OK)
-  // ou 400 "InvalidContent" qui prouve aussi que l'auth a marché
-  if (resp.status === 202) return 'Connexion OK';
-  if (resp.status === 400) {
-    const err = await resp.json().catch(() => ({}));
-    if (err.error?.code === 'InvalidContent' || err.error?.code === 'InvalidImage') {
-      return 'Connexion OK (image test rejetée mais auth valide)';
-    }
-    throw new Error('Azure: ' + (err.error?.message || 'requête invalide'));
-  }
-  if (resp.status === 401 || resp.status === 403) {
-    throw new Error('Clé invalide ou endpoint incorrect');
-  }
-  if (resp.status === 404) {
-    throw new Error('Endpoint introuvable : vérifie l\'URL');
-  }
-  throw new Error(`HTTP ${resp.status}`);
-}
-
-// =====================================================================
-// DISPATCHER : appel du moteur IA configuré
-// =====================================================================
-
-async function getProvider() {
-  return (await getConfig('aiProvider')) || 'claude';
-}
-
-async function setProvider(p) {
-  await setConfig('aiProvider', p);
-}
-
-// Point d'entrée unique : appelle le bon moteur selon le réglage
-async function extractFromImage(imageDataUrl) {
-  const provider = await getProvider();
-  if (provider === 'azure') {
-    return await callAzureAPI(imageDataUrl);
-  }
-  return await callClaudeAPI(imageDataUrl);
 }
 
 // =====================================================================
@@ -1797,7 +1987,6 @@ document.querySelectorAll('.tab').forEach(btn => {
     if (btn.dataset.tab === 'list') refreshList();
     if (btn.dataset.tab === 'plafonds') renderPlafonds();
     if (btn.dataset.tab === 'imputations') renderImputationsView();
-    if (btn.dataset.tab === 'settings') loadApiKeyIntoSettings();
   });
 });
 
@@ -1855,17 +2044,18 @@ async function handleFile(file) {
     $('extractedCard').style.display = 'none';
     editingId = null;
     try {
-      console.log('[handleFile] Appel Claude API…');
-      const extracted = await extractFromImage(currentImage);
-      console.log('[handleFile] Extrait:', extracted);
+      console.log('[handleFile] OCR start...');
+      const text = await runOCR(currentImage);
+      console.log('[handleFile] OCR done, ' + (text || '').length + ' chars');
       hideProgress();
-      currentRawText = JSON.stringify(extracted, null, 2);
-      $('rawText').textContent = currentRawText;
-      populateForm(extracted);
+      currentRawText = text;
+      $('rawText').textContent = text;
+      populateForm(text);
     } catch (err) {
       hideProgress();
       console.error('[handleFile] erreur:', err);
-      toast('Erreur : ' + (err.message || err));
+      toast('Erreur : ' + (err.message || err) + ' (voir debug)');
+      // Force afficher le panneau debug
       const p = document.getElementById('debugPanel');
       if (p) p.style.display = 'block';
     }
@@ -1899,15 +2089,15 @@ async function handlePdfFile(file) {
     if (invoices.length === 1) {
       const inv = invoices[0];
       currentImage = inv.image;
-      currentRawText = JSON.stringify(inv.aiData, null, 2);
+      currentRawText = inv.text;
       $('previewImg').src = inv.image;
       $('previewWrap').style.display = 'block';
-      $('rawText').textContent = currentRawText;
-      populateForm(inv.aiData);
+      $('rawText').textContent = inv.text;
+      populateForm(inv.text);
       toast(pdf.numPages > 1
         ? `✓ PDF ${pdf.numPages} pages → 1 facture`
         : '✓ PDF lu');
-      return inv.aiData;
+      return inv.text;
     }
 
     // Cas 2 : plusieurs factures détectées → import en lot direct
@@ -1955,21 +2145,21 @@ async function handlePdfFile(file) {
   }
 }
 
-// Sauvegarder une facture depuis l'objet extrait par Claude
-// `extracted` = { image, aiData: {date, time, amountTTC, category, nights, people, guests, vendor, ...} }
+// Sauvegarder une facture extraite (image + texte) sans passer par le formulaire UI
 async function saveInvoiceFromExtract(extracted, sourceLabel) {
-  const ai = extracted.aiData;
-  if (!ai) throw new Error('Pas de données IA');
+  const text = extracted.text;
+  const date = extractDate(text);
+  const amount = extractAmount(text);
+  const vendor = extractVendor(text); // utilisé uniquement pour suggestion catégorie
+  const time = extractTime(text);
+  const creneau = timeToCreneau(time); // interne pour suggestion
+  const cat = suggestCategory(vendor, text, creneau, categories);
 
-  const amount = parseFloat(ai.amountTTC);
   if (!amount || amount <= 0) {
     throw new Error('Montant non détecté');
   }
 
-  const dateStr = ai.date || new Date().toISOString().slice(0, 10);
-  const cat = (ai.category && categories.find(c => c.name === ai.category))
-    ? ai.category
-    : (categories[0]?.name || 'Autre');
+  const dateStr = date ? date.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
 
   const existing = (await getAllNotes()).find(n =>
     n.date === dateStr &&
@@ -1980,15 +2170,15 @@ async function saveInvoiceFromExtract(extracted, sourceLabel) {
 
   const note = {
     date: dateStr,
-    time: ai.time || '',
-    category: cat,
+    time: time || '',
+    category: cat || categories[0]?.name || 'Autre',
     amountPaid: amount,
     amount: amount,
-    nights: parseInt(ai.nights) || 1,
-    people: parseInt(ai.people) || 1,
-    guests: ai.guests || '',
-    comment: ai.rawNotes || '',
-    rawText: JSON.stringify(ai, null, 2),
+    nights: 1,
+    people: 1,
+    guests: '',
+    comment: '',
+    rawText: text,
     image: extracted.image,
     createdAt: new Date().toISOString(),
     importedFrom: sourceLabel,
@@ -2082,10 +2272,11 @@ async function handleBatch(files) {
 // Renvoie un objet { added, dups, failed } pour comptage cumulé dans le lot
 async function processFileForBatch(file) {
   if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
+    // PDF → peut produire 1 ou plusieurs factures
     const buf = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-    const invoices = await extractInvoicesFromPdf(pdf, (p, total) => {
-      $('batchDetail').textContent = `📄 ${file.name} — page ${p}/${total}`;
+    const invoices = await extractInvoicesFromPdf(pdf, (p, total, kind) => {
+      $('batchDetail').textContent = `📄 ${file.name} — page ${p}/${total}${kind === 'ocr' ? ' (OCR)' : ''}`;
     });
 
     let added = 0, dups = 0, failed = 0;
@@ -2102,18 +2293,18 @@ async function processFileForBatch(file) {
     return { added, dups, failed, splitInto: invoices.length };
   }
 
-  // Image : on appelle Claude directement
+  // Image
   const imageData = await new Promise((res, rej) => {
     const reader = new FileReader();
     reader.onload = e => res(e.target.result);
     reader.onerror = () => rej(new Error('Lecture impossible'));
     reader.readAsDataURL(file);
   });
-  $('batchDetail').textContent = `🖼 ${file.name} (IA…)`;
+  $('batchDetail').textContent = `🖼 ${file.name} (OCR…)`;
+  const rawText = await runOCR(imageData);
 
   try {
-    const aiData = await extractFromImage(imageData);
-    const r = await saveInvoiceFromExtract({ aiData, image: imageData, pages: [1] }, file.name);
+    const r = await saveInvoiceFromExtract({ text: rawText, image: imageData, pages: [1] }, file.name);
     if (r === 'dup') return { added: 0, dups: 1, failed: 0, splitInto: 1 };
     if (r) return { added: 1, dups: 0, failed: 0, splitInto: 1 };
     return { added: 0, dups: 0, failed: 1, splitInto: 1 };
@@ -2123,110 +2314,58 @@ async function processFileForBatch(file) {
   }
 }
 
-// Rend une page PDF en dataURL (image PNG)
-async function renderPdfPageToImage(pdf, pageNum, scale = 1.5) {
-  const page = await pdf.getPage(pageNum);
-  const viewport = page.getViewport({ scale });
-  const canvas = document.createElement('canvas');
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  const ctx = canvas.getContext('2d');
-  await page.render({ canvasContext: ctx, viewport }).promise;
-  return canvas.toDataURL('image/jpeg', 0.85);
-}
+function populateForm(text) {
+  console.log('[populateForm] Démarrage, text length:', (text || '').length);
 
-// Extrait les factures d'un PDF :
-// - 1 page = 1 appel Claude (extrait les infos + détecte si c'est une page autonome)
-// - Pages adjacentes "non-facture" sont fusionnées avec la précédente (CGV, mentions légales)
-async function extractInvoicesFromPdf(pdf, onProgress) {
-  const total = pdf.numPages;
-  const pageData = [];
-
-  // 1. Rendre chaque page en image et appeler Claude
-  for (let i = 1; i <= total; i++) {
-    if (onProgress) onProgress(i, total);
-    const imageData = await renderPdfPageToImage(pdf, i);
-    try {
-      const aiData = await extractFromImage(imageData);
-      // On considère qu'une page est une vraie facture si elle a un montant et une date
-      const isInvoice = aiData && aiData.amountTTC > 0 && !!aiData.date;
-      pageData.push({ pageNum: i, image: imageData, aiData, isInvoice });
-    } catch (err) {
-      console.warn(`[PDF p.${i}] Claude échec:`, err.message);
-      pageData.push({ pageNum: i, image: imageData, aiData: null, isInvoice: false });
-    }
-  }
-
-  // 2. Regrouper : chaque page-facture commence un groupe, les pages "non" se rattachent à la précédente
-  const invoices = [];
-  let current = null;
-  for (const p of pageData) {
-    if (p.isInvoice) {
-      if (current) invoices.push(current);
-      current = {
-        aiData: p.aiData,
-        image: p.image,
-        pages: [p.pageNum],
-      };
-    } else if (current) {
-      current.pages.push(p.pageNum);
-    }
-    // Si pas de current et page non-facture, on ignore
-  }
-  if (current) invoices.push(current);
-
-  // Fallback : si rien détecté mais des pages existent, prendre la première page comme facture unique
-  if (invoices.length === 0 && pageData.length > 0) {
-    const first = pageData.find(p => p.aiData) || pageData[0];
-    if (first.aiData) {
-      invoices.push({ aiData: first.aiData, image: first.image, pages: [first.pageNum] });
-    }
-  }
-
-  return invoices;
-}
-
-function populateForm(aiData) {
-  console.log('[populateForm] Démarrage, données IA:', aiData);
-
+  // Helper safe pour setter une valeur sur un champ qui pourrait ne pas exister
   const setVal = (id, val) => {
     const el = $(id);
-    if (el) el.value = val;
-    else console.warn('[populateForm] Champ introuvable:', id);
+    if (el) {
+      el.value = val;
+    } else {
+      console.warn('[populateForm] Champ introuvable:', id);
+    }
   };
 
   try {
+    const date = extractDate(text);
+    const amount = extractAmount(text);
+    const vendor = extractVendor(text);
+    const time = extractTime(text);
+    const creneau = timeToCreneau(time);
+    const cat = suggestCategory(vendor, text, creneau, categories);
+
+    console.log('[populateForm] Extrait:', { date: date?.toISOString?.() || date, amount, time, cat });
+
+    // Garde-fou : catégories doit exister
     if (!Array.isArray(categories) || categories.length === 0) {
+      console.error('[populateForm] categories vide ou invalide:', categories);
       throw new Error('Catégories non chargées (rafraîchis la page)');
     }
-    if (!aiData || typeof aiData !== 'object') {
-      throw new Error('Données IA absentes ou invalides');
-    }
 
-    // Date : si invalide, fallback aujourd'hui
-    const today = new Date().toISOString().slice(0, 10);
-    let dateStr = today;
-    if (aiData.date && /^\d{4}-\d{2}-\d{2}$/.test(aiData.date)) {
-      dateStr = aiData.date;
+    // Date safe : si date invalide ou null, fallback aujourd'hui
+    let dateStr;
+    try {
+      dateStr = date && !isNaN(date.getTime())
+        ? date.toISOString().slice(0, 10)
+        : new Date().toISOString().slice(0, 10);
+    } catch (e) {
+      console.warn('[populateForm] date invalide, fallback today:', date, e);
+      dateStr = new Date().toISOString().slice(0, 10);
     }
-
-    // Catégorie : doit être dans la liste, sinon fallback
-    const cat = (aiData.category && categories.find(c => c.name === aiData.category))
-      ? aiData.category
-      : categories[0].name;
 
     setVal('fDate', dateStr);
-    setVal('fAmount', aiData.amountTTC != null ? Number(aiData.amountTTC).toFixed(2) : '');
-    setVal('fTime', aiData.time && /^\d{1,2}:\d{2}/.test(aiData.time) ? aiData.time : '');
-    setVal('fCat', cat);
-    setVal('fComment', aiData.rawNotes || '');
+    setVal('fAmount', amount != null ? amount.toFixed(2) : '');
+    setVal('fTime', time || '');
+    setVal('fCat', cat || categories[0].name);
+    setVal('fComment', '');
     setVal('fProjectSearch', '');
     const fTask = $('fTask');
     if (fTask) fTask.innerHTML = '<option value="">— Choisir un projet —</option>';
     setVal('fSite', '');
-    setVal('fNights', parseInt(aiData.nights) || 1);
-    setVal('fPeople', parseInt(aiData.people) || 1);
-    setVal('fGuests', aiData.guests || '');
+    setVal('fNights', 1);
+    setVal('fPeople', 1);
+    setVal('fGuests', '');
 
     updateConditionalFields();
     $('extractedCard').style.display = 'block';
@@ -2236,7 +2375,7 @@ function populateForm(aiData) {
   } catch (err) {
     console.error('[populateForm] ÉCHEC:', err);
     toast('Erreur formulaire : ' + err.message);
-    throw err;
+    throw err; // remonte pour que handleFile puisse logger
   }
 }
 
@@ -3216,397 +3355,6 @@ window.resetAndReload = async function() {
   }
 };
 
-// =====================================================================
-// IMPUTATIONS COMPTABLES (Excel Bertin)
-// =====================================================================
-
-const IMPUT_COLUMN_HINTS = {
-  client:      ['client', 'societe', 'société'],
-  projectName: ['nom projet', 'designation projet', 'libelle projet', 'libellé projet'],
-  projectNum:  ['num projet', 'numero projet', 'n° projet', 'no projet', 'code projet', 'projets', 'projet'],
-  taskCode:    ['tache', 'tâche', 'code tache', 'n° tache'],
-  taskName:    ['nom de la tache', 'libelle tache', 'libellé tâche', 'descriptif de la tache', 'descriptif'],
-};
-
-function imputNormalize(s) {
-  if (s == null) return '';
-  return String(s).toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-function detectColumns(headerRow) {
-  const map = {};
-  for (let c = 0; c < headerRow.length; c++) {
-    const cell = imputNormalize(headerRow[c]);
-    if (!cell) continue;
-    for (const [field, hints] of Object.entries(IMPUT_COLUMN_HINTS)) {
-      if (map[field] != null) continue;
-      if (hints.some(h => cell.includes(imputNormalize(h)))) {
-        map[field] = c;
-        break;
-      }
-    }
-  }
-  return map;
-}
-
-function parseImputationsWorkbook(wb) {
-  const allImputations = [];
-  const issues = [];
-  for (const sheetName of wb.SheetNames) {
-    const ws = wb.Sheets[sheetName];
-    if (!ws) continue;
-    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
-    if (rows.length < 2) continue;
-    let bestHeaderIdx = -1;
-    let bestColMap = null;
-    for (let r = 0; r < Math.min(rows.length, 10); r++) {
-      const colMap = detectColumns(rows[r] || []);
-      if (Object.keys(colMap).length >= 3) {
-        bestHeaderIdx = r;
-        bestColMap = colMap;
-        break;
-      }
-    }
-    if (bestHeaderIdx === -1) {
-      issues.push(`Feuille "${sheetName}" : aucune en-tête reconnue, ignorée`);
-      continue;
-    }
-    if (bestColMap.projectNum == null || bestColMap.taskCode == null) {
-      issues.push(`Feuille "${sheetName}" : colonnes Projet ou Tâche manquantes`);
-      continue;
-    }
-    let lastClient = null, lastProjName = null, lastProjNum = null;
-    for (let r = bestHeaderIdx + 1; r < rows.length; r++) {
-      const row = rows[r] || [];
-      const client = row[bestColMap.client];
-      const projName = row[bestColMap.projectName];
-      const projNum = row[bestColMap.projectNum];
-      const taskCode = row[bestColMap.taskCode];
-      const taskName = bestColMap.taskName != null ? row[bestColMap.taskName] : null;
-      if (client != null && String(client).trim()) lastClient = String(client).trim();
-      if (projName != null && String(projName).trim()) lastProjName = String(projName).trim();
-      if (projNum != null && String(projNum).trim()) lastProjNum = String(projNum).trim();
-      if (!taskCode || !String(taskCode).trim()) continue;
-      if (!lastProjNum) continue;
-      const tcode = String(taskCode).trim();
-      const tname = taskName ? String(taskName).trim() : '';
-      allImputations.push({
-        client: lastClient || '', projectNum: lastProjNum, projectName: lastProjName || '',
-        taskCode: tcode, taskName: tname, sheet: sheetName, key: `${lastProjNum}|${tcode}`,
-      });
-    }
-  }
-  return { imputations: allImputations, issues };
-}
-
-function diffImputations(oldList, newList) {
-  const oldMap = new Map(oldList.map(i => [i.key, i]));
-  const newMap = new Map(newList.map(i => [i.key, i]));
-  const added = newList.filter(i => !oldMap.has(i.key));
-  const removed = oldList.filter(i => !newMap.has(i.key));
-  const changed = [];
-  const unchanged = [];
-  for (const n of newList) {
-    const o = oldMap.get(n.key);
-    if (!o) continue;
-    const fields = ['client', 'projectName', 'taskName'];
-    const diff = fields.filter(f => (o[f] || '') !== (n[f] || ''));
-    if (diff.length > 0) changed.push({ old: o, new: n, fields: diff });
-    else unchanged.push(n);
-  }
-  return { added, removed, changed, unchanged };
-}
-
-function showImputDiffPreview(fileName, newList, diff, issues) {
-  const isFirstImport = imputations.length === 0;
-  const totalChanges = diff.added.length + diff.removed.length + diff.changed.length;
-  let html = `<div class="diff-summary">
-    <div class="label">📊 Analyse "${escapeHtml(fileName)}"</div>
-    <div class="diff-row"><span>Total détectées</span><strong class="mono">${newList.length}</strong></div>`;
-  if (isFirstImport) {
-    html += `<div class="diff-row"><span class="added">➕ Nouvelles</span><strong class="mono">${newList.length}</strong></div>
-    </div>
-    <div class="scan-actions" style="margin-top:14px;">
-      <button class="btn btn-ghost" onclick="document.getElementById('imputPreview').innerHTML=''">Annuler</button>
-      <button class="btn btn-primary" id="btnConfirmImport">✓ Importer ${newList.length}</button>
-    </div>`;
-  } else {
-    html += `<div class="diff-row"><span class="added">➕ Ajoutées</span><strong class="mono">${diff.added.length}</strong></div>
-    <div class="diff-row"><span class="changed">✎ Modifiées</span><strong class="mono">${diff.changed.length}</strong></div>
-    <div class="diff-row"><span class="removed">✗ Supprimées</span><strong class="mono">${diff.removed.length}</strong></div>
-    <div class="diff-row"><span class="unchanged">= Inchangées</span><strong class="mono">${diff.unchanged.length}</strong></div>
-    </div>`;
-    if (totalChanges === 0) {
-      html += `<div style="margin-top:14px; padding:10px; background:var(--ok-soft); border-left:3px solid var(--ok); color:var(--ok); font-size:13px;">✓ Déjà à jour.</div>
-        <div class="scan-actions" style="margin-top:14px;"><button class="btn btn-ghost" onclick="document.getElementById('imputPreview').innerHTML=''">Fermer</button></div>`;
-    } else {
-      html += `<div class="scan-actions" style="margin-top:14px;">
-        <button class="btn btn-ghost" onclick="document.getElementById('imputPreview').innerHTML=''">Annuler</button>
-        <button class="btn btn-primary" id="btnConfirmImport">✓ Appliquer (${totalChanges})</button>
-      </div>`;
-    }
-  }
-  if (issues.length > 0) html += `<div style="margin-top:14px; padding:10px; background:var(--accent-soft); border-left:3px solid var(--accent); color:var(--accent); font-size:12px;">⚠ ${issues.map(i => escapeHtml(i)).join('<br>')}</div>`;
-  $('imputPreview').innerHTML = html;
-  const confirmBtn = $('btnConfirmImport');
-  if (confirmBtn) {
-    confirmBtn.addEventListener('click', async () => {
-      imputations = newList;
-      imputationsMeta = { sourceFile: fileName, importedAt: new Date().toISOString(), count: newList.length };
-      await setConfig('imputations', imputations);
-      await setConfig('imputationsMeta', imputationsMeta);
-      $('imputPreview').innerHTML = '';
-      renderImputationsView();
-      populateProjectDatalist();
-      toast(`✓ ${newList.length} imputations enregistrées`, 2500);
-    });
-  }
-}
-
-function renderImputationsView() {
-  if (imputationsMeta && imputations.length > 0) {
-    $('imputMetaCard').style.display = 'block';
-    const d = new Date(imputationsMeta.importedAt);
-    $('imputMetaInfo').innerHTML = `<strong>${imputations.length}</strong> imputations chargées<br>
-      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-2);">
-        Source : ${escapeHtml(imputationsMeta.sourceFile)} · ${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}
-      </span>`;
-    $('imputListCard').style.display = 'block';
-    renderImputationsTable();
-  } else {
-    $('imputMetaCard').style.display = 'none';
-    $('imputListCard').style.display = 'none';
-  }
-}
-
-function renderImputationsTable(filter = '') {
-  const f = imputNormalize(filter);
-  const filtered = f ? imputations.filter(i =>
-    imputNormalize(i.client).includes(f) || imputNormalize(i.projectNum).includes(f) ||
-    imputNormalize(i.projectName).includes(f) || imputNormalize(i.taskCode).includes(f) ||
-    imputNormalize(i.taskName).includes(f)
-  ) : imputations;
-  let html = `<div class="imput-row header"><div>Projet</div><div>Tâche</div><div>Description</div><div>Client</div></div>`;
-  if (filtered.length === 0) {
-    html += `<div style="padding:20px; text-align:center; color:var(--text-2); font-size:12px;">Aucun résultat</div>`;
-  } else {
-    filtered.slice(0, 200).forEach(i => {
-      html += `<div class="imput-row">
-        <div class="imput-cell-num">${escapeHtml(i.projectNum)}</div>
-        <div class="imput-cell-task">${escapeHtml(i.taskCode)}</div>
-        <div>${escapeHtml(i.projectName)} ${i.taskName ? `<span style="color:var(--text-2); font-size:11px;">— ${escapeHtml(i.taskName)}</span>` : ''}</div>
-        <div><span class="imput-cell-client">${escapeHtml(i.client || '—')}</span></div>
-      </div>`;
-    });
-    if (filtered.length > 200) html += `<div style="padding:10px; text-align:center; color:var(--text-2); font-size:11px;">… ${filtered.length - 200} autres</div>`;
-  }
-  $('imputTable').innerHTML = html;
-}
-
-function populateProjectDatalist() {
-  const dl = $('fProjectList');
-  if (!dl) return;
-  const projects = new Map();
-  imputations.forEach(i => {
-    if (!projects.has(i.projectNum)) projects.set(i.projectNum, { num: i.projectNum, client: i.client, name: i.projectName });
-  });
-  dl.innerHTML = [...projects.values()]
-    .map(p => `<option value="${escapeHtml(p.num)} - ${escapeHtml(p.client)} - ${escapeHtml(p.name)}"></option>`)
-    .join('');
-}
-
-function bindProjectFieldHandlers() {
-  const projInput = $('fProjectSearch');
-  if (!projInput || projInput._bound) return;
-  projInput._bound = true;
-  projInput.addEventListener('input', () => {
-    const projNum = projInput.value.split(' - ')[0].trim();
-    updateTaskSelectForProject(projNum);
-  });
-}
-
-function updateTaskSelectForProject(projectNum) {
-  const sel = $('fTask');
-  if (!sel) return;
-  if (!projectNum) {
-    sel.innerHTML = '<option value="">— Choisir un projet —</option>';
-    return;
-  }
-  const tasks = imputations.filter(i => i.projectNum === projectNum);
-  if (tasks.length === 0) {
-    sel.innerHTML = '<option value="">— Aucune tâche —</option>';
-    return;
-  }
-  sel.innerHTML = '<option value="">— Sélectionner —</option>' +
-    tasks.map(t => `<option value="${escapeHtml(t.taskCode)}">${escapeHtml(t.taskCode)} — ${escapeHtml(t.taskName || t.projectName)}</option>`).join('');
-}
-
-function bindImputationsHandlers() {
-  if (window._imputBound) return;
-  window._imputBound = true;
-  $('btnImportImput').addEventListener('click', () => $('imputFile').click());
-  $('imputFile').addEventListener('change', async e => {
-    const file = e.target.files[0];
-    e.target.value = '';
-    if (!file) return;
-    $('imputPreview').innerHTML = '<div style="padding:14px; color:var(--text-2);">⏳ Lecture…</div>';
-    try {
-      const buf = await file.arrayBuffer();
-      const wb = XLSX.read(buf, { type: 'array' });
-      const { imputations: newList, issues } = parseImputationsWorkbook(wb);
-      if (newList.length === 0) {
-        $('imputPreview').innerHTML = `<div class="diff-summary" style="border-left-color: var(--err);">
-          <div class="label">⚠ Aucune imputation</div>
-          <div style="color: var(--text-1); font-size: 12px;">${issues.length > 0 ? issues.map(i => '• ' + escapeHtml(i)).join('<br>') : 'Vérifie les colonnes Client / Num Projet / Tâche.'}</div>
-        </div>`;
-        return;
-      }
-      const diff = diffImputations(imputations, newList);
-      showImputDiffPreview(file.name, newList, diff, issues);
-    } catch (err) {
-      toast('Erreur lecture Excel : ' + err.message);
-      console.error(err);
-      $('imputPreview').innerHTML = '';
-    }
-  });
-  $('btnClearImput').addEventListener('click', async () => {
-    if (imputations.length === 0) return;
-    if (!confirm(`Effacer les ${imputations.length} imputations ?`)) return;
-    imputations = [];
-    imputationsMeta = null;
-    await setConfig('imputations', []);
-    await setConfig('imputationsMeta', null);
-    renderImputationsView();
-    populateProjectDatalist();
-    toast('Effacées');
-  });
-  document.addEventListener('input', e => {
-    if (e.target.id === 'imputSearch') renderImputationsTable(e.target.value);
-  });
-}
-
-// =====================================================================
-// RÉGLAGES — Clé API Claude
-// =====================================================================
-
-function updateProviderUI(provider) {
-  // Affiche/masque les blocs selon le provider sélectionné
-  const claudeBlock = $('claudeBlock');
-  const azureBlock = $('azureBlock');
-  if (claudeBlock) claudeBlock.style.opacity = provider === 'claude' ? '1' : '0.5';
-  if (azureBlock) azureBlock.style.opacity = provider === 'azure' ? '1' : '0.5';
-  // Mettre à jour le hint
-  const hint = $('providerHint');
-  if (hint) {
-    hint.textContent = provider === 'azure'
-      ? 'Azure actif. Configure endpoint + clé ci-dessous, puis teste.'
-      : 'Claude actif. Configure ta clé ci-dessous, puis teste.';
-  }
-}
-
-function bindSettingsHandlers() {
-  if (window._settingsBound) return;
-  window._settingsBound = true;
-
-  // === Sélecteur provider ===
-  $('fProvider').addEventListener('change', async () => {
-    const p = $('fProvider').value;
-    await setProvider(p);
-    updateProviderUI(p);
-    toast(`Moteur IA : ${p === 'azure' ? 'Azure' : 'Claude'}`);
-  });
-
-  // === Claude ===
-  $('btnSaveApiKey').addEventListener('click', async () => {
-    const key = $('fApiKey').value.trim();
-    if (!key) {
-      $('apiKeyStatus').innerHTML = `<div style="padding:10px; background:var(--err-soft); border-left:3px solid var(--err); color:var(--err); font-size:13px;">⚠ Entre une clé avant d'enregistrer.</div>`;
-      return;
-    }
-    if (!key.startsWith('sk-ant-')) {
-      $('apiKeyStatus').innerHTML = `<div style="padding:10px; background:var(--accent-soft); border-left:3px solid var(--accent); color:var(--accent); font-size:13px;">⚠ Format inhabituel : une clé Anthropic commence par <span class="mono">sk-ant-</span>. Enregistrée quand même.</div>`;
-    } else {
-      $('apiKeyStatus').innerHTML = `<div style="padding:10px; background:var(--ok-soft); border-left:3px solid var(--ok); color:var(--ok); font-size:13px;">✓ Clé enregistrée localement</div>`;
-    }
-    await setApiKey(key);
-    toast('✓ Clé Claude enregistrée');
-  });
-
-  $('btnTestApiKey').addEventListener('click', async () => {
-    const key = $('fApiKey').value.trim() || (await getApiKey());
-    if (!key) {
-      $('apiKeyStatus').innerHTML = `<div style="padding:10px; background:var(--err-soft); border-left:3px solid var(--err); color:var(--err); font-size:13px;">⚠ Pas de clé à tester</div>`;
-      return;
-    }
-    $('apiKeyStatus').innerHTML = `<div style="padding:10px; background:var(--bg-2); color:var(--text-2); font-size:13px;">⏳ Test en cours…</div>`;
-    try {
-      const reply = await testApiKey(key);
-      $('apiKeyStatus').innerHTML = `<div style="padding:10px; background:var(--ok-soft); border-left:3px solid var(--ok); color:var(--ok); font-size:13px;">✓ Connexion OK — Claude répond : <span class="mono">${escapeHtml(reply.slice(0, 50))}</span></div>`;
-    } catch (err) {
-      $('apiKeyStatus').innerHTML = `<div style="padding:10px; background:var(--err-soft); border-left:3px solid var(--err); color:var(--err); font-size:13px;">✗ ${escapeHtml(err.message)}</div>`;
-    }
-  });
-
-  // === Azure ===
-  $('btnSaveAzureKey').addEventListener('click', async () => {
-    const endpoint = $('fAzureEndpoint').value.trim();
-    const key = $('fAzureKey').value.trim();
-    if (!endpoint || !key) {
-      $('azureKeyStatus').innerHTML = `<div style="padding:10px; background:var(--err-soft); border-left:3px solid var(--err); color:var(--err); font-size:13px;">⚠ Renseigne endpoint ET clé.</div>`;
-      return;
-    }
-    if (!/cognitiveservices\.azure\.com/i.test(endpoint)) {
-      $('azureKeyStatus').innerHTML = `<div style="padding:10px; background:var(--accent-soft); border-left:3px solid var(--accent); color:var(--accent); font-size:13px;">⚠ L'endpoint Azure contient normalement <span class="mono">.cognitiveservices.azure.com</span>. Enregistré quand même.</div>`;
-    } else {
-      $('azureKeyStatus').innerHTML = `<div style="padding:10px; background:var(--ok-soft); border-left:3px solid var(--ok); color:var(--ok); font-size:13px;">✓ Configuration Azure enregistrée</div>`;
-    }
-    await setAzureConfig(endpoint, key);
-    toast('✓ Azure configuré');
-  });
-
-  $('btnTestAzureKey').addEventListener('click', async () => {
-    const endpoint = $('fAzureEndpoint').value.trim() || (await getConfig('azureEndpoint'));
-    const key = $('fAzureKey').value.trim() || (await getConfig('azureApiKey'));
-    if (!endpoint || !key) {
-      $('azureKeyStatus').innerHTML = `<div style="padding:10px; background:var(--err-soft); border-left:3px solid var(--err); color:var(--err); font-size:13px;">⚠ Endpoint et clé requis</div>`;
-      return;
-    }
-    $('azureKeyStatus').innerHTML = `<div style="padding:10px; background:var(--bg-2); color:var(--text-2); font-size:13px;">⏳ Test en cours…</div>`;
-    try {
-      const reply = await testAzureKey(endpoint, key);
-      $('azureKeyStatus').innerHTML = `<div style="padding:10px; background:var(--ok-soft); border-left:3px solid var(--ok); color:var(--ok); font-size:13px;">✓ ${escapeHtml(reply)}</div>`;
-    } catch (err) {
-      $('azureKeyStatus').innerHTML = `<div style="padding:10px; background:var(--err-soft); border-left:3px solid var(--err); color:var(--err); font-size:13px;">✗ ${escapeHtml(err.message)}</div>`;
-    }
-  });
-}
-
-async function loadApiKeyIntoSettings() {
-  // Provider
-  const provider = await getProvider();
-  if ($('fProvider')) {
-    $('fProvider').value = provider;
-    updateProviderUI(provider);
-  }
-
-  // Claude key
-  const claudeKey = await getApiKey();
-  if (claudeKey && $('fApiKey')) {
-    $('fApiKey').value = claudeKey;
-    if ($('apiKeyStatus')) {
-      $('apiKeyStatus').innerHTML = `<div style="padding:10px; background:var(--bg-2); color:var(--text-1); font-size:13px;">🔑 Clé Claude enregistrée — clique <em>Tester</em> pour vérifier.</div>`;
-    }
-  }
-
-  // Azure config
-  const az = await getAzureConfig();
-  if (az.endpoint && $('fAzureEndpoint')) $('fAzureEndpoint').value = az.endpoint;
-  if (az.apiKey && $('fAzureKey')) $('fAzureKey').value = az.apiKey;
-  if ((az.endpoint || az.apiKey) && $('azureKeyStatus')) {
-    $('azureKeyStatus').innerHTML = `<div style="padding:10px; background:var(--bg-2); color:var(--text-1); font-size:13px;">🔑 Configuration Azure enregistrée — clique <em>Tester</em> pour vérifier.</div>`;
-  }
-}
-
 (async function init() {
   try {
     await openDB();
@@ -3638,8 +3386,6 @@ async function loadApiKeyIntoSettings() {
     populateProjectDatalist();
     bindProjectFieldHandlers();
     bindImputationsHandlers();
-    bindSettingsHandlers();
-    await loadApiKeyIntoSettings();
     refreshHeaderStats();
     console.log('[init] terminé');
   } catch (err) {
