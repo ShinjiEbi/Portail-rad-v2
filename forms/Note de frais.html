@@ -1091,7 +1091,7 @@ main {
 
     <div class="list-toolbar">
       <button class="btn btn-bertin" id="btnExportOracle">⬇ Export Oracle (.xls)</button>
-      <button class="btn" id="btnExportXlsx">⬇ Excel détaillé</button>
+      <button class="btn" id="btnExportJsonNotes">📦 Export JSON (avec images)</button>
       <button class="btn" id="btnExportCsv">⬇ CSV</button>
       <button class="btn btn-archive" id="btnArchiveMonth">📦 Archiver le mois</button>
       <button class="btn btn-danger" id="btnClearAll">🗑 Tout effacer</button>
@@ -1108,6 +1108,11 @@ main {
         Vue calendrier des notes archivées par mois.
         Une archive fige les notes du mois (montants, plafonnements, totaux) et les retire de la liste active pour repartir sur une saisie propre.
       </p>
+
+      <div class="scan-actions" style="margin-bottom:14px;">
+        <button class="btn btn-archive" id="btnImportJsonArchive">📥 Importer JSON comme archive</button>
+      </div>
+      <input type="file" id="archiveImportFile" accept="application/json,.json" hidden>
 
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
         <button class="btn btn-sm btn-ghost" id="btnYearPrev">◀</button>
@@ -3149,70 +3154,38 @@ $('btnExportOracle').addEventListener('click', async () => {
 // EXPORT XLSX DÉTAILLÉ
 // =====================================================================
 
-$('btnExportXlsx').addEventListener('click', async () => {
+$('btnExportJsonNotes').addEventListener('click', async () => {
   const notes = (await getAllNotes()).sort((a, b) => a.date.localeCompare(b.date));
   if (notes.length === 0) { toast('Aucune note à exporter'); return; }
 
-  const rows = notes.map((n, i) => {
-    const isHotel = /h[oô]tel/i.test(n.category);
-    const isMealCat = /repas/i.test(n.category);
-    const isReceptionCat = /r[eé]ception/i.test(n.category);
-    const needsGuestsCat = isMealCat || isReceptionCat;
-    const nights = n.nights || 1;
-    const people = n.people || 1;
-    const paid = n.amountPaid ?? n.amount;
-    const refund = n.amount;
-    return {
-      'N°': i + 1,
-      'Date': n.date,
-      'Heure': n.time || '',
-      'Catégorie': n.category,
-      'Type Oracle': categories.find(c => c.name === n.category)?.oracle || '',
-      'Projet N°': n.projectNum || '',
-      'Tâche': n.taskCode || '',
-      'Nom Projet': n.projectName || '',
-      'Site': n.site || '',
-      'Nuits': isHotel ? nights : '',
-      'Personnes': needsGuestsCat ? people : '',
-      'Entreprise / Invités': needsGuestsCat ? (n.guests || '') : '',
-      'Montant payé (€)': paid,
-      'Prix unitaire (€)': isHotel && nights > 1
-        ? +(paid / nights).toFixed(2)
-        : (needsGuestsCat && people > 1 ? +(paid / people).toFixed(2) : paid),
-      'Montant remboursé (€)': refund,
-      'Écart plafonnement (€)': n.exceedsCap ? +(paid - refund).toFixed(2) : 0,
-      'Justification': n.comment,
-      'Plafond (€)': n.cap ?? '',
-      'Mode plafond': n.capMode === 'day' ? 'Jour' : (isHotel ? 'Nuit' : 'Note'),
-      'Cumul jour (€)': n.dayTotal ?? '',
-      'Dépassement': n.exceedsCap ? 'OUI' : 'non',
-      'Saisie le': n.createdAt?.slice(0, 10) ?? '',
-    };
-  });
+  // Stats pour métadonnées
+  const stats = computeStats(notes);
 
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = rows.length ? Object.keys(rows[0]).map(k => ({ wch: Math.max(k.length + 2, 14) })) : [];
+  // Détecter le mois "principal" pour nommer le fichier
+  const months = listMonthsWithNotes(notes);
+  const ym = months.length === 1 ? months[0] : new Date().toISOString().slice(0, 7);
 
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Notes de frais');
+  const payload = {
+    type: 'ndf-bertin-export',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    yearMonth: ym,
+    stats: {
+      count: stats.count,
+      paid: +stats.paid.toFixed(2),
+      refund: +stats.refund.toFixed(2),
+      lost: +stats.lost.toFixed(2),
+      exceedCount: stats.exceedCount,
+      nightsTotal: stats.nightsTotal,
+    },
+    notes: notes,  // contient image: dataURL base64
+  };
 
-  const recap = {};
-  notes.forEach(n => {
-    if (!recap[n.category]) recap[n.category] = { count: 0, total: 0 };
-    recap[n.category].count++;
-    recap[n.category].total += n.amount || 0;
-  });
-  const recapRows = Object.entries(recap).map(([cat, r]) => ({
-    'Catégorie': cat,
-    'Nombre': r.count,
-    'Total (€)': +r.total.toFixed(2),
-  }));
-  const wsRecap = XLSX.utils.json_to_sheet(recapRows);
-  wsRecap['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 12 }];
-  XLSX.utils.book_append_sheet(wb, wsRecap, 'Récap');
-
-  XLSX.writeFile(wb, `notes_de_frais_detail_${new Date().toISOString().slice(0,10)}.xlsx`);
-  toast('✓ Export Excel détaillé');
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
+  downloadBlob(blob, `notes_de_frais_${ym}.json`);
+  toast(`✓ Export JSON (${notes.length} notes, ${sizeMB} Mo)`, 3000);
 });
 
 $('btnExportCsv').addEventListener('click', async () => {
@@ -4109,6 +4082,107 @@ function bindArchiveHandlers() {
     $('archiveDetailCard').style.display = 'none';
     renderArchivesCalendar();
   });
+
+  // Import JSON comme archive
+  $('btnImportJsonArchive')?.addEventListener('click', () => $('archiveImportFile').click());
+  $('archiveImportFile')?.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      await importJsonAsArchive(data, file.name);
+    } catch (err) {
+      console.error('[importJson] erreur:', err);
+      toast('Erreur import : ' + err.message);
+    }
+  });
+}
+
+// Import d'un fichier JSON comme nouvelle archive
+async function importJsonAsArchive(data, fileName) {
+  // Validation : doit être un export ndf-bertin OU un objet contenant des notes
+  let notes;
+  let exportedAt = null;
+  let sourceYM = null;
+
+  if (data && data.type === 'ndf-bertin-export' && Array.isArray(data.notes)) {
+    notes = data.notes;
+    exportedAt = data.exportedAt;
+    sourceYM = data.yearMonth;
+  } else if (Array.isArray(data)) {
+    notes = data;
+  } else if (data && Array.isArray(data.notes)) {
+    notes = data.notes;
+    exportedAt = data.exportedAt || null;
+  } else {
+    throw new Error('Format JSON non reconnu (attendu : export ndf-bertin)');
+  }
+
+  if (notes.length === 0) {
+    toast('Le fichier ne contient aucune note');
+    return;
+  }
+
+  // Validation minimale du format des notes
+  const invalid = notes.find(n => !n.date || (n.amount == null && n.amountPaid == null));
+  if (invalid) {
+    throw new Error('Une ou plusieurs notes sont invalides (date ou montant manquant)');
+  }
+
+  // Détecter le mois
+  const months = listMonthsWithNotes(notes);
+  let ym = sourceYM;
+  if (!ym || !/^\d{4}-\d{2}$/.test(ym)) {
+    if (months.length === 1) {
+      ym = months[0];
+    } else if (months.length > 1) {
+      // Plusieurs mois : prendre celui le plus représenté
+      const counts = {};
+      for (const n of notes) {
+        const key = (n.date || '').slice(0, 7);
+        if (key) counts[key] = (counts[key] || 0) + 1;
+      }
+      ym = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+    } else {
+      ym = new Date().toISOString().slice(0, 7);
+    }
+  }
+
+  const [y, mo] = ym.split('-');
+  const monthLabel = `${MONTH_NAMES[parseInt(mo) - 1]} ${y}`;
+
+  // Vérifier si une archive existe déjà pour ce mois
+  const existing = (await getAllArchives()).find(a => a.yearMonth === ym);
+  if (existing) {
+    if (!confirm(
+      `Une archive existe déjà pour ${monthLabel} (${existing.noteCount} notes).\n\n` +
+      `Importer en plus de l'existante ? (l'ancienne sera conservée)`
+    )) return;
+  }
+
+  // Nettoyer les ID des notes (sinon collisions IndexedDB) et calculer les stats
+  const cleanNotes = notes.map(n => {
+    const { id, ...rest } = n;
+    return rest;
+  });
+  const stats = computeStats(cleanNotes);
+
+  const archive = {
+    yearMonth: ym,
+    label: monthLabel + (existing ? ' (importé)' : ''),
+    archivedAt: new Date().toISOString(),
+    importedFrom: fileName,
+    importedExportedAt: exportedAt,
+    stats: stats,
+    notes: cleanNotes,
+    noteCount: cleanNotes.length,
+  };
+  await addArchive(archive);
+
+  toast(`✓ Importées : ${cleanNotes.length} notes dans ${monthLabel}`, 3000);
+  renderArchivesCalendar();
 }
 
 // =====================================================================
