@@ -211,169 +211,9 @@ main {
   border-color: var(--err);
 }
 .btn-danger:hover { background: var(--err-soft); }
-.btn-archive {
-  background: #6b46c1; color: #fff; border-color: #6b46c1;
-}
-.btn-archive:hover { background: #5b34b3; border-color: #5b34b3; }
 .btn-ghost { background: transparent; border-color: var(--border); }
 .btn-block { width: 100%; }
 .btn-sm { padding: 8px 12px; font-size: 11px; }
-
-/* ===== ARCHIVES CALENDAR ===== */
-.archive-calendar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-.archive-month {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  position: relative;
-  min-height: 110px;
-}
-.archive-month:hover {
-  border-color: var(--accent);
-  background: var(--bg-3);
-}
-.archive-month.has-archive { border-left: 3px solid #6b46c1; }
-.archive-month.has-current { border-left: 3px solid var(--accent); }
-.archive-month.empty { opacity: 0.4; cursor: default; }
-.archive-month-name {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  margin-bottom: 6px;
-}
-.archive-month-amount {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-0);
-  margin-bottom: 2px;
-}
-.archive-month-meta {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  color: var(--text-2);
-  letter-spacing: 0.04em;
-}
-.archive-month-tag {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-.archive-month-tag.archived {
-  background: rgba(107, 70, 193, 0.2);
-  color: #c4a8f0;
-  border: 1px solid #6b46c1;
-}
-.archive-month-tag.current {
-  background: var(--accent-soft);
-  color: var(--accent);
-  border: 1px solid var(--accent);
-}
-.archive-month-exceed {
-  display: inline-block;
-  margin-left: 6px;
-  color: var(--err);
-  font-size: 10px;
-}
-
-/* ===== ARCHIVE DETAIL ===== */
-.archive-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 18px;
-}
-.archive-stat {
-  background: var(--bg-2);
-  border-radius: 4px;
-  padding: 12px;
-  border-left: 3px solid var(--accent);
-}
-.archive-stat.paid { border-left-color: var(--text-1); }
-.archive-stat.refund { border-left-color: var(--ok); }
-.archive-stat.lost { border-left-color: var(--err); }
-.archive-stat-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  margin-bottom: 4px;
-}
-.archive-stat-value {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-0);
-}
-.archive-stat.lost .archive-stat-value { color: var(--err); }
-.archive-stat.refund .archive-stat-value { color: var(--ok); }
-
-.archive-breakdown { margin-bottom: 14px; }
-.archive-breakdown-title {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px dashed var(--border);
-}
-.archive-breakdown-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 10px;
-  padding: 5px 0;
-  font-size: 13px;
-  align-items: center;
-}
-.archive-breakdown-bar {
-  background: var(--bg-2);
-  height: 6px;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 2px;
-}
-.archive-breakdown-bar-fill {
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.3s ease;
-}
-.archive-breakdown-amount {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  color: var(--text-1);
-  text-align: right;
-  min-width: 80px;
-}
-.archive-breakdown-pct {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--text-2);
-  text-align: right;
-  min-width: 40px;
-}
-
-@media (max-width: 540px) {
-  .archive-calendar { grid-template-columns: repeat(2, 1fr); }
-  .archive-stats-grid { grid-template-columns: 1fr; }
-}
 
 #previewWrap {
   display: none;
@@ -956,7 +796,6 @@ main {
 <nav class="tabs">
   <button class="tab active" data-tab="scan">Scanner</button>
   <button class="tab" data-tab="list">Mes Notes</button>
-  <button class="tab" data-tab="archives">Archives</button>
   <button class="tab" data-tab="imputations">Imputations</button>
   <button class="tab" data-tab="plafonds">Plafonds</button>
   <button class="tab" data-tab="settings">Réglages</button>
@@ -1091,42 +930,12 @@ main {
 
     <div class="list-toolbar">
       <button class="btn btn-bertin" id="btnExportOracle">⬇ Export Oracle (.xls)</button>
-      <button class="btn" id="btnExportJsonNotes">📦 Export JSON (avec images)</button>
+      <button class="btn" id="btnExportXlsx">⬇ Excel détaillé</button>
       <button class="btn" id="btnExportCsv">⬇ CSV</button>
-      <button class="btn btn-archive" id="btnArchiveMonth">📦 Archiver le mois</button>
       <button class="btn btn-danger" id="btnClearAll">🗑 Tout effacer</button>
     </div>
 
     <div id="noteList"></div>
-  </section>
-
-  <!-- ============== ARCHIVES VIEW ============== -->
-  <section class="view" id="view-archives">
-    <div class="card">
-      <div class="card-title">📦 Archives mensuelles</div>
-      <p style="color:var(--text-2); font-size:13px; margin-bottom:14px; line-height:1.5;">
-        Vue calendrier des notes archivées par mois.
-        Une archive fige les notes du mois (montants, plafonnements, totaux) et les retire de la liste active pour repartir sur une saisie propre.
-      </p>
-
-      <div class="scan-actions" style="margin-bottom:14px;">
-        <button class="btn btn-archive" id="btnImportJsonArchive">📥 Importer JSON comme archive</button>
-      </div>
-      <input type="file" id="archiveImportFile" accept="application/json,.json" hidden>
-
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
-        <button class="btn btn-sm btn-ghost" id="btnYearPrev">◀</button>
-        <div class="mono" style="font-size:18px; font-weight:600; color:var(--accent); min-width:80px; text-align:center;" id="archiveYear">2026</div>
-        <button class="btn btn-sm btn-ghost" id="btnYearNext">▶</button>
-        <div style="margin-left:auto; color:var(--text-2); font-size:12px;" id="archiveYearStats"></div>
-      </div>
-
-      <div id="archiveCalendar" class="archive-calendar"></div>
-    </div>
-
-    <div id="archiveDetailCard" class="card" style="display:none;">
-      <div id="archiveDetail"></div>
-    </div>
   </section>
 
   <!-- ============== IMPUTATIONS VIEW ============== -->
@@ -1438,10 +1247,9 @@ const DEFAULT_HEADER = {
 };
 
 const DB_NAME = 'ndf_bertin_db';
-const DB_VERSION = 2;
+const DB_VERSION = 1;
 const STORE_NOTES = 'notes';
 const STORE_CONFIG = 'config';
-const STORE_ARCHIVES = 'archives';
 
 // =====================================================================
 // INDEXEDDB
@@ -1466,9 +1274,6 @@ function openDB(retried = false) {
       }
       if (!d.objectStoreNames.contains(STORE_CONFIG)) {
         d.createObjectStore(STORE_CONFIG, { keyPath: 'key' });
-      }
-      if (!d.objectStoreNames.contains(STORE_ARCHIVES)) {
-        d.createObjectStore(STORE_ARCHIVES, { keyPath: 'id', autoIncrement: true });
       }
     };
 
@@ -1545,18 +1350,6 @@ const setConfig = (k, v) => new Promise((res, rej) => {
   const r = tx(STORE_CONFIG, 'readwrite').put({ key: k, value: v });
   r.onsuccess = () => res(); r.onerror = () => rej(r.error);
 });
-const getAllArchives = () => new Promise((res, rej) => {
-  const r = tx(STORE_ARCHIVES).getAll();
-  r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error);
-});
-const addArchive = a => new Promise((res, rej) => {
-  const r = tx(STORE_ARCHIVES, 'readwrite').add(a);
-  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
-});
-const deleteArchive = id => new Promise((res, rej) => {
-  const r = tx(STORE_ARCHIVES, 'readwrite').delete(id);
-  r.onsuccess = () => res(); r.onerror = () => rej(r.error);
-});
 
 // =====================================================================
 // EXTRACTION IA — Claude Haiku 4.5 (Anthropic)
@@ -1606,7 +1399,8 @@ Analyse l'image ci-jointe et extrais STRICTEMENT les informations suivantes au f
   "people": 1,                  // Nb personnes si repas (déduit du nombre de couverts/menus), sinon 1
   "guests": "",                 // Si repas d'affaires : "Société X — M. Untel". Vide sinon
   "siret": "",                  // SIRET si visible (14 chiffres), sinon vide
-  "vendor": "Nom du commerçant" // Le vrai nom (pas "TOTAL"/"TICKET")
+  "vendor": "Nom du commerçant",// Le vrai nom (pas "TOTAL"/"TICKET")
+  "rawNotes": ""                // Détails utiles supplémentaires (n° facture, lieu...) ou ""
 }
 
 Règles strictes :
@@ -1903,7 +1697,7 @@ async function callAzureAPI(imageDataUrl) {
     guests: '',
     siret: '',
     vendor: merchantName,
-    rawNotes: '',
+    rawNotes: receiptType ? `Type Azure: ${receiptType}` : '',
   };
 }
 
@@ -2001,7 +1795,6 @@ document.querySelectorAll('.tab').forEach(btn => {
     btn.classList.add('active');
     $('view-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'list') refreshList();
-    if (btn.dataset.tab === 'archives') renderArchivesCalendar();
     if (btn.dataset.tab === 'plafonds') renderPlafonds();
     if (btn.dataset.tab === 'imputations') renderImputationsView();
     if (btn.dataset.tab === 'settings') loadApiKeyIntoSettings();
@@ -2194,7 +1987,7 @@ async function saveInvoiceFromExtract(extracted, sourceLabel) {
     nights: parseInt(ai.nights) || 1,
     people: parseInt(ai.people) || 1,
     guests: ai.guests || '',
-    comment: '',
+    comment: ai.rawNotes || '',
     rawText: JSON.stringify(ai, null, 2),
     image: extracted.image,
     createdAt: new Date().toISOString(),
@@ -2426,7 +2219,7 @@ function populateForm(aiData) {
     setVal('fAmount', aiData.amountTTC != null ? Number(aiData.amountTTC).toFixed(2) : '');
     setVal('fTime', aiData.time && /^\d{1,2}:\d{2}/.test(aiData.time) ? aiData.time : '');
     setVal('fCat', cat);
-    setVal('fComment', '');
+    setVal('fComment', aiData.rawNotes || '');
     setVal('fProjectSearch', '');
     const fTask = $('fTask');
     if (fTask) fTask.innerHTML = '<option value="">— Choisir un projet —</option>';
@@ -3154,38 +2947,70 @@ $('btnExportOracle').addEventListener('click', async () => {
 // EXPORT XLSX DÉTAILLÉ
 // =====================================================================
 
-$('btnExportJsonNotes').addEventListener('click', async () => {
+$('btnExportXlsx').addEventListener('click', async () => {
   const notes = (await getAllNotes()).sort((a, b) => a.date.localeCompare(b.date));
   if (notes.length === 0) { toast('Aucune note à exporter'); return; }
 
-  // Stats pour métadonnées
-  const stats = computeStats(notes);
+  const rows = notes.map((n, i) => {
+    const isHotel = /h[oô]tel/i.test(n.category);
+    const isMealCat = /repas/i.test(n.category);
+    const isReceptionCat = /r[eé]ception/i.test(n.category);
+    const needsGuestsCat = isMealCat || isReceptionCat;
+    const nights = n.nights || 1;
+    const people = n.people || 1;
+    const paid = n.amountPaid ?? n.amount;
+    const refund = n.amount;
+    return {
+      'N°': i + 1,
+      'Date': n.date,
+      'Heure': n.time || '',
+      'Catégorie': n.category,
+      'Type Oracle': categories.find(c => c.name === n.category)?.oracle || '',
+      'Projet N°': n.projectNum || '',
+      'Tâche': n.taskCode || '',
+      'Nom Projet': n.projectName || '',
+      'Site': n.site || '',
+      'Nuits': isHotel ? nights : '',
+      'Personnes': needsGuestsCat ? people : '',
+      'Entreprise / Invités': needsGuestsCat ? (n.guests || '') : '',
+      'Montant payé (€)': paid,
+      'Prix unitaire (€)': isHotel && nights > 1
+        ? +(paid / nights).toFixed(2)
+        : (needsGuestsCat && people > 1 ? +(paid / people).toFixed(2) : paid),
+      'Montant remboursé (€)': refund,
+      'Écart plafonnement (€)': n.exceedsCap ? +(paid - refund).toFixed(2) : 0,
+      'Justification': n.comment,
+      'Plafond (€)': n.cap ?? '',
+      'Mode plafond': n.capMode === 'day' ? 'Jour' : (isHotel ? 'Nuit' : 'Note'),
+      'Cumul jour (€)': n.dayTotal ?? '',
+      'Dépassement': n.exceedsCap ? 'OUI' : 'non',
+      'Saisie le': n.createdAt?.slice(0, 10) ?? '',
+    };
+  });
 
-  // Détecter le mois "principal" pour nommer le fichier
-  const months = listMonthsWithNotes(notes);
-  const ym = months.length === 1 ? months[0] : new Date().toISOString().slice(0, 7);
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = rows.length ? Object.keys(rows[0]).map(k => ({ wch: Math.max(k.length + 2, 14) })) : [];
 
-  const payload = {
-    type: 'ndf-bertin-export',
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    yearMonth: ym,
-    stats: {
-      count: stats.count,
-      paid: +stats.paid.toFixed(2),
-      refund: +stats.refund.toFixed(2),
-      lost: +stats.lost.toFixed(2),
-      exceedCount: stats.exceedCount,
-      nightsTotal: stats.nightsTotal,
-    },
-    notes: notes,  // contient image: dataURL base64
-  };
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Notes de frais');
 
-  const json = JSON.stringify(payload, null, 2);
-  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
-  const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
-  downloadBlob(blob, `notes_de_frais_${ym}.json`);
-  toast(`✓ Export JSON (${notes.length} notes, ${sizeMB} Mo)`, 3000);
+  const recap = {};
+  notes.forEach(n => {
+    if (!recap[n.category]) recap[n.category] = { count: 0, total: 0 };
+    recap[n.category].count++;
+    recap[n.category].total += n.amount || 0;
+  });
+  const recapRows = Object.entries(recap).map(([cat, r]) => ({
+    'Catégorie': cat,
+    'Nombre': r.count,
+    'Total (€)': +r.total.toFixed(2),
+  }));
+  const wsRecap = XLSX.utils.json_to_sheet(recapRows);
+  wsRecap['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 12 }];
+  XLSX.utils.book_append_sheet(wb, wsRecap, 'Récap');
+
+  XLSX.writeFile(wb, `notes_de_frais_detail_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('✓ Export Excel détaillé');
 });
 
 $('btnExportCsv').addEventListener('click', async () => {
@@ -3661,531 +3486,6 @@ function bindImputationsHandlers() {
 }
 
 // =====================================================================
-// ARCHIVES MENSUELLES
-// =====================================================================
-
-let currentArchiveYear = new Date().getFullYear();
-
-const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-
-// Calcule des stats agrégées sur un set de notes
-function computeStats(notes) {
-  const stats = {
-    count: notes.length,
-    paid: 0,
-    refund: 0,
-    lost: 0,            // payé - remboursé (non pris en charge)
-    exceedCount: 0,     // nombre de notes dépassées
-    byCategory: {},     // {catName: {count, paid, refund}}
-    byProject: {},      // {projectKey: {count, paid, refund, label}}
-    bySite: {},         // {site: {count, paid, refund}}
-    nightsTotal: 0,     // total de nuits hôtel
-  };
-  for (const n of notes) {
-    const paid = n.amountPaid ?? n.amount ?? 0;
-    const refund = n.amount ?? 0;
-    stats.paid += paid;
-    stats.refund += refund;
-    stats.lost += Math.max(0, paid - refund);
-    if (n.exceedsCap) stats.exceedCount++;
-    if (/h[oô]tel/i.test(n.category)) stats.nightsTotal += (n.nights || 1);
-
-    // Par catégorie
-    const cat = n.category || 'Autre';
-    if (!stats.byCategory[cat]) stats.byCategory[cat] = { count: 0, paid: 0, refund: 0 };
-    stats.byCategory[cat].count++;
-    stats.byCategory[cat].paid += paid;
-    stats.byCategory[cat].refund += refund;
-
-    // Par projet
-    if (n.projectNum) {
-      const k = n.projectNum;
-      if (!stats.byProject[k]) {
-        stats.byProject[k] = {
-          count: 0, paid: 0, refund: 0,
-          label: n.projectName ? `${n.projectNum} — ${n.projectName}` : n.projectNum,
-        };
-      }
-      stats.byProject[k].count++;
-      stats.byProject[k].paid += paid;
-      stats.byProject[k].refund += refund;
-    }
-
-    // Par site
-    if (n.site) {
-      if (!stats.bySite[n.site]) stats.bySite[n.site] = { count: 0, paid: 0, refund: 0 };
-      stats.bySite[n.site].count++;
-      stats.bySite[n.site].paid += paid;
-      stats.bySite[n.site].refund += refund;
-    }
-  }
-  return stats;
-}
-
-// Filtre les notes d'un mois donné (year-month, ex: "2026-04")
-function filterNotesByMonth(notes, ym) {
-  return notes.filter(n => (n.date || '').startsWith(ym));
-}
-
-// Liste des mois (YYYY-MM) qui contiennent au moins une note
-function listMonthsWithNotes(notes) {
-  const set = new Set();
-  for (const n of notes) {
-    if (n.date && /^\d{4}-\d{2}/.test(n.date)) {
-      set.add(n.date.slice(0, 7));
-    }
-  }
-  return [...set].sort();
-}
-
-// === Archiver le mois en cours (ou le mois choisi) ===
-async function archiveMonth(targetYM = null) {
-  const allNotes = await getAllNotes();
-  if (allNotes.length === 0) {
-    toast('Aucune note à archiver');
-    return;
-  }
-
-  // Si pas de mois précisé, on propose le mois le plus représenté
-  let ym = targetYM;
-  if (!ym) {
-    const months = listMonthsWithNotes(allNotes);
-    if (months.length === 0) { toast('Aucune note datée'); return; }
-    if (months.length === 1) {
-      ym = months[0];
-    } else {
-      // Plusieurs mois présents : demander à l'utilisateur
-      const choices = months.map(m => {
-        const [y, mo] = m.split('-');
-        const cnt = filterNotesByMonth(allNotes, m).length;
-        return `${MONTH_NAMES[parseInt(mo) - 1]} ${y} (${cnt} note${cnt > 1 ? 's' : ''})`;
-      });
-      const idx = prompt(
-        'Plusieurs mois ont des notes. Lequel veux-tu archiver ?\n\n' +
-        choices.map((c, i) => `${i + 1}. ${c}`).join('\n') +
-        '\n\nEntre le numéro :',
-        '1'
-      );
-      const i = parseInt(idx) - 1;
-      if (isNaN(i) || i < 0 || i >= months.length) return;
-      ym = months[i];
-    }
-  }
-
-  const monthNotes = filterNotesByMonth(allNotes, ym);
-  if (monthNotes.length === 0) {
-    toast(`Aucune note pour ${ym}`);
-    return;
-  }
-
-  const [y, mo] = ym.split('-');
-  const monthLabel = `${MONTH_NAMES[parseInt(mo) - 1]} ${y}`;
-
-  if (!confirm(
-    `Archiver ${monthNotes.length} note${monthNotes.length > 1 ? 's' : ''} de ${monthLabel} ?\n\n` +
-    `Les notes seront figées dans une archive consultable mais non modifiable.\n` +
-    `Elles disparaîtront de la liste active.`
-  )) return;
-
-  const stats = computeStats(monthNotes);
-  const archive = {
-    yearMonth: ym,
-    label: monthLabel,
-    archivedAt: new Date().toISOString(),
-    stats: stats,
-    notes: monthNotes, // snapshot complet
-    noteCount: monthNotes.length,
-  };
-  await addArchive(archive);
-
-  // Supprimer les notes archivées de la liste active
-  for (const n of monthNotes) {
-    await deleteNote(n.id);
-  }
-
-  toast(`✓ ${monthNotes.length} note${monthNotes.length > 1 ? 's' : ''} archivées dans ${monthLabel}`);
-  refreshList();
-  refreshHeaderStats();
-  // Basculer sur l'onglet Archives
-  document.querySelector('.tab[data-tab="archives"]').click();
-}
-
-// === Affichage du calendrier ===
-async function renderArchivesCalendar() {
-  const archives = await getAllArchives();
-  const activeNotes = await getAllNotes();
-
-  $('archiveYear').textContent = currentArchiveYear;
-
-  const container = $('archiveCalendar');
-  let html = '';
-
-  // Stats globales de l'année
-  const yearArchives = archives.filter(a => a.yearMonth.startsWith(String(currentArchiveYear)));
-  const yearActiveNotes = activeNotes.filter(n => (n.date || '').startsWith(String(currentArchiveYear)));
-  const yearStats = {
-    paid: yearArchives.reduce((s, a) => s + (a.stats?.paid || 0), 0),
-    refund: yearArchives.reduce((s, a) => s + (a.stats?.refund || 0), 0),
-    archivedCount: yearArchives.reduce((s, a) => s + (a.noteCount || 0), 0),
-  };
-  if (yearActiveNotes.length > 0) {
-    const active = computeStats(yearActiveNotes);
-    yearStats.paid += active.paid;
-    yearStats.refund += active.refund;
-  }
-  $('archiveYearStats').innerHTML = `
-    <span style="color:var(--text-1);">${yearStats.archivedCount + yearActiveNotes.length} notes</span> ·
-    payé <span class="mono" style="color:var(--text-1);">${fmtEur(yearStats.paid)}</span> ·
-    remboursé <span class="mono" style="color:var(--ok);">${fmtEur(yearStats.refund)}</span>`;
-
-  // 12 mois
-  for (let m = 1; m <= 12; m++) {
-    const ym = `${currentArchiveYear}-${String(m).padStart(2, '0')}`;
-    const monthName = MONTH_NAMES[m - 1];
-    const archive = archives.find(a => a.yearMonth === ym);
-    const monthActiveNotes = filterNotesByMonth(activeNotes, ym);
-
-    let cls = 'archive-month';
-    let tag = '';
-    let amount = '';
-    let meta = '';
-
-    if (archive) {
-      cls += ' has-archive';
-      tag = '<span class="archive-month-tag archived">📦 archivé</span>';
-      amount = fmtEur(archive.stats?.refund || 0);
-      const exceedHtml = archive.stats?.exceedCount > 0
-        ? `<span class="archive-month-exceed">⚠ ${archive.stats.exceedCount}</span>` : '';
-      meta = `${archive.noteCount} notes${exceedHtml}`;
-    } else if (monthActiveNotes.length > 0) {
-      cls += ' has-current';
-      tag = '<span class="archive-month-tag current">en cours</span>';
-      const s = computeStats(monthActiveNotes);
-      amount = fmtEur(s.refund);
-      const exceedHtml = s.exceedCount > 0
-        ? `<span class="archive-month-exceed">⚠ ${s.exceedCount}</span>` : '';
-      meta = `${monthActiveNotes.length} notes${exceedHtml}`;
-    } else {
-      cls += ' empty';
-      amount = '—';
-      meta = '0 note';
-    }
-
-    html += `
-      <div class="${cls}" data-ym="${ym}" data-archive-id="${archive?.id || ''}">
-        ${tag}
-        <div class="archive-month-name">${monthName}</div>
-        <div class="archive-month-amount">${amount}</div>
-        <div class="archive-month-meta">${meta}</div>
-      </div>`;
-  }
-  container.innerHTML = html;
-
-  // Bind clic sur chaque mois
-  container.querySelectorAll('.archive-month').forEach(el => {
-    if (el.classList.contains('empty')) return;
-    el.addEventListener('click', async () => {
-      const ym = el.dataset.ym;
-      const archiveId = el.dataset.archiveId ? parseInt(el.dataset.archiveId) : null;
-      if (archiveId) {
-        const a = (await getAllArchives()).find(x => x.id === archiveId);
-        if (a) renderArchiveDetail(a, true);
-      } else {
-        // Mois en cours non archivé : on calcule les stats à la volée
-        const monthNotes = filterNotesByMonth(await getAllNotes(), ym);
-        const [y, mo] = ym.split('-');
-        const pseudoArchive = {
-          yearMonth: ym,
-          label: `${MONTH_NAMES[parseInt(mo) - 1]} ${y}`,
-          stats: computeStats(monthNotes),
-          notes: monthNotes,
-          noteCount: monthNotes.length,
-          archivedAt: null,
-        };
-        renderArchiveDetail(pseudoArchive, false);
-      }
-    });
-  });
-}
-
-function renderArchiveDetail(archive, isArchived) {
-  const card = $('archiveDetailCard');
-  const target = $('archiveDetail');
-  const s = archive.stats;
-
-  let html = `
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
-      <div>
-        <div class="card-title" style="margin-bottom:4px;">
-          ${isArchived ? '📦 ' : '📋 '}${escapeHtml(archive.label)}
-        </div>
-        <div style="color:var(--text-2); font-size:12px;">
-          ${isArchived
-            ? `Archivé le ${new Date(archive.archivedAt).toLocaleDateString('fr-FR')} à ${new Date(archive.archivedAt).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}`
-            : 'Notes en cours (non archivées)'}
-        </div>
-      </div>
-      <div style="display:flex; gap:6px;">
-        ${isArchived
-          ? `<button class="btn btn-sm btn-ghost" id="btnRestoreArchive">↩ Restaurer</button>
-             <button class="btn btn-sm btn-danger" id="btnDeleteArchive">🗑 Supprimer</button>`
-          : `<button class="btn btn-sm btn-archive" id="btnArchiveThisMonth">📦 Archiver ce mois</button>`}
-      </div>
-    </div>
-
-    <div class="archive-stats-grid">
-      <div class="archive-stat paid">
-        <div class="archive-stat-label">💳 Total payé</div>
-        <div class="archive-stat-value">${fmtEur(s.paid)}</div>
-      </div>
-      <div class="archive-stat refund">
-        <div class="archive-stat-label">✅ Remboursé</div>
-        <div class="archive-stat-value">${fmtEur(s.refund)}</div>
-      </div>
-      <div class="archive-stat lost">
-        <div class="archive-stat-label">❌ Non pris en charge</div>
-        <div class="archive-stat-value">${fmtEur(s.lost)}</div>
-      </div>
-    </div>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:18px;">
-      <div style="padding:8px 10px; background:var(--bg-2); border-radius:4px;">
-        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-2);">Notes</div>
-        <div class="mono" style="font-size:14px; font-weight:600;">${s.count}</div>
-      </div>
-      <div style="padding:8px 10px; background:var(--bg-2); border-radius:4px;">
-        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-2);">Dépassements</div>
-        <div class="mono" style="font-size:14px; font-weight:600; color:${s.exceedCount > 0 ? 'var(--err)' : 'var(--text-1)'}">${s.exceedCount}</div>
-      </div>
-      ${s.nightsTotal > 0 ? `
-      <div style="padding:8px 10px; background:var(--bg-2); border-radius:4px;">
-        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-2);">Nuits hôtel</div>
-        <div class="mono" style="font-size:14px; font-weight:600;">${s.nightsTotal}</div>
-      </div>` : ''}
-      <div style="padding:8px 10px; background:var(--bg-2); border-radius:4px;">
-        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-2);">Taux remboursement</div>
-        <div class="mono" style="font-size:14px; font-weight:600; color:var(--ok);">${s.paid > 0 ? Math.round((s.refund / s.paid) * 100) : 0}%</div>
-      </div>
-    </div>
-  `;
-
-  // Breakdown par catégorie
-  const cats = Object.entries(s.byCategory).sort((a, b) => b[1].refund - a[1].refund);
-  if (cats.length > 0) {
-    html += `<div class="archive-breakdown">
-      <div class="archive-breakdown-title">📊 Répartition par catégorie</div>`;
-    const maxAmount = Math.max(...cats.map(([, v]) => v.refund));
-    for (const [cat, v] of cats) {
-      const pct = s.refund > 0 ? Math.round((v.refund / s.refund) * 100) : 0;
-      const barWidth = maxAmount > 0 ? (v.refund / maxAmount) * 100 : 0;
-      html += `
-        <div class="archive-breakdown-row">
-          <div>
-            <div>${escapeHtml(cat)} <span style="color:var(--text-2); font-size:11px;">(${v.count})</span></div>
-            <div class="archive-breakdown-bar"><div class="archive-breakdown-bar-fill" style="width:${barWidth}%"></div></div>
-          </div>
-          <div class="archive-breakdown-amount">${fmtEur(v.refund)}</div>
-          <div class="archive-breakdown-pct">${pct}%</div>
-        </div>`;
-    }
-    html += `</div>`;
-  }
-
-  // Breakdown par projet
-  const projects = Object.entries(s.byProject).sort((a, b) => b[1].refund - a[1].refund);
-  if (projects.length > 0) {
-    html += `<div class="archive-breakdown">
-      <div class="archive-breakdown-title">📁 Répartition par projet d'imputation</div>`;
-    const maxAmount = Math.max(...projects.map(([, v]) => v.refund));
-    for (const [, v] of projects) {
-      const pct = s.refund > 0 ? Math.round((v.refund / s.refund) * 100) : 0;
-      const barWidth = maxAmount > 0 ? (v.refund / maxAmount) * 100 : 0;
-      html += `
-        <div class="archive-breakdown-row">
-          <div>
-            <div style="font-size:12px;">${escapeHtml(v.label)} <span style="color:var(--text-2); font-size:11px;">(${v.count})</span></div>
-            <div class="archive-breakdown-bar"><div class="archive-breakdown-bar-fill" style="width:${barWidth}%"></div></div>
-          </div>
-          <div class="archive-breakdown-amount">${fmtEur(v.refund)}</div>
-          <div class="archive-breakdown-pct">${pct}%</div>
-        </div>`;
-    }
-    html += `</div>`;
-  }
-
-  // Breakdown par site
-  const sites = Object.entries(s.bySite).sort((a, b) => b[1].refund - a[1].refund);
-  if (sites.length > 0) {
-    html += `<div class="archive-breakdown">
-      <div class="archive-breakdown-title">📍 Répartition par site</div>`;
-    const maxAmount = Math.max(...sites.map(([, v]) => v.refund));
-    for (const [site, v] of sites) {
-      const barWidth = maxAmount > 0 ? (v.refund / maxAmount) * 100 : 0;
-      html += `
-        <div class="archive-breakdown-row">
-          <div>
-            <div style="font-size:12px;">${escapeHtml(site)} <span style="color:var(--text-2); font-size:11px;">(${v.count})</span></div>
-            <div class="archive-breakdown-bar"><div class="archive-breakdown-bar-fill" style="width:${barWidth}%"></div></div>
-          </div>
-          <div class="archive-breakdown-amount">${fmtEur(v.refund)}</div>
-          <div class="archive-breakdown-pct"></div>
-        </div>`;
-    }
-    html += `</div>`;
-  }
-
-  target.innerHTML = html;
-  card.style.display = 'block';
-  card.scrollIntoView({ behavior: 'smooth' });
-
-  // Boutons
-  $('btnArchiveThisMonth')?.addEventListener('click', () => archiveMonth(archive.yearMonth));
-
-  $('btnDeleteArchive')?.addEventListener('click', async () => {
-    if (!confirm(`Supprimer définitivement l'archive de ${archive.label} ? Les notes seront perdues.`)) return;
-    await deleteArchive(archive.id);
-    card.style.display = 'none';
-    renderArchivesCalendar();
-    toast('Archive supprimée');
-  });
-
-  $('btnRestoreArchive')?.addEventListener('click', async () => {
-    if (!confirm(`Restaurer les ${archive.noteCount} notes de ${archive.label} dans la liste active ?\n\nL'archive sera supprimée.`)) return;
-    for (const note of archive.notes) {
-      const { id, ...noteWithoutId } = note;
-      await addNote(noteWithoutId);
-    }
-    await deleteArchive(archive.id);
-    card.style.display = 'none';
-    renderArchivesCalendar();
-    refreshList();
-    refreshHeaderStats();
-    toast(`✓ ${archive.notes.length} notes restaurées`);
-  });
-}
-
-function bindArchiveHandlers() {
-  if (window._archivesBound) return;
-  window._archivesBound = true;
-
-  // Bouton archiver depuis l'onglet liste
-  $('btnArchiveMonth')?.addEventListener('click', () => archiveMonth());
-
-  // Navigation année
-  $('btnYearPrev')?.addEventListener('click', () => {
-    currentArchiveYear--;
-    $('archiveDetailCard').style.display = 'none';
-    renderArchivesCalendar();
-  });
-  $('btnYearNext')?.addEventListener('click', () => {
-    currentArchiveYear++;
-    $('archiveDetailCard').style.display = 'none';
-    renderArchivesCalendar();
-  });
-
-  // Import JSON comme archive
-  $('btnImportJsonArchive')?.addEventListener('click', () => $('archiveImportFile').click());
-  $('archiveImportFile')?.addEventListener('change', async e => {
-    const file = e.target.files[0];
-    e.target.value = '';
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      await importJsonAsArchive(data, file.name);
-    } catch (err) {
-      console.error('[importJson] erreur:', err);
-      toast('Erreur import : ' + err.message);
-    }
-  });
-}
-
-// Import d'un fichier JSON comme nouvelle archive
-async function importJsonAsArchive(data, fileName) {
-  // Validation : doit être un export ndf-bertin OU un objet contenant des notes
-  let notes;
-  let exportedAt = null;
-  let sourceYM = null;
-
-  if (data && data.type === 'ndf-bertin-export' && Array.isArray(data.notes)) {
-    notes = data.notes;
-    exportedAt = data.exportedAt;
-    sourceYM = data.yearMonth;
-  } else if (Array.isArray(data)) {
-    notes = data;
-  } else if (data && Array.isArray(data.notes)) {
-    notes = data.notes;
-    exportedAt = data.exportedAt || null;
-  } else {
-    throw new Error('Format JSON non reconnu (attendu : export ndf-bertin)');
-  }
-
-  if (notes.length === 0) {
-    toast('Le fichier ne contient aucune note');
-    return;
-  }
-
-  // Validation minimale du format des notes
-  const invalid = notes.find(n => !n.date || (n.amount == null && n.amountPaid == null));
-  if (invalid) {
-    throw new Error('Une ou plusieurs notes sont invalides (date ou montant manquant)');
-  }
-
-  // Détecter le mois
-  const months = listMonthsWithNotes(notes);
-  let ym = sourceYM;
-  if (!ym || !/^\d{4}-\d{2}$/.test(ym)) {
-    if (months.length === 1) {
-      ym = months[0];
-    } else if (months.length > 1) {
-      // Plusieurs mois : prendre celui le plus représenté
-      const counts = {};
-      for (const n of notes) {
-        const key = (n.date || '').slice(0, 7);
-        if (key) counts[key] = (counts[key] || 0) + 1;
-      }
-      ym = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-    } else {
-      ym = new Date().toISOString().slice(0, 7);
-    }
-  }
-
-  const [y, mo] = ym.split('-');
-  const monthLabel = `${MONTH_NAMES[parseInt(mo) - 1]} ${y}`;
-
-  // Vérifier si une archive existe déjà pour ce mois
-  const existing = (await getAllArchives()).find(a => a.yearMonth === ym);
-  if (existing) {
-    if (!confirm(
-      `Une archive existe déjà pour ${monthLabel} (${existing.noteCount} notes).\n\n` +
-      `Importer en plus de l'existante ? (l'ancienne sera conservée)`
-    )) return;
-  }
-
-  // Nettoyer les ID des notes (sinon collisions IndexedDB) et calculer les stats
-  const cleanNotes = notes.map(n => {
-    const { id, ...rest } = n;
-    return rest;
-  });
-  const stats = computeStats(cleanNotes);
-
-  const archive = {
-    yearMonth: ym,
-    label: monthLabel + (existing ? ' (importé)' : ''),
-    archivedAt: new Date().toISOString(),
-    importedFrom: fileName,
-    importedExportedAt: exportedAt,
-    stats: stats,
-    notes: cleanNotes,
-    noteCount: cleanNotes.length,
-  };
-  await addArchive(archive);
-
-  toast(`✓ Importées : ${cleanNotes.length} notes dans ${monthLabel}`, 3000);
-  renderArchivesCalendar();
-}
-
-// =====================================================================
 // RÉGLAGES — Clé API Claude
 // =====================================================================
 
@@ -4338,7 +3638,6 @@ async function loadApiKeyIntoSettings() {
     populateProjectDatalist();
     bindProjectFieldHandlers();
     bindImputationsHandlers();
-    bindArchiveHandlers();
     bindSettingsHandlers();
     await loadApiKeyIntoSettings();
     refreshHeaderStats();
