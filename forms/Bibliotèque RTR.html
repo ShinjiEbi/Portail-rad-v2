@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d0e10">
+<title>Bibliothèque IZ — Bertin Tech.</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+<style>
+:root {
+  --bg-0: #0d0e10;
+  --bg-1: #15171b;
+  --bg-2: #1c1f24;
+  --bg-3: #262a31;
+  --border: #2a2e34;
+  --border-strong: #3a3f48;
+  --text-0: #f0eee9;
+  --text-1: #b8b6b0;
+  --text-2: #6e6c66;
+  --accent: #10b981;
+  --accent-soft: rgba(16, 185, 129, 0.12);
+  --bertin: #1e40af;
+  --ok: #4ade80;
+  --ok-soft: rgba(74, 222, 128, 0.12);
+  --warn: #fbbf24;
+  --err: #ef4444;
+  --err-soft: rgba(239, 68, 68, 0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+body {
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 80% 100%, rgba(30, 64, 175, 0.05) 0%, transparent 40%);
+  background-attachment: fixed;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.mono { font-family: 'IBM Plex Mono', monospace; }
+
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-0);
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(8px);
+  flex-wrap: wrap; gap: 10px;
+}
+header h1 {
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: 'IBM Plex Mono', monospace;
+}
+header h1 .accent { color: var(--accent); }
+header h1 .sub { color: var(--text-2); font-weight: 400; }
+
+.header-stats {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; text-align: right; line-height: 1.3;
+  color: var(--text-2);
+}
+.header-stats .num { color: var(--text-0); font-weight: 600; }
+.header-stats .num.acc { color: var(--accent); }
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-0);
+  position: sticky; top: 53px; z-index: 49;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 1; min-width: 100px;
+  padding: 12px 14px;
+  background: none; border: none;
+  color: var(--text-2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+.tab:hover { color: var(--text-1); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-2);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::before {
+  content: ''; width: 8px; height: 8px;
+  background: var(--accent);
+  display: inline-block;
+}
+
+.btn {
+  background: var(--bg-3);
+  color: var(--text-0);
+  border: 1px solid var(--border-strong);
+  padding: 12px 18px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+}
+.btn:hover { border-color: var(--text-2); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary {
+  background: var(--accent); color: var(--bg-0);
+  border-color: var(--accent); font-weight: 700;
+}
+.btn-primary:hover { background: #34d399; border-color: #34d399; }
+.btn-bertin {
+  background: var(--bertin); color: #fff;
+  border-color: var(--bertin); font-weight: 600;
+}
+.btn-ghost { background: transparent; border-color: var(--border); }
+.btn-danger {
+  background: transparent; color: var(--err);
+  border-color: var(--err);
+}
+.btn-danger:hover { background: var(--err-soft); }
+.btn-sm { padding: 8px 12px; font-size: 11px; }
+
+.actions-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.actions-row .btn { flex: 1; min-width: 140px; }
+
+/* ===== SCANNER ===== */
+#scannerWrap {
+  display: none;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+#scannerWrap.show { display: block; }
+#qrReader {
+  width: 100% !important;
+  max-width: 500px;
+  margin: 0 auto;
+}
+#qrReader video {
+  border-radius: 4px;
+}
+.scanner-controls {
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+}
+.scanner-status {
+  padding: 10px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* ===== RECHERCHE & FILTRES ===== */
+.search-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.search-bar input {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text-0);
+  padding: 12px 14px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+}
+.search-bar input:focus {
+  outline: none; border-color: var(--accent);
+}
+.filter-section {
+  margin-bottom: 12px;
+}
+.filter-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+.filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.filter-chips.scrollable {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+}
+.filter-chips.scrollable::-webkit-scrollbar { height: 4px; }
+.filter-chips.scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+.filter-chips.scrollable .chip {
+  flex-shrink: 0;
+}
+.chip {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chip:hover { border-color: var(--accent); color: var(--text-1); }
+.chip.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ===== LISTE IZ ===== */
+.iz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.iz-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-left: 3px solid var(--accent);
+}
+.iz-card:hover {
+  background: var(--bg-3);
+  border-left-color: var(--ok);
+}
+.iz-card-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 6px;
+  gap: 10px;
+}
+.iz-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+}
+.iz-label {
+  font-size: 13px;
+  color: var(--text-0);
+  margin-bottom: 4px;
+}
+.iz-meta {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+}
+.iz-meta span {
+  background: var(--bg-1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.iz-tags {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-top: 6px;
+}
+.iz-tag {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.iz-usage {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.iz-empty {
+  text-align: center;
+  color: var(--text-2);
+  padding: 40px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+
+/* ===== MODALE D'ÉDITION ===== */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  background: var(--bg-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 22px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+.modal-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.field label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-2);
+}
+.field input, .field select, .field textarea {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text-0);
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px; width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--accent);
+}
+.field input.code-input {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--accent);
+}
+.field-row-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.field-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-2);
+}
+.tag-input-wrap {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px;
+  min-height: 40px;
+  align-items: center;
+}
+.tag-input-wrap input {
+  border: none !important;
+  background: transparent !important;
+  flex: 1;
+  min-width: 100px;
+  padding: 4px !important;
+}
+.tag-input-wrap .tag-pill {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  display: flex; gap: 4px; align-items: center;
+}
+.tag-input-wrap .tag-pill button {
+  background: none; border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.modal-actions .left { display: flex; gap: 8px; }
+.modal-actions .right { display: flex; gap: 8px; }
+
+/* ===== MODALE DÉTAIL ===== */
+.detail-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  padding: 16px;
+  background: var(--bg-2);
+  border-radius: 6px;
+  margin-bottom: 14px;
+  border: 2px dashed var(--accent);
+  word-break: break-all;
+}
+
+.barcode-wrap {
+  background: #fff;
+  border-radius: 6px;
+  padding: 14px 10px;
+  margin-bottom: 8px;
+  text-align: center;
+  border: 1px solid var(--border-strong);
+}
+.barcode-wrap svg {
+  max-width: 100%;
+  height: auto;
+}
+.barcode-error {
+  color: var(--err);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 12px;
+  display: none;
+}
+.barcode-error.show { display: block; }
+.barcode-wrap.has-error svg { display: none; }
+.barcode-wrap.has-error { background: var(--err-soft); border-color: var(--err); }
+
+.barcode-format-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.barcode-format-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.barcode-format-chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.barcode-format-chips .chip {
+  padding: 4px 10px;
+  font-size: 10px;
+}
+.detail-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.detail-row .key {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  align-self: center;
+}
+.detail-row .value {
+  color: var(--text-0);
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-3);
+  color: var(--text-0);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 12px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.toast.show { opacity: 1; }
+
+@media (max-width: 540px) {
+  main { padding: 16px 14px 80px; }
+  .card { padding: 14px; }
+  header h1 .sub { display: none; }
+  .field-row-2 { grid-template-columns: 1fr; }
+  .detail-row { grid-template-columns: 80px 1fr; gap: 8px; font-size: 12px; }
+  .detail-code { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="accent">▮</span> Bibliothèque IZ <span class="sub">/ RTR Bertin Tech.</span></h1>
+  <div class="header-stats" id="headerStats">
+    <div><span class="num acc" id="statTotal">0</span> IZ enregistrés</div>
+    <div><span class="num" id="statRecent">0</span> utilisés ce mois</div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="library">📚 Bibliothèque</button>
+  <button class="tab" data-tab="settings">⚙ Réglages</button>
+</nav>
+
+<main>
+
+  <!-- ============== BIBLIOTHÈQUE ============== -->
+  <section class="view active" id="view-library">
+
+    <div class="card">
+      <div class="actions-row">
+        <button class="btn btn-primary" id="btnScan">📷 Scanner un IZ</button>
+        <button class="btn btn-bertin" id="btnManual">✏ Saisie manuelle</button>
+      </div>
+
+      <div id="scannerWrap">
+        <div id="qrReader"></div>
+        <div class="scanner-status" id="scannerStatus">Initialisation caméra…</div>
+        <div class="scanner-controls">
+          <button class="btn btn-sm btn-ghost" id="btnStopScan">⏹ Arrêter</button>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher (IZ, libellé, tag, site…)">
+        <button class="btn btn-sm btn-ghost" id="btnClearSearch">✕</button>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-label">Site</div>
+        <div class="filter-chips" id="filterSiteChips"></div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-label">Libellé</div>
+        <div class="filter-chips" id="filterLabelChips"></div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-label">Catégorie</div>
+        <div class="filter-chips" id="filterChips"></div>
+      </div>
+
+      <div class="iz-list" id="izList"></div>
+    </div>
+  </section>
+
+  <!-- ============== RÉGLAGES ============== -->
+  <section class="view" id="view-settings">
+    <div class="card">
+      <div class="card-title">Sites par défaut</div>
+      <p style="color:var(--text-2); font-size:13px; margin-bottom:12px; line-height:1.5;">
+        Ces sites apparaîtront dans le dropdown au moment de la saisie d'un IZ.
+        Modifie selon les CNPE sur lesquels tu interviens.
+      </p>
+      <div class="field">
+        <label>Sites (un par ligne)</label>
+        <textarea id="cfgSites" rows="6" placeholder="Bugey&#10;Creys-Malville&#10;St Alban&#10;Tricastin"></textarea>
+      </div>
+      <div class="actions-row" style="margin-bottom:0;">
+        <button class="btn btn-primary" id="btnSaveSites">💾 Enregistrer</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tags suggérés</div>
+      <p style="color:var(--text-2); font-size:13px; margin-bottom:12px;">
+        Tags couramment utilisés (suggérés en auto-complétion).
+      </p>
+      <div class="field">
+        <label>Tags suggérés (un par ligne)</label>
+        <textarea id="cfgTags" rows="6" placeholder="routine&#10;étalonnage&#10;intervention&#10;urgence&#10;arrêt de tranche"></textarea>
+      </div>
+      <div class="actions-row" style="margin-bottom:0;">
+        <button class="btn btn-primary" id="btnSaveTags">💾 Enregistrer</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Données</div>
+      <div class="actions-row">
+        <button class="btn" id="btnExportJson">📦 Sauvegarde JSON</button>
+        <button class="btn" id="btnExportCsv">📊 Export CSV</button>
+        <button class="btn btn-ghost" id="btnImportJson">📥 Import JSON</button>
+        <button class="btn btn-danger" id="btnClearAll">🗑 Tout effacer</button>
+      </div>
+      <input type="file" id="jsonImportFile" accept="application/json,.json" hidden>
+    </div>
+  </section>
+
+</main>
+
+<!-- Modale d'édition / saisie d'un IZ -->
+<div class="modal-backdrop" id="modalIz">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Nouvel IZ</div>
+
+    <div class="field">
+      <label>Code IZ <span style="color:var(--err);">*</span></label>
+      <input type="text" id="izCode" class="code-input" placeholder="ex: IZ-BUG-2026-04123" autocomplete="off">
+      <div class="field-hint">Le code-barres scanné, ou saisie manuelle.</div>
+    </div>
+
+    <div class="field">
+      <label>Libellé court</label>
+      <input type="text" id="izLabel" placeholder="ex: Ronde KRT mensuelle - Bugey T2">
+    </div>
+
+    <div class="field-row-2">
+      <div class="field">
+        <label>Site</label>
+        <select id="izSite">
+          <option value="">— Choisir —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tranche</label>
+        <input type="text" id="izTranche" placeholder="ex: 2">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Local / Repère SIPN</label>
+      <input type="text" id="izLocal" placeholder="ex: BAN niv. -3,5 / L425">
+    </div>
+
+    <div class="field">
+      <label>Tags (Entrée pour valider)</label>
+      <div class="tag-input-wrap" id="izTagsWrap">
+        <input type="text" id="izTagInput" placeholder="ex: routine, étalonnage…" autocomplete="off">
+      </div>
+      <div class="field-hint" id="tagSuggestions"></div>
+    </div>
+
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="izNotes" rows="3" placeholder="Informations utiles, modes opératoires, contacts…"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <div class="left">
+        <button class="btn btn-sm btn-danger" id="btnDelIz">Supprimer</button>
+      </div>
+      <div class="right">
+        <button class="btn btn-sm btn-ghost" id="btnCancelIz">Annuler</button>
+        <button class="btn btn-sm btn-primary" id="btnSaveIz">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modale détail (lecture seule + actions rapides) -->
+<div class="modal-backdrop" id="modalDetail">
+  <div class="modal">
+    <div class="modal-title">Détail IZ</div>
+
+    <div class="barcode-wrap" id="barcodeWrap">
+      <svg id="barcodeSvg"></svg>
+      <div class="barcode-error" id="barcodeError"></div>
+    </div>
+
+    <div class="barcode-format-row" id="barcodeFormatRow">
+      <span class="barcode-format-label">Format</span>
+      <div class="barcode-format-chips" id="barcodeFormatChips"></div>
+    </div>
+
+    <div class="detail-code" id="detailCode"></div>
+
+    <button class="btn btn-block btn-primary" id="btnCopyCode" style="width:100%; margin-bottom:14px;">
+      📋 Copier le code
+    </button>
+
+    <div id="detailRows"></div>
+
+    <div class="modal-actions">
+      <div class="left">
+        <button class="btn btn-sm btn-ghost" id="btnUseToday">✓ Utilisé aujourd'hui</button>
+      </div>
+      <div class="right">
+        <button class="btn btn-sm btn-ghost" id="btnCloseDetail">Fermer</button>
+        <button class="btn btn-sm btn-bertin" id="btnEditFromDetail">✏ Modifier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================================
+// CONFIG
+// =====================================================================
+
+const DB_NAME = 'iz_bertin_db';
+const DB_VERSION = 1;
+const STORE_IZ = 'iz';
+const STORE_CONFIG = 'config';
+
+let userCfg = {
+  sites: ['Bugey', 'Creys-Malville', 'St Alban', 'Tricastin'],
+  tags: ['routine', 'étalonnage', 'intervention', 'urgence', 'arrêt de tranche', 'frottis', 'point chaud'],
+};
+
+let allIzs = [];
+let currentFilter = 'all';
+let currentSearch = '';
+let currentSite = '';
+let currentLabel = '';
+let editingIz = null;
+let modalTags = []; // tags en cours d'édition
+let scanner = null;
+
+// =====================================================================
+// INDEXEDDB
+// =====================================================================
+
+let db;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE_IZ)) {
+        const s = d.createObjectStore(STORE_IZ, { keyPath: 'code' });
+        s.createIndex('lastUsed', 'lastUsed', { unique: false });
+      }
+      if (!d.objectStoreNames.contains(STORE_CONFIG)) {
+        d.createObjectStore(STORE_CONFIG, { keyPath: 'key' });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror = e => rej(e.target.error);
+  });
+}
+
+const tx = (s, m='readonly') => db.transaction(s, m).objectStore(s);
+
+const getAllIzs = () => new Promise((res, rej) => {
+  const r = tx(STORE_IZ).getAll();
+  r.onsuccess = () => res(r.result || []);
+  r.onerror = () => rej(r.error);
+});
+const getIz = code => new Promise((res, rej) => {
+  const r = tx(STORE_IZ).get(code);
+  r.onsuccess = () => res(r.result);
+  r.onerror = () => rej(r.error);
+});
+const putIz = iz => new Promise((res, rej) => {
+  const r = tx(STORE_IZ, 'readwrite').put(iz);
+  r.onsuccess = () => res();
+  r.onerror = () => rej(r.error);
+});
+const deleteIz = code => new Promise((res, rej) => {
+  const r = tx(STORE_IZ, 'readwrite').delete(code);
+  r.onsuccess = () => res();
+  r.onerror = () => rej(r.error);
+});
+const clearIzs = () => new Promise((res, rej) => {
+  const r = tx(STORE_IZ, 'readwrite').clear();
+  r.onsuccess = () => res();
+  r.onerror = () => rej(r.error);
+});
+const getConfig = k => new Promise((res, rej) => {
+  const r = tx(STORE_CONFIG).get(k);
+  r.onsuccess = () => res(r.result?.value);
+  r.onerror = () => rej(r.error);
+});
+const setConfig = (k, v) => new Promise((res, rej) => {
+  const r = tx(STORE_CONFIG, 'readwrite').put({ key: k, value: v });
+  r.onsuccess = () => res();
+  r.onerror = () => rej(r.error);
+});
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+
+const $ = id => document.getElementById(id);
+
+function toast(msg, dur = 2200) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function isThisMonth(iso) {
+  if (!iso) return false;
+  const d = new Date(iso);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+}
+
+// =====================================================================
+// NAVIGATION ONGLETS
+// =====================================================================
+
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    $('view-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'settings') loadCfgIntoForm();
+  });
+});
+
+// =====================================================================
+// RENDU DE LA LISTE
+// =====================================================================
+
+function renderFilters() {
+  const chipsEl = $('filterChips');
+  // Compter les tags
+  const tagCounts = {};
+  for (const iz of allIzs) {
+    for (const t of (iz.tags || [])) {
+      tagCounts[t] = (tagCounts[t] || 0) + 1;
+    }
+  }
+  const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+
+  const fixedHtml = `
+    <div class="chip ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">Tous (${allIzs.length})</div>
+    <div class="chip ${currentFilter === 'recent' ? 'active' : ''}" data-filter="recent">📅 Récents</div>
+    <div class="chip ${currentFilter === 'frequent' ? 'active' : ''}" data-filter="frequent">⭐ Fréquents</div>
+  `;
+  const tagsHtml = sortedTags.slice(0, 8).map(([t, n]) =>
+    `<div class="chip ${currentFilter === 'tag:' + t ? 'active' : ''}" data-filter="tag:${escapeHtml(t)}">#${escapeHtml(t)} (${n})</div>`
+  ).join('');
+
+  chipsEl.innerHTML = fixedHtml + tagsHtml;
+
+  chipsEl.querySelectorAll('.chip').forEach(el => {
+    el.addEventListener('click', () => {
+      currentFilter = el.dataset.filter;
+      renderList();
+    });
+  });
+}
+
+function renderFilterDropdowns() {
+  // === Sites ===
+  const siteCounts = {};
+  for (const iz of allIzs) {
+    if (iz.site) siteCounts[iz.site] = (siteCounts[iz.site] || 0) + 1;
+  }
+  const sites = Object.entries(siteCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+  const siteEl = $('filterSiteChips');
+  if (sites.length === 0) {
+    siteEl.innerHTML = `<div class="chip active">Aucun site</div>`;
+  } else {
+    siteEl.classList.toggle('scrollable', sites.length > 4);
+    let html = `<div class="chip ${currentSite === '' ? 'active' : ''}" data-site="">Tous (${allIzs.length})</div>`;
+    html += sites.map(([s, n]) =>
+      `<div class="chip ${currentSite === s ? 'active' : ''}" data-site="${escapeHtml(s)}">${escapeHtml(s)} (${n})</div>`
+    ).join('');
+    siteEl.innerHTML = html;
+    siteEl.querySelectorAll('.chip').forEach(el => {
+      el.addEventListener('click', () => {
+        currentSite = el.dataset.site;
+        renderFilterDropdowns();
+        renderList();
+      });
+    });
+  }
+
+  // === Libellés ===
+  const labelCounts = {};
+  for (const iz of allIzs) {
+    const lbl = (iz.label || '').trim();
+    if (lbl) labelCounts[lbl] = (labelCounts[lbl] || 0) + 1;
+  }
+  const labels = Object.entries(labelCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+  const labelEl = $('filterLabelChips');
+  if (labels.length === 0) {
+    labelEl.innerHTML = `<div class="chip active">Aucun libellé</div>`;
+  } else {
+    labelEl.classList.toggle('scrollable', labels.length > 3);
+    let html = `<div class="chip ${currentLabel === '' ? 'active' : ''}" data-label="">Tous</div>`;
+    html += labels.map(([l, n]) =>
+      `<div class="chip ${currentLabel === l ? 'active' : ''}" data-label="${escapeHtml(l)}" title="${escapeHtml(l)}">${escapeHtml(l.length > 30 ? l.slice(0, 28) + '…' : l)} (${n})</div>`
+    ).join('');
+    labelEl.innerHTML = html;
+    labelEl.querySelectorAll('.chip').forEach(el => {
+      el.addEventListener('click', () => {
+        currentLabel = el.dataset.label;
+        renderFilterDropdowns();
+        renderList();
+      });
+    });
+  }
+}
+
+function renderList() {
+  const list = $('izList');
+  let filtered = allIzs.slice();
+
+  // Filtres dropdowns site / label (cumulables)
+  if (currentSite) {
+    filtered = filtered.filter(iz => iz.site === currentSite);
+  }
+  if (currentLabel) {
+    filtered = filtered.filter(iz => (iz.label || '').trim() === currentLabel);
+  }
+
+  // Filtre par catégorie (chips)
+  if (currentFilter === 'recent') {
+    filtered.sort((a, b) => (b.lastUsed || b.createdAt || '').localeCompare(a.lastUsed || a.createdAt || ''));
+    filtered = filtered.slice(0, 30);
+  } else if (currentFilter === 'frequent') {
+    filtered.sort((a, b) => (b.useCount || 0) - (a.useCount || 0));
+    filtered = filtered.filter(iz => (iz.useCount || 0) > 0);
+  } else if (currentFilter.startsWith('tag:')) {
+    const tag = currentFilter.slice(4);
+    filtered = filtered.filter(iz => (iz.tags || []).includes(tag));
+  }
+
+  // Recherche live
+  if (currentSearch) {
+    const q = currentSearch.toLowerCase();
+    filtered = filtered.filter(iz =>
+      iz.code.toLowerCase().includes(q) ||
+      (iz.label || '').toLowerCase().includes(q) ||
+      (iz.site || '').toLowerCase().includes(q) ||
+      (iz.local || '').toLowerCase().includes(q) ||
+      (iz.notes || '').toLowerCase().includes(q) ||
+      (iz.tags || []).some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  // Tri par défaut : récent en haut (sauf si filtre fréquents qui a son propre tri)
+  if (currentFilter === 'all' && !currentSearch) {
+    filtered.sort((a, b) => (b.lastUsed || b.createdAt || '').localeCompare(a.lastUsed || a.createdAt || ''));
+  }
+
+  if (filtered.length === 0) {
+    const hasActiveFilter = currentSite || currentLabel || currentSearch || currentFilter !== 'all';
+    list.innerHTML = `<div class="iz-empty">
+      ${allIzs.length === 0
+        ? 'Aucun IZ enregistré.<br>Scanne ou saisis ton premier IZ ↑'
+        : (hasActiveFilter ? 'Aucun résultat pour ces filtres.' : 'Aucun résultat.')}
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(iz => {
+    const meta = [
+      iz.site ? `<span>${escapeHtml(iz.site)}</span>` : '',
+      iz.tranche ? `<span>T${escapeHtml(iz.tranche)}</span>` : '',
+      iz.local ? `<span>${escapeHtml(iz.local)}</span>` : '',
+    ].filter(Boolean).join('');
+    const tags = (iz.tags || []).map(t => `<span class="iz-tag">#${escapeHtml(t)}</span>`).join('');
+    const usage = iz.useCount > 0
+      ? `${iz.useCount}× · ${formatDate(iz.lastUsed)}`
+      : `Créé ${formatDate(iz.createdAt)}`;
+
+    return `
+      <div class="iz-card" data-code="${escapeHtml(iz.code)}">
+        <div class="iz-card-header">
+          <div style="flex:1; min-width:0;">
+            <div class="iz-code">${escapeHtml(iz.code)}</div>
+            ${iz.label ? `<div class="iz-label">${escapeHtml(iz.label)}</div>` : ''}
+          </div>
+          <div class="iz-usage">${usage}</div>
+        </div>
+        ${meta ? `<div class="iz-meta">${meta}</div>` : ''}
+        ${tags ? `<div class="iz-tags">${tags}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.iz-card').forEach(el => {
+    el.addEventListener('click', () => openDetailModal(el.dataset.code));
+  });
+}
+
+function refreshHeaderStats() {
+  $('statTotal').textContent = allIzs.length;
+  const recent = allIzs.filter(iz => isThisMonth(iz.lastUsed)).length;
+  $('statRecent').textContent = recent;
+}
+
+async function refreshAll() {
+  allIzs = await getAllIzs();
+  refreshHeaderStats();
+  renderFilters();
+  renderFilterDropdowns();
+  renderList();
+}
+
+// === Recherche live ===
+$('searchInput').addEventListener('input', e => {
+  currentSearch = e.target.value.trim();
+  renderList();
+});
+$('btnClearSearch').addEventListener('click', () => {
+  $('searchInput').value = '';
+  currentSearch = '';
+  renderList();
+  $('searchInput').focus();
+});
+
+// =====================================================================
+// SCANNER (html5-qrcode)
+// =====================================================================
+
+$('btnScan').addEventListener('click', async () => {
+  const wrap = $('scannerWrap');
+  if (wrap.classList.contains('show')) {
+    stopScanner();
+    return;
+  }
+  wrap.classList.add('show');
+  $('scannerStatus').textContent = 'Initialisation caméra…';
+
+  try {
+    scanner = new Html5Qrcode('qrReader');
+    const config = {
+      fps: 10,
+      qrbox: { width: 280, height: 140 },
+      aspectRatio: 1.7,
+      formatsToSupport: undefined, // tous formats
+    };
+
+    await scanner.start(
+      { facingMode: 'environment' },
+      config,
+      (decodedText, decodedResult) => {
+        // Code détecté !
+        $('scannerStatus').textContent = `✓ Détecté : ${decodedText}`;
+        stopScanner();
+        // Vibration courte sur mobile
+        if (navigator.vibrate) navigator.vibrate(80);
+        handleScannedCode(decodedText);
+      },
+      () => {} // erreurs de scan : silencieux
+    );
+    $('scannerStatus').textContent = 'Pointe la caméra vers le code-barres IZ';
+  } catch (err) {
+    console.error('[scanner]', err);
+    $('scannerStatus').textContent = `❌ ${err.message || 'Caméra non accessible'}. Vérifie les permissions du navigateur.`;
+    if (scanner) {
+      try { await scanner.clear(); } catch (_) {}
+      scanner = null;
+    }
+  }
+});
+
+async function stopScanner() {
+  if (scanner) {
+    try {
+      await scanner.stop();
+      await scanner.clear();
+    } catch (e) { console.warn(e); }
+    scanner = null;
+  }
+  $('scannerWrap').classList.remove('show');
+}
+
+$('btnStopScan').addEventListener('click', stopScanner);
+
+async function handleScannedCode(code) {
+  const trimmed = code.trim();
+  // Si déjà en base, on incrémente l'usage et on ouvre la modale détail
+  const existing = await getIz(trimmed);
+  if (existing) {
+    existing.useCount = (existing.useCount || 0) + 1;
+    existing.lastUsed = new Date().toISOString();
+    await putIz(existing);
+    await refreshAll();
+    toast(`✓ IZ existant — usage incrémenté (${existing.useCount}×)`);
+    openDetailModal(trimmed);
+  } else {
+    // Sinon ouvrir la modale d'édition pré-remplie
+    openEditModal(null, trimmed);
+    toast('Nouvel IZ — complète les infos', 1500);
+  }
+}
+
+// =====================================================================
+// MODALE D'ÉDITION
+// =====================================================================
+
+function openEditModal(existingCode = null, prefilledCode = '') {
+  editingIz = existingCode;
+  modalTags = [];
+
+  // Charger sites dans le dropdown
+  const siteSel = $('izSite');
+  siteSel.innerHTML = '<option value="">— Choisir —</option>' +
+    (userCfg.sites || []).map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+
+  if (existingCode) {
+    $('modalTitle').textContent = 'Modifier IZ';
+    const iz = allIzs.find(x => x.code === existingCode);
+    if (iz) {
+      $('izCode').value = iz.code;
+      $('izCode').readOnly = true;
+      $('izLabel').value = iz.label || '';
+      $('izSite').value = iz.site || '';
+      $('izTranche').value = iz.tranche || '';
+      $('izLocal').value = iz.local || '';
+      $('izNotes').value = iz.notes || '';
+      modalTags = (iz.tags || []).slice();
+    }
+    $('btnDelIz').style.display = 'inline-flex';
+  } else {
+    $('modalTitle').textContent = 'Nouvel IZ';
+    $('izCode').value = prefilledCode;
+    $('izCode').readOnly = false;
+    $('izLabel').value = '';
+    $('izSite').value = '';
+    $('izTranche').value = '';
+    $('izLocal').value = '';
+    $('izNotes').value = '';
+    $('btnDelIz').style.display = 'none';
+  }
+
+  renderModalTags();
+  renderTagSuggestions();
+  $('modalIz').classList.add('show');
+  setTimeout(() => {
+    if (prefilledCode) $('izLabel').focus();
+    else $('izCode').focus();
+  }, 50);
+}
+
+function closeEditModal() {
+  $('modalIz').classList.remove('show');
+  editingIz = null;
+  modalTags = [];
+}
+
+function renderModalTags() {
+  const wrap = $('izTagsWrap');
+  // Garder l'input à la fin
+  const existingInput = $('izTagInput');
+  const html = modalTags.map((t, i) =>
+    `<div class="tag-pill">#${escapeHtml(t)} <button type="button" data-idx="${i}">×</button></div>`
+  ).join('');
+  wrap.innerHTML = html;
+  wrap.appendChild(existingInput);
+  existingInput.focus();
+
+  wrap.querySelectorAll('.tag-pill button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modalTags.splice(parseInt(btn.dataset.idx), 1);
+      renderModalTags();
+    });
+  });
+}
+
+function renderTagSuggestions() {
+  const tagSet = new Set();
+  for (const iz of allIzs) {
+    for (const t of (iz.tags || [])) tagSet.add(t);
+  }
+  for (const t of (userCfg.tags || [])) tagSet.add(t);
+  const all = [...tagSet].filter(t => !modalTags.includes(t)).sort();
+  if (all.length === 0) {
+    $('tagSuggestions').textContent = '';
+    return;
+  }
+  $('tagSuggestions').innerHTML = 'Suggérés : ' + all.slice(0, 10).map(t =>
+    `<span style="cursor:pointer; color:var(--accent); margin-right:8px;" data-tag="${escapeHtml(t)}">#${escapeHtml(t)}</span>`
+  ).join('');
+  $('tagSuggestions').querySelectorAll('span[data-tag]').forEach(el => {
+    el.addEventListener('click', () => {
+      modalTags.push(el.dataset.tag);
+      renderModalTags();
+      renderTagSuggestions();
+    });
+  });
+}
+
+$('izTagInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const v = e.target.value.trim().replace(/,$/, '');
+    if (v && !modalTags.includes(v)) {
+      modalTags.push(v);
+      renderModalTags();
+      renderTagSuggestions();
+    }
+    e.target.value = '';
+  } else if (e.key === 'Backspace' && !e.target.value && modalTags.length > 0) {
+    modalTags.pop();
+    renderModalTags();
+    renderTagSuggestions();
+  }
+});
+
+$('btnManual').addEventListener('click', () => openEditModal(null, ''));
+$('btnCancelIz').addEventListener('click', closeEditModal);
+$('modalIz').addEventListener('click', e => {
+  if (e.target === $('modalIz')) closeEditModal();
+});
+
+$('btnSaveIz').addEventListener('click', async () => {
+  const code = $('izCode').value.trim();
+  if (!code) {
+    toast('Code IZ obligatoire');
+    return;
+  }
+
+  // Conflit : nouveau IZ avec un code déjà existant
+  if (!editingIz && (await getIz(code))) {
+    if (!confirm(`Un IZ avec ce code existe déjà. Le remplacer ?`)) return;
+  }
+
+  // Tag input restant ?
+  const remaining = $('izTagInput').value.trim();
+  if (remaining && !modalTags.includes(remaining)) modalTags.push(remaining);
+
+  const now = new Date().toISOString();
+  const existing = editingIz ? allIzs.find(x => x.code === editingIz) : null;
+
+  const iz = {
+    code,
+    label: $('izLabel').value.trim(),
+    site: $('izSite').value,
+    tranche: $('izTranche').value.trim(),
+    local: $('izLocal').value.trim(),
+    notes: $('izNotes').value.trim(),
+    tags: modalTags.slice(),
+    createdAt: existing?.createdAt || now,
+    lastUsed: existing?.lastUsed || null,
+    useCount: existing?.useCount || 0,
+    updatedAt: now,
+  };
+
+  // Si c'est un nouveau scan et qu'on l'a pas encore utilisé, on incrémente
+  if (!existing) {
+    iz.lastUsed = now;
+    iz.useCount = 1;
+  }
+
+  await putIz(iz);
+  closeEditModal();
+  toast(`✓ ${editingIz ? 'Modifié' : 'Enregistré'}`);
+  await refreshAll();
+});
+
+$('btnDelIz').addEventListener('click', async () => {
+  if (!editingIz) return;
+  if (!confirm(`Supprimer définitivement l'IZ "${editingIz}" ?`)) return;
+  await deleteIz(editingIz);
+  closeEditModal();
+  toast('Supprimé');
+  await refreshAll();
+});
+
+// =====================================================================
+// MODALE DÉTAIL
+// =====================================================================
+
+let currentDetailCode = null;
+
+// Formats supportés par JsBarcode dispos dans la lib (.all.min.js)
+const BARCODE_FORMATS = [
+  { id: 'CODE128', label: 'Code 128' },     // standard industriel, le plus probable EDF
+  { id: 'CODE39', label: 'Code 39' },       // ancien standard, parfois encore utilisé
+  { id: 'EAN13', label: 'EAN-13' },         // commerce
+  { id: 'ITF', label: 'ITF' },              // Interleaved 2 of 5, logistique
+];
+
+let currentBarcodeFormat = 'CODE128';
+
+function renderBarcode(code, format) {
+  const wrap = $('barcodeWrap');
+  const svg = $('barcodeSvg');
+  const errEl = $('barcodeError');
+
+  wrap.classList.remove('has-error');
+  errEl.classList.remove('show');
+
+  try {
+    JsBarcode(svg, code, {
+      format: format,
+      displayValue: false,    // on affiche le code en texte ailleurs
+      width: 2,
+      height: 70,
+      margin: 0,
+      background: '#ffffff',
+      lineColor: '#000000',
+      valid: (valid) => {
+        if (!valid) throw new Error('Invalide pour ' + format);
+      },
+    });
+  } catch (err) {
+    wrap.classList.add('has-error');
+    errEl.textContent = `❌ Ce code n'est pas valide pour le format ${format}. Essaie un autre format ci-dessous.`;
+    errEl.classList.add('show');
+  }
+}
+
+function renderBarcodeFormatChips(code) {
+  const chipsEl = $('barcodeFormatChips');
+  chipsEl.innerHTML = BARCODE_FORMATS.map(f =>
+    `<div class="chip ${currentBarcodeFormat === f.id ? 'active' : ''}" data-format="${f.id}">${f.label}</div>`
+  ).join('');
+  chipsEl.querySelectorAll('.chip').forEach(el => {
+    el.addEventListener('click', async () => {
+      currentBarcodeFormat = el.dataset.format;
+      renderBarcodeFormatChips(code);
+      renderBarcode(code, currentBarcodeFormat);
+      // Mémoriser le format préféré pour cet IZ
+      const iz = await getIz(currentDetailCode);
+      if (iz) {
+        iz.barcodeFormat = currentBarcodeFormat;
+        await putIz(iz);
+      }
+    });
+  });
+}
+
+function openDetailModal(code) {
+  const iz = allIzs.find(x => x.code === code);
+  if (!iz) return;
+  currentDetailCode = code;
+
+  // Format mémorisé pour cet IZ (si déjà choisi), sinon Code 128 par défaut
+  currentBarcodeFormat = iz.barcodeFormat || 'CODE128';
+
+  // Code-barres
+  renderBarcode(iz.code, currentBarcodeFormat);
+  renderBarcodeFormatChips(iz.code);
+
+  $('detailCode').textContent = iz.code;
+
+  const rows = [
+    ['Libellé', iz.label || '—'],
+    ['Site', iz.site || '—'],
+    ['Tranche', iz.tranche ? `T${iz.tranche}` : '—'],
+    ['Local', iz.local || '—'],
+    ['Tags', (iz.tags || []).length > 0 ? iz.tags.map(t => `#${t}`).join(' ') : '—'],
+    ['Notes', iz.notes || '—'],
+    ['Créé', formatDate(iz.createdAt)],
+    ['Dernier usage', iz.lastUsed ? formatDate(iz.lastUsed) : '—'],
+    ['Compteur', `${iz.useCount || 0}×`],
+  ];
+  $('detailRows').innerHTML = rows.map(([k, v]) =>
+    `<div class="detail-row">
+      <div class="key">${escapeHtml(k)}</div>
+      <div class="value">${escapeHtml(v)}</div>
+    </div>`).join('');
+
+  $('modalDetail').classList.add('show');
+}
+
+function closeDetailModal() {
+  $('modalDetail').classList.remove('show');
+  currentDetailCode = null;
+}
+
+$('btnCloseDetail').addEventListener('click', closeDetailModal);
+$('modalDetail').addEventListener('click', e => {
+  if (e.target === $('modalDetail')) closeDetailModal();
+});
+
+$('btnCopyCode').addEventListener('click', async () => {
+  if (!currentDetailCode) return;
+  try {
+    await navigator.clipboard.writeText(currentDetailCode);
+    toast('✓ Code copié dans le presse-papier');
+  } catch (err) {
+    // Fallback ancien navigateur
+    const ta = document.createElement('textarea');
+    ta.value = currentDetailCode;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('✓ Code copié');
+  }
+});
+
+$('btnUseToday').addEventListener('click', async () => {
+  if (!currentDetailCode) return;
+  const iz = await getIz(currentDetailCode);
+  if (!iz) return;
+  iz.useCount = (iz.useCount || 0) + 1;
+  iz.lastUsed = new Date().toISOString();
+  await putIz(iz);
+  await refreshAll();
+  toast(`✓ Marqué utilisé (${iz.useCount}×)`);
+  openDetailModal(currentDetailCode);
+});
+
+$('btnEditFromDetail').addEventListener('click', () => {
+  const code = currentDetailCode;
+  closeDetailModal();
+  openEditModal(code);
+});
+
+// =====================================================================
+// RÉGLAGES
+// =====================================================================
+
+function loadCfgIntoForm() {
+  $('cfgSites').value = (userCfg.sites || []).join('\n');
+  $('cfgTags').value = (userCfg.tags || []).join('\n');
+}
+
+$('btnSaveSites').addEventListener('click', async () => {
+  userCfg.sites = $('cfgSites').value.split('\n').map(s => s.trim()).filter(Boolean);
+  await setConfig('userCfg', userCfg);
+  toast('✓ Sites enregistrés');
+});
+
+$('btnSaveTags').addEventListener('click', async () => {
+  userCfg.tags = $('cfgTags').value.split('\n').map(s => s.trim()).filter(Boolean);
+  await setConfig('userCfg', userCfg);
+  toast('✓ Tags enregistrés');
+});
+
+// =====================================================================
+// SAUVEGARDE / IMPORT
+// =====================================================================
+
+$('btnExportJson').addEventListener('click', async () => {
+  const all = await getAllIzs();
+  const payload = {
+    type: 'iz-bertin-export',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    userCfg,
+    izs: all,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `iz_backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast(`✓ Sauvegarde JSON (${all.length} IZ)`);
+});
+
+$('btnExportCsv').addEventListener('click', async () => {
+  const all = await getAllIzs();
+  if (all.length === 0) { toast('Aucun IZ à exporter'); return; }
+  const headers = ['Code IZ', 'Libellé', 'Site', 'Tranche', 'Local', 'Tags', 'Notes', 'Créé', 'Dernier usage', 'Nb usages'];
+  const rows = all.map(iz => [
+    iz.code,
+    iz.label || '',
+    iz.site || '',
+    iz.tranche || '',
+    iz.local || '',
+    (iz.tags || []).join('; '),
+    (iz.notes || '').replace(/\n/g, ' '),
+    iz.createdAt || '',
+    iz.lastUsed || '',
+    iz.useCount || 0,
+  ]);
+  const csv = [headers, ...rows].map(r =>
+    r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `iz_export_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast('✓ Export CSV');
+});
+
+$('btnImportJson').addEventListener('click', () => $('jsonImportFile').click());
+$('jsonImportFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (!Array.isArray(data.izs)) { toast('Format JSON invalide'); return; }
+    if (data.userCfg && confirm('Importer aussi la config (sites, tags) ?')) {
+      userCfg = { ...userCfg, ...data.userCfg };
+      await setConfig('userCfg', userCfg);
+    }
+    if (!confirm(`Importer ${data.izs.length} IZ ? (les codes existants seront fusionnés)`)) return;
+    for (const iz of data.izs) {
+      const existing = await getIz(iz.code);
+      if (existing) {
+        // Fusion : on garde le useCount le plus haut, on prend le plus récent lastUsed
+        iz.useCount = Math.max(existing.useCount || 0, iz.useCount || 0);
+        if (existing.lastUsed && (!iz.lastUsed || existing.lastUsed > iz.lastUsed)) {
+          iz.lastUsed = existing.lastUsed;
+        }
+      }
+      await putIz(iz);
+    }
+    await refreshAll();
+    toast(`✓ Import : ${data.izs.length} IZ`);
+  } catch (err) {
+    console.error(err);
+    toast('Erreur import : ' + err.message);
+  }
+});
+
+$('btnClearAll').addEventListener('click', async () => {
+  if (!confirm('⚠ Effacer TOUS les IZ ?')) return;
+  if (!confirm('Vraiment ? Action irréversible.')) return;
+  await clearIzs();
+  await refreshAll();
+  toast('Tous les IZ effacés');
+});
+
+// =====================================================================
+// INIT
+// =====================================================================
+
+(async function init() {
+  try {
+    await openDB();
+    const saved = await getConfig('userCfg');
+    if (saved) userCfg = { ...userCfg, ...saved };
+    await refreshAll();
+    console.log('[init] OK');
+  } catch (err) {
+    console.error('[init]', err);
+    toast('Erreur init : ' + err.message);
+  }
+})();
+</script>
+</body>
+</html>
