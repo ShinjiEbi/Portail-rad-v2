@@ -2657,13 +2657,31 @@ function rdBuildConstatNum(it){
   return tri + dp + hm + 'C';
 }
 
+// Retourne un HHMM dont le n° de constat n'est pas déjà pris (décale la minute)
+function rdUniqueHm(baseHm, used){
+  let mins = parseInt(baseHm.slice(0,2),10)*60 + parseInt(baseHm.slice(2),10);
+  if(isNaN(mins)) mins = 0;
+  for(let i=0;i<1440;i++){
+    const m = (mins + i) % 1440;
+    const hm = String(Math.floor(m/60)).padStart(2,'0') + String(m%60).padStart(2,'0');
+    if(!used.has(rdBuildConstatNum({hm: hm}))) return hm;
+  }
+  return baseHm;
+}
+
 // Recalcule les n° de constat liés à la date/trigramme (sauf saisie manuelle)
 function rdRefreshConstatNums(){
   if(!rdSession.items.length) return;
+  const used = new Set();
+  // Les saisies manuelles sont prioritaires et ne sont jamais écrasées
   rdSession.items.forEach(function(it){
-    if(!it.numConstatManual){
-      it.numConstat = rdBuildConstatNum(it);
-    }
+    if(it.numConstatManual && it.numConstat) used.add(it.numConstat);
+  });
+  rdSession.items.forEach(function(it){
+    if(it.numConstatManual) return;
+    it.hm = rdUniqueHm(it.hm || '0000', used);
+    it.numConstat = rdBuildConstatNum(it);
+    used.add(it.numConstat);
   });
   rdSaveSession();
   if(rdCurrentIdx >= 0){
@@ -2703,10 +2721,13 @@ function rdAddAppareil(){
   type_radia = desc;
   const id_short = rdParseId(code);
   const type_short = rdGetTypeShort(desc);
-  // Heure/minute de création (HHMM) — figée à la création du constat
+  // Heure/minute de création (HHMM) — figée à la création du constat.
+  // En cas de collision (2 radia dans la même minute), on décale la minute.
   rdSession.counter++;
   const now = new Date();
-  const hm = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+  const baseHm = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+  const usedNums = new Set(rdSession.items.map(function(it){ return it.numConstat; }));
+  const hm = rdUniqueHm(baseHm, usedNums);
 
   const bancData = rdGetBancData();
   const item = {
