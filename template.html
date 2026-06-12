@@ -957,8 +957,8 @@ function fRaz(){['f_flux_ref','f_act_ref','f_act_jour'].forEach(id=>document.get
 // ══════════════════════════════════════════════════════════
 // ÉTIQUETTES — Scan QR + Liste + Impression
 // ══════════════════════════════════════════════════════════
-const MOIS_FR=['JAN','FÉV','MAR','AVR','MAI','JUN','JUL','AOÛ','SEP','OCT','NOV','DÉC'];
-function fmtDateEtiq(d){if(!d)return'—';const dt=typeof d==='string'?new Date(d):d;if(isNaN(dt))return'—';return String(dt.getDate()).padStart(2,'0')+' '+MOIS_FR[dt.getMonth()]+' '+String(dt.getFullYear()).slice(-2);}
+const MOIS_FR=['JANV','FÉVR','MARS','AVR','MAI','JUIN','JUIL','AOÛT','SEPT','OCT','NOV','DÉC'];
+function fmtDateEtiq(d){if(!d)return'—';const dt=typeof d==='string'?new Date(d):d;if(isNaN(dt))return'—';return String(dt.getDate()).padStart(2,'0')+' '+MOIS_FR[dt.getMonth()]+' '+String(dt.getFullYear());}
 function addMonths(d,n){const r=new Date(d);r.setMonth(r.getMonth()+n);return r;}
 
 let eqItems=[];
