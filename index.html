@@ -929,7 +929,7 @@ body.light header{--bg-header1:#d0d8e8}
           <label>N° CORIM / GMAO</label>
           <input id="rd_c_corim" oninput="rdSaveItem()">
           <label>N° constat</label>
-          <input id="rd_c_numcst" readonly style="color:var(--accent)">
+          <input id="rd_c_numcst" oninput="rdSaveNumConstat()" style="color:var(--accent)">
 
           <!-- §5 Contrôles préliminaires -->
           <div class="rd-section">5. Contrôles préliminaires</div>
@@ -2414,6 +2414,8 @@ function rdSaveConfig(){
     banc_model: document.getElementById('rd_model').value
   };
   LS.set('radia_config', rdConfig);
+  // Le n° de constat est lié à la date/trigramme → on le met à jour
+  rdRefreshConstatNums();
 }
 
 function rdInit(){
@@ -2645,6 +2647,60 @@ function rdGetTypeShort(desc){
 }
 
 // ── ADD APPAREIL ───────────────────────────────────────────
+// ── N° CONSTAT ─────────────────────────────────────────────
+// Format : <Trigramme> + AAMMJJ (date essai) + HHMM (création) + 'C'
+function rdBuildConstatNum(it){
+  const tri = (rdConfig.trigramme || 'XXX').toUpperCase();
+  const dt = rdConfig.date || new Date().toISOString().slice(0,10);
+  const dp = dt.replace(/-/g,'').slice(2); // AAMMJJ
+  const hm = it.hm || '0000';              // HHMM figé à la création
+  return tri + dp + hm + 'C';
+}
+
+// Retourne un HHMM dont le n° de constat n'est pas déjà pris (décale la minute)
+function rdUniqueHm(baseHm, used){
+  let mins = parseInt(baseHm.slice(0,2),10)*60 + parseInt(baseHm.slice(2),10);
+  if(isNaN(mins)) mins = 0;
+  for(let i=0;i<1440;i++){
+    const m = (mins + i) % 1440;
+    const hm = String(Math.floor(m/60)).padStart(2,'0') + String(m%60).padStart(2,'0');
+    if(!used.has(rdBuildConstatNum({hm: hm}))) return hm;
+  }
+  return baseHm;
+}
+
+// Recalcule les n° de constat liés à la date/trigramme (sauf saisie manuelle)
+function rdRefreshConstatNums(){
+  if(!rdSession.items.length) return;
+  const used = new Set();
+  // Les saisies manuelles sont prioritaires et ne sont jamais écrasées
+  rdSession.items.forEach(function(it){
+    if(it.numConstatManual && it.numConstat) used.add(it.numConstat);
+  });
+  rdSession.items.forEach(function(it){
+    if(it.numConstatManual) return;
+    it.hm = rdUniqueHm(it.hm || '0000', used);
+    it.numConstat = rdBuildConstatNum(it);
+    used.add(it.numConstat);
+  });
+  rdSaveSession();
+  if(rdCurrentIdx >= 0){
+    const it = rdSession.items[rdCurrentIdx];
+    if(it) document.getElementById('rd_c_numcst').value = it.numConstat || '';
+  }
+}
+
+// Saisie manuelle du n° de constat (case éditable)
+function rdSaveNumConstat(){
+  if(rdCurrentIdx < 0) return;
+  const it = rdSession.items[rdCurrentIdx];
+  if(!it) return;
+  it.numConstat = document.getElementById('rd_c_numcst').value;
+  it.numConstatManual = true;
+  rdSaveSession();
+  rdRenderSidebar();
+}
+
 function rdAddAppareil(){
   const code = document.getElementById('rd_scan_input').value.trim();
   if(!code){ toast('Saisir un code matériel',true); return; }
@@ -2665,13 +2721,13 @@ function rdAddAppareil(){
   type_radia = desc;
   const id_short = rdParseId(code);
   const type_short = rdGetTypeShort(desc);
-  // Generate constat number
+  // Heure/minute de création (HHMM) — figée à la création du constat.
+  // En cas de collision (2 radia dans la même minute), on décale la minute.
   rdSession.counter++;
-  const tri = (rdConfig.trigramme || 'XXX').toUpperCase();
-  const dt = rdConfig.date || new Date().toISOString().slice(0,10);
-  const dp = dt.replace(/-/g,'').slice(2); // AAMMJJ
-  const cnum = String(rdSession.counter).padStart(4,'0');
-  const numConstat = tri + dp + cnum + 'C';
+  const now = new Date();
+  const baseHm = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+  const usedNums = new Set(rdSession.items.map(function(it){ return it.numConstat; }));
+  const hm = rdUniqueHm(baseHm, usedNums);
 
   const bancData = rdGetBancData();
   const item = {
@@ -2681,7 +2737,9 @@ function rdAddAppareil(){
     type_radia: type_radia,
     sn: sn,
     corim: corim,
-    numConstat: numConstat,
+    hm: hm,
+    numConstatManual: false,
+    numConstat: '',
     aspect: 'Correct',
     batterie: 'Conforme',
     son: 'Conforme',
@@ -2694,6 +2752,7 @@ function rdAddAppareil(){
     comment: '',
     jugement: null
   };
+  item.numConstat = rdBuildConstatNum(item);
   rdSession.items.push(item);
   rdSaveSession();
   rdRenderSidebar();
