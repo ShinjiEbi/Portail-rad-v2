@@ -2091,16 +2091,16 @@ function eqPreview(){
     ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
     if(!isNC){
       // VALIDITÉ : centre zone x=393 (décalé droite), y=87
-      ctx.font='bold '+Math.round(38*sx)+'px sans-serif';
+      ctx.font='bold '+Math.round(46*sx)+'px sans-serif';
       ctx.fillText(last.val||'',393*sx,87*sy);
       // VP : centre zone (373, 170)
-      ctx.font='bold '+Math.round(34*sx)+'px sans-serif';
+      ctx.font='bold '+Math.round(42*sx)+'px sans-serif';
       ctx.fillText(last.dvp||'',373*sx,170*sy);
       // ID : centre zone (373, 262) descendu
       ctx.fillText(last.idEtiq||last.id||'',373*sx,262*sy);
     } else {
       // Date contrôle : centre zone (249, 257)
-      ctx.font='bold '+Math.round(34*sx)+'px sans-serif';
+      ctx.font='bold '+Math.round(42*sx)+'px sans-serif';
       ctx.fillText(last.dvp||'',249*sx,257*sy);
     }
   };
@@ -2207,11 +2207,11 @@ function eqPrint(){
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
         ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
         if(!isNC){
-          ctx.font='bold 38px sans-serif';ctx.fillText(it.val||'',393,87);
-          ctx.font='bold 34px sans-serif';ctx.fillText(it.dvp||'',373,170);
+          ctx.font='bold 46px sans-serif';ctx.fillText(it.val||'',393,87);
+          ctx.font='bold 42px sans-serif';ctx.fillText(it.dvp||'',373,170);
           ctx.fillText(it.idEtiq||it.id||'',373,262);
         } else {
-          ctx.font='bold 34px sans-serif';ctx.fillText(it.dvp||'',249,257);
+          ctx.font='bold 42px sans-serif';ctx.fillText(it.dvp||'',249,257);
         }
         resolve(canvas.toDataURL('image/png'));
       };
@@ -2274,11 +2274,11 @@ function eqGenerateCanvasImages(){
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
         ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
         if(!isNC){
-          ctx.font='bold 38px sans-serif';ctx.fillText(it.val||'',393,87);
-          ctx.font='bold 34px sans-serif';ctx.fillText(it.dvp||'',373,170);
+          ctx.font='bold 46px sans-serif';ctx.fillText(it.val||'',393,87);
+          ctx.font='bold 42px sans-serif';ctx.fillText(it.dvp||'',373,170);
           ctx.fillText(it.idEtiq||it.id||'',373,262);
         } else {
-          ctx.font='bold 34px sans-serif';ctx.fillText(it.dvp||'',249,257);
+          ctx.font='bold 42px sans-serif';ctx.fillText(it.dvp||'',249,257);
         }
         resolve(canvas.toDataURL('image/png'));
       };
