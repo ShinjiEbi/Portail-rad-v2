@@ -2951,16 +2951,22 @@ function rdExportCSV(){
 // ── TRANSFERT VERS LISTING ────────────────────────────────
 function rdPushToListing(){
   if(!rdSession.items.length){ toast('Session vide',true); return; }
-  var added=0;
+  var added=0, updated=0;
   rdSession.items.forEach(function(it){
     var fullScan=it.code||'';
-    // Vérifier doublon dans lstItems
-    if(typeof lstItems!=='undefined'&&lstItems.find(function(l){return l.scan===fullScan;})) return;
     // Calculer le jugement (rdCalcJugementFor renvoie true / false / null)
     var jug=rdCalcJugementFor(it);
     var conformite='';
     if(jug===true)conformite='Conforme';
     else if(jug===false)conformite='Non conforme';
+    // Déjà présent dans le listing → mettre à jour conformité + commentaire
+    var existing=(typeof lstItems!=='undefined')?lstItems.find(function(l){return l.scan===fullScan;}):null;
+    if(existing){
+      if(conformite) existing.conformite=conformite;
+      if(it.comment) existing.commentaire=it.comment;
+      updated++;
+      return;
+    }
     // Chercher dans DATA_MATERIELS pour infos complémentaires
     var m=null;
     if(typeof DATA_MATERIELS!=='undefined'){
@@ -2994,11 +3000,12 @@ function rdPushToListing(){
   });
   if(typeof lstSave==='function')lstSave();
   if(typeof lstRender==='function')lstRender();
-  if(added>0){
-    toast('✓ '+added+' radiamètre(s) transféré(s) au listing');
-    pLog('listing','📝','Radiamètres → Listing : <b>'+added+' matériel(s)</b> transférés');
+  if(added>0||updated>0){
+    var msg='✓ '+added+' transféré(s)'+(updated>0?', '+updated+' mis à jour':'');
+    toast(msg);
+    pLog('listing','📝','Radiamètres → Listing : <b>'+added+' ajouté(s)</b>'+(updated>0?', <b>'+updated+' mis à jour</b>':''));
   } else {
-    toast('Aucun nouveau matériel à transférer (déjà dans le listing)',true);
+    toast('Aucun matériel à transférer',true);
   }
 }
 
