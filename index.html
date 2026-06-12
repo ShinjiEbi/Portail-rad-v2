@@ -2956,11 +2956,11 @@ function rdPushToListing(){
     var fullScan=it.code||'';
     // Vérifier doublon dans lstItems
     if(typeof lstItems!=='undefined'&&lstItems.find(function(l){return l.scan===fullScan;})) return;
-    // Calculer le jugement
+    // Calculer le jugement (rdCalcJugementFor renvoie true / false / null)
     var jug=rdCalcJugementFor(it);
     var conformite='';
-    if(jug==='CONFORME')conformite='CONFORME';
-    else if(jug==='NON CONFORME')conformite='NON CONFORME';
+    if(jug===true)conformite='Conforme';
+    else if(jug===false)conformite='Non conforme';
     // Chercher dans DATA_MATERIELS pour infos complémentaires
     var m=null;
     if(typeof DATA_MATERIELS!=='undefined'){
