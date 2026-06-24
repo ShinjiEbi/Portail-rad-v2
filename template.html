@@ -89,6 +89,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0b1a
 .ctag{font-family:var(--mono);font-size:.58rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);padding:1px 6px;border-radius:3px}.ctag i{color:var(--text3);font-style:normal}
 .ctag.act{border-color:var(--green);color:var(--green);font-weight:700}
 .badge-local{font-family:var(--mono);font-size:.5rem;padding:1px 5px;border-radius:8px;background:rgba(255,152,0,.15);border:1px solid var(--orange);color:var(--orange)}
+.badge-etiq{font-family:var(--mono);font-size:.5rem;padding:1px 5px;border-radius:8px;background:rgba(0,230,118,.15);border:1px solid var(--green);color:var(--green);flex-shrink:0}
 .badge-ce{margin-left:4px;font-size:.75rem}
 
 /* ══════════════════════════════════════════════════════════
@@ -870,7 +871,7 @@ function setMcnpe(c,b){fMcnpe=c;activateBtn(b);filtrerM();}
 function setMctr(c,b){fMctr=c;activateBtn(b);filtrerM();}
 function filtrerM(){const q=document.getElementById('sm').value.toLowerCase();renderMateriels(DATA_MATERIELS.filter(m=>{if(fMcnpe&&m.cnpe!==fMcnpe)return false;if(fMctr&&m.ctr!==fMctr)return false;if(!q)return true;return[m.id,m.des,m.ns,m.nc,m.cnpe,m.loc,m.ctr,m.obs].join(' ').toLowerCase().includes(q);}));}
 function renderMateriels(items=DATA_MATERIELS){document.getElementById('lcm').innerHTML='<span>'+items.length+'</span> matériel'+(items.length>1?'s':'');const el=document.getElementById('listM');if(!items.length){el.innerHTML='<div class="empty"><div class="ei">🔍</div><div class="et">Aucun résultat</div></div>';return;}
-const MAX=200;const aff=items.slice(0,MAX);el.innerHTML=aff.map((m,i)=>{const b=VB[m.sv]||VB.inconnu;const vd=m.val?dfr(m.val):'';return'<div class="mc" style="animation-delay:'+Math.min(i*15,400)+'ms" onclick="detailM(\''+esc(m.id).replace(/'/g,"\\'")+'\')">'+'<div class="r1"><span class="mid">'+esc(m.id)+'</span>'+(m.ctr?'<span class="mctr">'+esc(m.ctr)+'</span>':'')+'<span class="vb '+b[0]+'">'+b[1]+(vd?' '+vd:'')+'</span></div>'+'<div class="r2">'+esc(m.des)+'</div>'+'<div class="r3">'+(m.cnpe?esc(m.cnpe):'')+(m.loc?' › '+esc(m.loc):'')+(m.ns?' · S/N: '+esc(m.ns):'')+'</div></div>';}).join('')+(items.length>MAX?'<div class="empty"><div class="et">'+(items.length-MAX)+' résultats suppl.</div></div>':'');}
+const MAX=200;const aff=items.slice(0,MAX);el.innerHTML=aff.map((m,i)=>{const b=VB[m.sv]||VB.inconnu;const vd=m.val?dfr(m.val):'';return'<div class="mc" style="animation-delay:'+Math.min(i*15,400)+'ms" onclick="detailM(\''+esc(m.id).replace(/'/g,"\\'")+'\')">'+'<div class="r1"><span class="mid">'+esc(m.id)+'</span>'+(m.ctr?'<span class="mctr">'+esc(m.ctr)+'</span>':'')+'<span class="vb '+b[0]+'">'+b[1]+(vd?' '+vd:'')+'</span>'+(eqPrinted.has(m.id)?'<span class="badge-etiq">🏷 étiq.</span>':'')+'</div>'+'<div class="r2">'+esc(m.des)+'</div>'+'<div class="r3">'+(m.cnpe?esc(m.cnpe):'')+(m.loc?' › '+esc(m.loc):'')+(m.ns?' · S/N: '+esc(m.ns):'')+'</div></div>';}).join('')+(items.length>MAX?'<div class="empty"><div class="et">'+(items.length-MAX)+' résultats suppl.</div></div>':'');}
 function detailM(id){const m=DATA_MATERIELS.find(x=>x.id===id);if(!m)return;document.getElementById('mt').textContent=m.id;const b=VB[m.sv]||VB.inconnu;let h='<div class="ds"><h3>Identification</h3>'+dr('ID',m.id,1)+dr('Désignation',m.des)+dr('N° Série',m.ns)+dr('N° Corim',m.nc)+'</div>';h+='<div class="ds"><h3>Localisation</h3>'+dr('CNPE',m.cnpe)+dr('Localisation',m.loc)+dr('Contrat',m.ctr)+'</div>';h+='<div class="ds"><h3>Validité</h3>'+dr('Date VP',dfr(m.dvp))+dr('Validité',dfr(m.val))+'<div class="dr"><span class="dl">Statut</span><span class="vb '+b[0]+'">'+b[1]+'</span></div></div>';if(m.obs)h+='<div class="ds"><h3>Observations</h3><div class="dobs">'+esc(m.obs)+'</div></div>';document.getElementById('mbd').innerHTML=h;document.getElementById('modal').classList.add('open');}
 
 // ══════════════════════════════════════════════════════════
@@ -962,6 +963,7 @@ function fmtDateEtiq(d){if(!d)return'—';const dt=typeof d==='string'?new Date(
 function addMonths(d,n){const r=new Date(d);r.setMonth(r.getMonth()+n);return r;}
 
 let eqItems=[];
+let eqPrinted=new Set();
 let qrScanner=null;
 const ETIQ_IMG_C='%%ETIQ_IMG_C%%';
 const ETIQ_IMG_NC='%%ETIQ_IMG_NC%%';
@@ -990,6 +992,8 @@ function eqAdd(){
   const val=type==='C'?addMonths(dvp,12):null;
   const fullId=mat?mat.id:id;
   const etiqId=eqParseId(fullId);
+  if(eqItems.some(x=>x.id===fullId)){showToast('Déjà dans la liste en cours','err');return;}
+  if(eqPrinted.has(fullId)){showToast('Étiquette déjà imprimée pour ce listing','err');return;}
   eqItems.push({id:fullId,idEtiq:etiqId,des:mat?mat.des:'',type,dvp:fmtDateEtiq(dvp),val:val?fmtDateEtiq(val):'',nc:mat?mat.nc:''});
   document.getElementById('eq_input').value='';document.getElementById('eq_found').style.display='none';
   eqRender();eqPreview();showToast('✓ '+id+' ajouté');
@@ -1157,6 +1161,7 @@ function eqPrint(){
     html+='<script>setTimeout(()=>{window.print()},400)<\/script></body></html>';
     win.document.write(html);win.document.close();
     showToast('✓ '+eqItems.length+' étiquette(s) générée(s)');
+    eqItems.forEach(it=>eqPrinted.add(it.id));eqClear();filtrerM();
   });
 }
 
