@@ -1352,7 +1352,7 @@ function dfr(s){if(!s)return'–';try{const p=s.split('-');return p.length>=3?p[
 const VB={valide:['vv','VALIDE'],permanent:['vp','∞ PERMANENT'],bientot:['vb2','⚠ BIENTÔT'],expire:['ve','✗ EXPIRÉ'],inconnu:['vi','–']};
 function buildFilters(items,key,cid,setter){const vals=[...new Set(items.map(i=>i[key]).filter(Boolean))].sort();const el=document.getElementById(cid);el.innerHTML='<button class="fbtn active" onclick="'+setter+'(\'\',this)">Tout</button>';vals.forEach(v=>{el.innerHTML+='<button class="fbtn" onclick="'+setter+'(\''+esc(v).replace(/'/g,"\\'")+'\',this)">'+esc(v)+'</button>';});}
 function activateBtn(b){b.parentElement.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
-function toast(m,err){const e=document.getElementById('toast');e.textContent=m;e.className='toast show'+(err?' err':'');clearTimeout(e._t);e._t=setTimeout(()=>e.className='toast',3000);}
+function toast(m,err){const e=document.getElementById('toast');e.textContent=m;e.className='toast show'+(err?' err':'');clearTimeout(e._t);e._t=setTimeout(()=>e.className='toast',Math.max(3000,m.length*60));}
 function showToast(m,type){toast(m,type==='err');}
 function dr(l,v,a){return'<div class="dr"><span class="dl">'+esc(l)+'</span><span class="dv'+(a?' ac':'')+'">'+esc(v||'–')+'</span></div>';}
 
@@ -1448,7 +1448,7 @@ const catDef=getCats().find(c=>c.nom===cat);const champs=[];if(catDef&&catDef.ch
 const valStr=document.getElementById('f_val').value;let sv='inconnu';if(valStr){const d=new Date(valStr);const delta=Math.floor((d-new Date())/(864e5));if(d.getFullYear()>=2999)sv='permanent';else if(delta<0)sv='expire';else if(delta<=90)sv='bientot';else sv='valide';}
 let src={};if(cat==='Source'&&catDef){const tv=champs.find(c=>c.l==='Demi-vie (jours)');const a0=champs.find(c=>c.l==='Activité ref (Bq)');const dref=champs.find(c=>c.l==='Date référence');if(tv)try{src.tv=parseFloat(tv.v.replace(',','.'));}catch{}if(a0)try{src.a0=parseFloat(a0.v.replace(',','.'));}catch{}if(dref)src.dr=dref.v;}
 const obj={id,cat,val:valStr,sv,site:document.getElementById('f_site').value.trim(),loc:document.getElementById('f_loc').value.trim(),ch:champs,src,dc:new Date().toISOString().substring(0,10),dm:'',uc:'Portail',um:'',_local:true};
-let all=getEtalons();if(editingId){const idx=all.findIndex(x=>x.id===editingId);if(idx>=0){obj.dc=all[idx].dc||obj.dc;obj.dm=new Date().toISOString().substring(0,10);obj.um='Portail';all[idx]=obj;}else all.push(obj);}
+let all=getEtalons();if(editingId){if(id!==editingId&&all.find(x=>x.id===id)){toast('ID déjà existant !',true);return;}const idx=all.findIndex(x=>x.id===editingId);if(idx>=0){obj.dc=all[idx].dc||obj.dc;obj.dm=new Date().toISOString().substring(0,10);obj.um='Portail';all[idx]=obj;}else all.push(obj);}
 else{if(all.find(x=>x.id===id)){toast('ID déjà existant !',true);return;}all.push(obj);}
 setEtalons(all);closeForm();refreshE();toast(editingId?'Étalon modifié ✓':'Étalon ajouté ✓');pLog('etalon','⚗️',editingId?'Étalon modifié : <b>'+id+'</b> ('+cat+')':'Étalon créé : <b>'+id+'</b> ('+cat+')');}
 
