@@ -1319,7 +1319,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
 // ══════════════════════════════════════════════════════════
 const LS = {
   get(k, def) { try { const v=localStorage.getItem('pt_'+k); return v?JSON.parse(v):def; } catch { return def; } },
-  set(k, v) { try { localStorage.setItem('pt_'+k, JSON.stringify(v)); } catch {} }
+  set(k, v) { try { localStorage.setItem('pt_'+k, JSON.stringify(v)); } catch(e) { showToast('Stockage plein — données non sauvegardées','err'); } }
 };
 
 // Init: si premier lancement, copier données embarquées
@@ -1405,8 +1405,8 @@ function closeM(){document.getElementById('modal').classList.remove('open');}
 // ══════════════════════════════════════════════════════════
 function getCertificats(){try{return JSON.parse(localStorage.getItem('pt_certificats')||'{}');}catch(e){return {};}}
 function getCertificat(id){return getCertificats()[id]||null;}
-function setCertificat(id,b64){const c=getCertificats();c[id]=b64;localStorage.setItem('pt_certificats',JSON.stringify(c));}
-function supprimerCE(id){const c=getCertificats();delete c[id];localStorage.setItem('pt_certificats',JSON.stringify(c));showToast('Certificat supprimé');pLog('etalon','🗑','Certificat supprimé pour <b>'+id+'</b>');}
+function setCertificat(id,b64){const c=getCertificats();c[id]=b64;try{localStorage.setItem('pt_certificats',JSON.stringify(c));}catch(e){showToast('Stockage plein — certificat non sauvegardé','err');}}
+function supprimerCE(id){const c=getCertificats();delete c[id];try{localStorage.setItem('pt_certificats',JSON.stringify(c));}catch(e){}showToast('Certificat supprimé');pLog('etalon','🗑','Certificat supprimé pour <b>'+id+'</b>');}
 function chargerCE(id,input){
   const file=input.files&&input.files[0];
   if(!file)return;
